@@ -21,7 +21,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from mtg.deck.arena import IllFormedArenaDecklist, PlaysetLine
-from mtg.deck.parse import CardNotFound, InvalidDeck
+from mtg.deck.core import CardNotFound, Deck, InvalidDeck
 from mtg.deck.scrapers.abc import DeckScraper
 from mtg.lib.common import ParsingError, extract_float, get_date_from_ago_text
 from mtg.lib.scrape.core import ScrapingError, strip_url_query

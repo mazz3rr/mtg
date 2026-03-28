@@ -12,7 +12,7 @@ from typing import Literal
 
 from mtg.constants import OUTPUT_DIR, PathLike
 from mtg.deck.arena import ArenaParser, IllFormedArenaDecklist, is_arena_decklist
-from mtg.deck.parse import CardNotFound, Deck, DeckParser, Mode
+from mtg.deck.core import CardNotFound, Deck, DeckParser, Mode
 from mtg.lib.common import ParsingError, from_iterable
 from mtg.lib.files import getdir, getfile, sanitize_filename, truncate_path
 from mtg.lib.json import from_json as deserialize_json, to_json

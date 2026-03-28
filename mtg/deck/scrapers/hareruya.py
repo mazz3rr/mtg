@@ -15,7 +15,7 @@ import dateutil.parser
 from bs4 import BeautifulSoup, NavigableString, Tag
 
 from mtg.constants import Json, SECRETS
-from mtg.deck.parse import JsonBasedDeckParser, TagBasedDeckParser
+from mtg.deck.abc import JsonBasedDeckParser, TagBasedDeckParser
 from mtg.deck.scrapers.abc import Collected, DeckScraper, DeckUrlsContainerScraper, \
     HybridContainerScraper, throttled_deck_scraper
 from mtg.deck.scrapers.goldfish import HEADERS as GOLDFISH_HEADERS

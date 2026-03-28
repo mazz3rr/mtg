@@ -13,7 +13,7 @@ from typing import override
 import regex as re
 
 from mtg.constants import Json
-from mtg.deck.parse import ARENA_MULTIFACE_SEPARATOR, CardNotFound, DeckParser
+from mtg.deck.core import ARENA_MULTIFACE_SEPARATOR, CardNotFound, DeckParser
 from mtg.lib.common import ParsingError, extract_int, getrepr, is_foreign, sanitize_whitespace
 from mtg.scryfall import COMMANDER_FORMATS, Card, \
     MULTIFACE_SEPARATOR as SCRYFALL_MULTIFACE_SEPARATOR, query_api_for_card

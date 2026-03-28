@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup, Comment, NavigableString, Tag
 from selenium.common import TimeoutException
 
 from mtg.constants import Json
-from mtg.deck.parse import TagBasedDeckParser
+from mtg.deck.abc import TagBasedDeckParser
 from mtg.deck.scrapers.abc import Collected, DeckScraper, DeckTagsContainerScraper
 from mtg.lib.common import ParsingError, sanitize_whitespace
 from mtg.lib.scrape.core import ScrapingError, strip_url_query

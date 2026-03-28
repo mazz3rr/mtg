@@ -15,7 +15,7 @@ from typing import Self
 
 from mtg.constants import Json
 from mtg.deck.arena import ArenaParser
-from mtg.deck.parse import Deck
+from mtg.deck.core import Deck
 from mtg.gstate import DecklistsStateManager
 from mtg.lib.common import Counter, breadcrumbs
 from mtg.lib.json import to_json

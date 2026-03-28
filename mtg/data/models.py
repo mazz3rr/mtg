@@ -10,9 +10,12 @@
 from datetime import datetime
 
 from sqlalchemy import Column, ForeignKey, Integer, JSON, String, Table, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from mtg.data.db import Base
+
+class Base(DeclarativeBase):
+    pass
+
 
 # association tables for many-to-many relationships
 snapshot_tags = Table(
@@ -84,15 +87,16 @@ class Video(Base):
     snapshot_id: Mapped[int] = mapped_column(ForeignKey("snapshots.id"))
 
     yt_id: Mapped[str] = mapped_column(String(11), index=True)
-    title: Mapped[str | None]
+    title: Mapped[str]
     description: Mapped[str] = mapped_column(Text)
     publish_time: Mapped[datetime] = mapped_column()
-    views: Mapped[int | None]
+    views: Mapped[int]
+    comment: Mapped[str | None]
 
     snapshot: Mapped["Snapshot"] = relationship(back_populates='videos')
     keywords: Mapped[list["Tag"]] = relationship(secondary=video_keywords, back_populates='videos')
     decks: Mapped[list["Deck"]] = relationship(
-        back_populates='videos', cascade='all, delete-orphan')
+        back_populates='video', cascade='all, delete-orphan')
 
 
 class Tag(Base):
@@ -122,7 +126,8 @@ class Deck(Base):
     video_id: Mapped[int] = mapped_column(ForeignKey("videos.id"))
     decklist_id: Mapped[int | None] = mapped_column(ForeignKey("decklists.id"))
 
-    json_metadata: Mapped[dict] = mapped_column(JSON)  # needs to be different from `Base.metadata`
+    # needs to be different from `Base.metadata`
+    json_metadata: Mapped[dict | None] = mapped_column(JSON)
 
     video: Mapped["Video"] = relationship(back_populates="decks")
     decklist: Mapped["Decklist"] = relationship(back_populates="decks")
@@ -156,6 +161,3 @@ class FailedUrl(Base):
     text: Mapped[str] = mapped_column(Text)
 
     channel: Mapped["Channel"] = relationship(back_populates="failed_urls")
-
-
-# TODO: an event listener to delete orphaned decklists: https://x.com/i/grok/share/e5d2d23d74d848ca863f840c7890f380

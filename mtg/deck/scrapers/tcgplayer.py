@@ -20,7 +20,7 @@ from requests import HTTPError
 from selenium.common import TimeoutException
 
 from mtg.constants import Json, SECRETS
-from mtg.deck.parse import JsonBasedDeckParser
+from mtg.deck.abc import JsonBasedDeckParser
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper, DecksJsonContainerScraper, \
     HybridContainerScraper
 from mtg.lib.common import extract_int

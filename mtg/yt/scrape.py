@@ -29,7 +29,7 @@ from mtg.data.handle import ScrapingSession, load_channel, retrieve_ids
 from mtg.data.structures import CHANNEL_URL_TEMPLATE, Channel, SerializedDeck, VIDEO_URL_TEMPLATE, \
     Video
 from mtg.deck import Deck
-from mtg.deck.parse import DeckParser
+from mtg.deck.core import DeckParser
 from mtg.deck.arena import ArenaParser, LinesParser
 from mtg.deck.scrapers.abc import DeckTagsContainerScraper, DecksJsonContainerScraper, \
     get_throttled_deck_scrapers

@@ -15,7 +15,7 @@ import dateutil.parser
 from bs4 import Tag
 
 from mtg.constants import Json
-from mtg.deck.parse import TagBasedDeckParser
+from mtg.deck.abc import TagBasedDeckParser
 from mtg.deck.scrapers.abc import HybridContainerScraper
 from mtg.scryfall import COMMANDER_FORMATS
 from mtg.lib.common import ParsingError, from_iterable

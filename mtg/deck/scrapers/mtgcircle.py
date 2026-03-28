@@ -16,7 +16,7 @@ from typing import Type, override
 from bs4 import BeautifulSoup, Tag
 
 from mtg.constants import Json
-from mtg.deck.parse import JsonBasedDeckParser
+from mtg.deck.abc import JsonBasedDeckParser
 from mtg.deck.scrapers.abc import DeckScraper, HybridContainerScraper
 from mtg.lib.common import from_iterable
 from mtg.lib.json import Node

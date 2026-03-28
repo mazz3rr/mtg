@@ -15,7 +15,8 @@ from bs4 import BeautifulSoup, Tag
 
 from mtg.constants import Json
 from mtg.deck.arena import ArenaParser
-from mtg.deck.parse import DeckParser, JsonBasedDeckParser
+from mtg.deck.core import DeckParser
+from mtg.deck.abc import JsonBasedDeckParser
 from mtg.deck.scrapers.abc import ContainerScraper, DeckScraper, DecksJsonContainerScraper, \
     HybridContainerScraper
 from mtg.lib.common import ParsingError, decode_escapes, extract_int

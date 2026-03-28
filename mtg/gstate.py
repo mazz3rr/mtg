@@ -272,10 +272,10 @@ class DecklistsStateManager(_Singleton):
     def add_with_printings(self, decklist_hash: str, decklist: str) -> None:
         self._with_printings[decklist_hash] = decklist
 
-    def retrieve(self, decklist_id: str) -> str | None:
+    def retrieve(self, decklist_hash: str) -> str | None:
         if not self._regular or not self._with_printings:
             _log.warning("No decklists. Are you sure you loaded them?")
-        return self._regular.get(decklist_id) or self._with_printings.get(decklist_id)
+        return self._regular.get(decklist_hash) or self._with_printings.get(decklist_hash)
 
     def prune(self, filter_: Callable[[str], bool]) -> None:
         """Prune all decklists that match the given filter.

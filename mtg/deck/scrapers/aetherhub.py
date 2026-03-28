@@ -15,7 +15,8 @@ import dateutil.parser
 from bs4 import Tag
 
 from mtg.constants import Json
-from mtg.deck.parse import Mode, TagBasedDeckParser
+from mtg.deck.core import Mode
+from mtg.deck.abc import TagBasedDeckParser
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper, \
     throttled_deck_scraper
 from mtg.lib.common import extract_float, extract_int, from_iterable

@@ -14,7 +14,7 @@ import dateutil.parser
 from bs4 import Tag
 
 from mtg.constants import Json
-from mtg.deck.parse import TagBasedDeckParser
+from mtg.deck.abc import TagBasedDeckParser
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper
 from mtg.lib.common import extract_float
 from mtg.lib.scrape.core import ScrapingError, dissect_js, find_links, \

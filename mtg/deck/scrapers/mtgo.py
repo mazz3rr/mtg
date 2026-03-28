@@ -16,7 +16,7 @@ from bs4 import BeautifulSoup
 
 from mtg.constants import Json
 from mtg.constants import SECRETS
-from mtg.deck.scrapers import JsonBasedDeckParser
+from mtg.deck.abc import JsonBasedDeckParser
 from mtg.deck.scrapers.abc import DecksJsonContainerScraper
 from mtg import DeckScraper
 from mtg.scryfall import all_formats

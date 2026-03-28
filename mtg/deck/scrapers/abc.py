@@ -17,8 +17,8 @@ from requests import ConnectionError, HTTPError, ReadTimeout
 from selenium.common import ElementClickInterceptedException, TimeoutException
 
 from mtg.constants import Json
-from mtg.deck.parse import CardNotFound, Deck, InvalidDeck, JsonBasedDeckParser, \
-    NestedDeckParser, TagBasedDeckParser
+from mtg.deck.core import CardNotFound, Deck, InvalidDeck
+from mtg.deck.abc import JsonBasedDeckParser, NestedDeckParser, TagBasedDeckParser
 from mtg.gstate import UrlsStateManager
 from mtg.lib.common import ParsingError, register_type, timed
 from mtg.lib.scrape.core import InaccessiblePage, ScrapingError, Soft404Error, Throttling, \

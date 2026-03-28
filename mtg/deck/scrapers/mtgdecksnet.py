@@ -15,7 +15,7 @@ from bs4 import Tag
 
 from mtg.constants import Json
 from mtg.deck.arena import normalize_decklist
-from mtg.deck.parse import TagBasedDeckParser
+from mtg.deck.abc import TagBasedDeckParser
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper
 from mtg.lib.common import ParsingError
 from mtg.lib.scrape.core import ScrapingError, find_previous_sibling_tag, strip_url_query

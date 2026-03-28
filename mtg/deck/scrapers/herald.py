@@ -14,7 +14,7 @@ import dateutil.parser
 from bs4 import Tag
 
 from mtg.constants import Json, SECRETS
-from mtg.deck.parse import TagBasedDeckParser
+from mtg.deck.abc import TagBasedDeckParser
 from mtg.deck.scrapers.abc import HybridContainerScraper
 from mtg.lib.scrape.core import ScrapingError, is_more_than_root_path, strip_url_query
 from mtg.yt.discover import UrlHook
