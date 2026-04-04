@@ -17,7 +17,6 @@ from contexttimer import Timer
 from dateutil.relativedelta import relativedelta
 
 from mtg.constants import FILENAME_TIMESTAMP_FORMAT, READABLE_TIMESTAMP_FORMAT
-from mtg.lib.check_type import type_checker
 
 _log = logging.getLogger(__name__)
 
@@ -79,7 +78,6 @@ def timed(operation="", precision: int | None = None) -> Callable:
     return decorator
 
 
-@type_checker(str)
 def get_date_from_ago_text(ago_text: str) -> date | None:
     """Parse 'ago' text (e.g. '2 days ago') into a Date object.
     """
@@ -103,7 +101,6 @@ def get_date_from_ago_text(ago_text: str) -> date | None:
     return None
 
 
-@type_checker(str)
 def get_date_from_french_ago_text(ago_text: str) -> date | None:
     """Parse French 'ago' text (e.g. '3 jours par') into a Date object.
 
@@ -130,7 +127,6 @@ def get_date_from_french_ago_text(ago_text: str) -> date | None:
     return None
 
 
-@type_checker(str)
 def get_date_from_month_text(month_text: str) -> date | None:
     """Parse 'month' text (e.g. 'June 27th') into a Date object.
 

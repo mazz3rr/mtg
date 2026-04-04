@@ -16,7 +16,7 @@ from typing import Self
 from mtg.constants import Json
 from mtg.deck.arena import ArenaParser
 from mtg.deck.core import Deck
-from mtg.gstate import DecklistsStateManager
+from mtg.session import DecklistsStateManager
 from mtg.lib.common import MarkdownTableCounter, breadcrumbs
 from mtg.lib.json import to_json
 from mtg.lib.scrape.core import extract_url, get_netloc_domain

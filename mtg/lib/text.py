@@ -14,8 +14,6 @@ from typing import Any, Type
 
 from lingua import Language, LanguageDetectorBuilder
 
-from mtg.lib.check_type import type_checker
-
 
 def getrepr(class_: Type, *name_value_pairs: tuple[str, Any]) -> str:
     """Return ``__repr__`` string format: 'ClassName(name=value, ..., name_n=value_n)'
@@ -28,7 +26,6 @@ def getrepr(class_: Type, *name_value_pairs: tuple[str, Any]) -> str:
     return f"{class_.__name__}({', '.join(reprs)})"
 
 
-@type_checker(str)
 def camel_case_split(text: str) -> list[str]:
     """Do camel-case split on ``text``.
 

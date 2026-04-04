@@ -18,7 +18,6 @@ import requests
 from tqdm import tqdm
 
 from mtg.constants import PathLike
-from mtg.lib.check_type import type_checker
 
 _log = getLogger(__name__)
 
@@ -54,7 +53,6 @@ def getfile(path: PathLike, *extensions: str, suppress_errors=False) -> Path | N
     return f
 
 
-@type_checker(str)
 def recursive_removedir(dirpath: str, check_delay: int = 500) -> None:
     """Remove directory at ``dirpath`` and it contents recursively. Check after delay (default is
     500ms), if something still exists, list it.
@@ -73,7 +71,6 @@ def recursive_removedir(dirpath: str, check_delay: int = 500) -> None:
         _log.info(f"Nothing to remove at {dirpath}.")
 
 
-@type_checker(str, str)
 def remove_by_ext(ext: str, destdir: str, recursive=False, opposite=False) -> int:
     """Remove from ``destdir`` files by provided extension. Optionally, remove all files of
     different extension.

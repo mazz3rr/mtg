@@ -14,7 +14,7 @@ from typing import Literal
 from tqdm import tqdm
 
 from mtg.constants import DECKS_DIR, PathLike
-from mtg.data.handle import load_channels, retrieve_ids
+from mtg.data.common import load_channels, retrieve_ids
 from mtg.data.structures import Channel
 from mtg.deck.export import Exporter, FORMATS as EXPORT_FORMATS
 from mtg.lib.common import logging_disabled

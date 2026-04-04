@@ -1,6 +1,6 @@
 """
 
-    mtg.data.handle
+    mtg.data.common
     ~~~~~~~~~~~~~~~
     Handle scraped data.
 
@@ -15,15 +15,14 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 from operator import attrgetter, itemgetter
-from types import TracebackType
-from typing import Callable, Iterator, Self, Type
+from typing import Callable, Iterator
 
 from tqdm import tqdm
 
-from mtg.constants import FILENAME_TIMESTAMP_FORMAT, READABLE_TIMESTAMP_FORMAT, README, \
-    WITHDRAWN_DIR
+from mtg.constants import CHANNELS_DIR, FILENAME_TIMESTAMP_FORMAT, READABLE_TIMESTAMP_FORMAT, \
+    README_FILE, WITHDRAWN_DIR
 from mtg.data.structures import CHANNEL_URL_TEMPLATE, Channel, Video
-from mtg.gstate import CHANNELS_DIR, CoolOffManager, DecklistsStateManager, UrlsStateManager
+from mtg.session import DecklistsStateManager, UrlsStateManager
 from mtg.lib.common import MarkdownTableCounter, logging_disabled
 from mtg.lib.numbers import get_ordinal_suffix
 from mtg.lib.time import naive_utc_now as utcnow
@@ -174,44 +173,6 @@ def update_gsheet() -> None:
     extend_gsheet_rows_with_cols("mtga_yt", "channels", data, start_row=2, start_col=2)
 
 
-class ScrapingSession:
-    """Context manager to ensure proper state management during scraping.
-    """
-    @property
-    def urls_manager(self) -> UrlsStateManager:
-        return self._urls_manager
-
-    @property
-    def decklists_manager(self) -> DecklistsStateManager:
-        return self._decklists_manager
-
-    @property
-    def cooloff_manager(self) -> CoolOffManager:
-        return self._cooloff_manager
-
-    def __init__(self) -> None:
-        self._urls_manager, self._decklists_manager = UrlsStateManager(), DecklistsStateManager()
-        self._cooloff_manager = CoolOffManager()
-
-    def __enter__(self) -> Self:
-        self._decklists_manager.load()
-        self._urls_manager.load_failed()
-        return self
-
-    def __exit__(
-            self, exc_type: Type[BaseException] | None, exc_val: BaseException | None,
-            exc_tb: TracebackType | None) -> None:
-        _log.info(
-            f"Session finished with: {self._cooloff_manager.total_decks} deck(s) from "
-            f"{self._cooloff_manager.total_videos} video(s) from "
-            f"{self._cooloff_manager.total_channels} channel(s) scraped in total")
-        self._decklists_manager.dump()
-        self._urls_manager.dump_failed()
-        self._decklists_manager.reset()
-        self._urls_manager.reset()
-        self._cooloff_manager.reset()
-
-
 def get_aggregate_deck_data() -> tuple[MarkdownTableCounter, MarkdownTableCounter]:
     """Get aggregated deck data across all channels.
     """
@@ -244,10 +205,10 @@ def update_readme_with_deck_data() -> None:
     fmt_c, src_c = get_aggregate_deck_data()
     table_lines = fmt_c.markdown("Format").splitlines() + [""] + src_c.markdown(
         "Source").splitlines() + [""]
-    old_lines = README.read_text(encoding="utf-8").splitlines()
+    old_lines = README_FILE.read_text(encoding="utf-8").splitlines()
     idx = old_lines.index("### Scraped decks breakdown")
     new_lines = old_lines[:idx + 1] + [f"**{dt}**"] + table_lines
-    README.write_text("\n".join(new_lines), encoding="utf-8")
+    README_FILE.write_text("\n".join(new_lines), encoding="utf-8")
     _log.info("README.md updates done")
 
 

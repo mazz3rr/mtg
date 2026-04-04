@@ -19,7 +19,6 @@ from operator import attrgetter, itemgetter
 from typing import Any, Iterable, Iterator, Self
 
 from mtg.constants import Json
-from mtg.lib.check_type import type_checker
 from mtg.lib.common import ParsingError, from_iterable
 from mtg.lib.text import get_hash, getrepr, remove_furigana
 from mtg.lib.json import to_json
@@ -833,7 +832,6 @@ class _ParsingState:
         return self.__state
 
     @state.setter
-    @type_checker(_ParsingStates, is_method=True)
     def state(self, value: _ParsingStates) -> None:
         if value is self.state:
             raise ParsingError(f"Invalid transition from {self.state.name!r} to {value.name!r}")

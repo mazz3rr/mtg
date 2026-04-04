@@ -13,7 +13,7 @@ from typing import Literal
 
 from youtubesearchpython import CustomSearch, VideoSortOrder, VideoUploadDateFilter
 
-from mtg.data.handle import retrieve_ids
+from mtg.data.common import retrieve_ids
 
 _log = logging.getLogger(__name__)
 _QUERY_EXCLUDES = (

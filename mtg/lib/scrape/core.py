@@ -28,7 +28,6 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from mtg.constants import Json
-from mtg.lib.check_type import type_checker
 from mtg.lib.time import timed
 
 _log = logging.getLogger(__name__)
@@ -97,7 +96,6 @@ def handle_brotli(response: Response, return_json: bool = False) -> str | Json:
 
 
 @timed("fetching")
-@type_checker(str)
 def fetch(
         url: str, postdata: Json | None = None, handle_http_errors=True,
         request_timeout=REQUESTS_TIMEOUT,
@@ -132,7 +130,6 @@ def fetch_json(url: str, handle_http_errors=True, **requests_kwargs) -> Json:
     return response.json() if response.text else {}
 
 
-@type_checker(str)
 def fetch_soup(
         url: str, headers: dict[str, str] | None = None,
         params: dict[str, str] | None = None,

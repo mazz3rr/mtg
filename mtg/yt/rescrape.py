@@ -17,10 +17,10 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from mtg.constants import OUTPUT_DIR, PathLike
-from mtg.data.handle import ScrapingSession, load_channels, retrieve_ids, retrieve_video_data
+from mtg.constants import CHANNELS_DIR, OUTPUT_DIR, PathLike
+from mtg.data.common import load_channels, retrieve_ids, retrieve_video_data
 from mtg.data.structures import DataPath, Video
-from mtg.gstate import CHANNELS_DIR, DecklistsStateManager
+from mtg.session import DecklistsStateManager, ScrapingSession
 from mtg.lib.time import naive_utc_now as utcnow, timed
 from mtg.lib.files import getdir, getfile
 from mtg.lib.json import from_json, to_json
@@ -177,7 +177,7 @@ def rescrape_videos(
         return
 
     with ScrapingSession() as session:
-        session.urls_manager.ignore_scraped_within_current_video = True
+        session.urls_manager.ignore_scraped_for_current_video = True
         session.urls_manager.ignore_failed = True
         for i, (channel_id, videos) in enumerate(channels.items(), start=1):
             _log.info(

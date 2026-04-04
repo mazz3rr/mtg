@@ -24,15 +24,16 @@ from tqdm import tqdm
 from youtube_comment_downloader import SORT_BY_POPULAR, YoutubeCommentDownloader
 
 from mtg import DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper
-from mtg.constants import FILENAME_TIMESTAMP_FORMAT, Json, PathLike
-from mtg.data.handle import ScrapingSession, load_channel, retrieve_ids
+from mtg.constants import CHANNELS_DIR, FILENAME_TIMESTAMP_FORMAT, Json, PathLike
+from mtg.data.common import load_channel, retrieve_ids
 from mtg.data.structures import CHANNEL_URL_TEMPLATE, Channel, SerializedDeck, VIDEO_URL_TEMPLATE, \
     Video
 from mtg.deck.arena import ArenaParser, LinesParser
 from mtg.deck.core import Deck, DeckParser
 from mtg.deck.scrapers.abc import DeckTagsContainerScraper, DecksJsonContainerScraper, \
     get_throttled_deck_scrapers
-from mtg.gstate import CHANNELS_DIR, CoolOffManager, DecklistsStateManager, UrlsStateManager
+from mtg.session import CoolOffManager, DecklistsStateManager, ScrapingSession, \
+    UrlsStateManager
 from mtg.lib.common import find_longest_seqs, from_iterable, logging_disabled
 from mtg.lib.numbers import extract_float, multiply_by_symbol
 from mtg.lib.time import naive_utc_now as utcnow, timed
@@ -459,7 +460,7 @@ class ChannelScraper:
         self._id = channel_id
         self._cooloff_manager = CoolOffManager()
         self._urls_manager = UrlsStateManager()
-        self._urls_manager.current_channel = self._id
+        self._urls_manager.current_snapshot = self._id
         self._title, self._subscribers, self._description, self._tags = None, None, None, None
         self._scrape_time, self._videos = None, []
         self._data = None

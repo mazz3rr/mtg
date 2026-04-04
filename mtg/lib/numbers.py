@@ -9,14 +9,11 @@
 """
 import logging
 
-from mtg.lib.check_type import type_checker
 from mtg.lib.common import ParsingError
-
 
 _log = logging.getLogger(__name__)
 
 
-@type_checker(str)
 def extract_float(text: str) -> float:
     """Extract floating point number from text.
     """
@@ -27,7 +24,6 @@ def extract_float(text: str) -> float:
     return float(num.replace(",", "."))
 
 
-@type_checker(str)
 def extract_int(text: str) -> int:
     """Extract an integer from text.
     """
@@ -37,7 +33,6 @@ def extract_int(text: str) -> int:
     return int(num)
 
 
-@type_checker(str, none_allowed=True)
 def getfloat(string: str | None) -> float | None:
     """Interpret string as floating point number or, if not possible, return None.
     """
@@ -49,7 +44,6 @@ def getfloat(string: str | None) -> float | None:
         return None
 
 
-@type_checker(str, none_allowed=True)
 def getint(string: str | None) -> int | None:
     """Interpret string as integer or, if not possible, return None.
     """
@@ -61,7 +55,6 @@ def getint(string: str | None) -> int | None:
         return None
 
 
-@type_checker(str, none_allowed=True)
 def getbool(string: str | None) -> bool | None:
     """Interpret string as boolean value or, if not possible, return None
     """

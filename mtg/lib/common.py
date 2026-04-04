@@ -13,8 +13,6 @@ import logging
 from collections import Counter
 from typing import Callable, Iterable, Protocol, Sequence, Type
 
-from mtg.lib.check_type import uniform_type_checker
-
 _log = logging.getLogger(__name__)
 
 
@@ -53,7 +51,6 @@ def cleardir(obj: object) -> list[str]:
     return [attr for attr in dir(obj) if not attr.startswith("_")]
 
 
-@uniform_type_checker(str)
 def breadcrumbs(*crumbs: str) -> str:
     """Return a breadcrumb string based on ``crumbs`` supplied.
 
@@ -170,3 +167,20 @@ def register_type(
     if parent_type and not issubclass(registered_type, parent_type):
         raise TypeError(f"Not a subclass of {parent_type.__name__}: {registered_type!r}")
     registry.add(registered_type)
+
+
+def fullqualname(class_: Type) -> str:
+    """Return fully qualified name of ``class_``.
+
+    Example: 'builtins.int'
+    """
+    return f"{class_.__module__}.{class_.__name__}"
+
+
+def types_to_namestr(types: Iterable[Type]) -> str:
+    """Convert ``types`` to a string representation using their fully qualified names.
+
+    Example: '[builtins.str, builtins.int, builtins.float]'
+    """
+    return ", ".join([fullqualname(t) for t in types])
+

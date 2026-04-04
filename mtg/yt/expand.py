@@ -14,7 +14,7 @@ from bs4 import Tag
 from requests import ConnectionError, HTTPError, ReadTimeout
 from selenium.common import TimeoutException
 
-from mtg.gstate import UrlsStateManager
+from mtg.session import UrlsStateManager
 from mtg.lib.scrape.core import dissect_js, fetch
 from mtg.lib.scrape.dynamic import fetch_dynamic_soup
 

@@ -13,12 +13,10 @@ import gspread
 import gspread.utils
 
 from mtg.lib.time import timed
-from mtg.lib.check_type import type_checker
 
 _log = logging.getLogger(__name__)
 
 
-@type_checker(str, str)
 def _get_worksheet(spreadsheet: str, worksheet: str) -> gspread.Worksheet:
     creds_file = "scraping_service_account.json"
     client = gspread.service_account(filename=creds_file)
