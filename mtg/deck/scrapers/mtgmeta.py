@@ -33,6 +33,9 @@ class MtgMetaIoDeckScraper(DeckScraper):
     """
     USE_WAYBACK = True  # override
     JSON_FROM_SOUP = True  # override
+    EXAMPLE_URLS = (
+        "https://mtgmeta.io/decks/26293",
+    )
 
     @staticmethod
     @override
@@ -109,6 +112,9 @@ class MtgMetaIoTournamentScraper(DeckUrlsContainerScraper):
     CONTAINER_NAME = "MTGMeta.io tournament"  # override
     DECK_SCRAPER_TYPES = MtgMetaIoDeckScraper,  # override
     USE_WAYBACK = True  # override
+    EXAMPLE_URLS = (
+        "https://mtgmeta.io/tournaments/4214",
+    )
 
     @staticmethod
     @override
@@ -161,6 +167,9 @@ class MtgMetaIoArticleScraper(HybridContainerScraper):
     THROTTLING = MtgMetaIoTournamentScraper.THROTTLING  # override
     DECK_TAG_PARSER_TYPE = MtgMetaIoDeckTagParser  # override
     USE_WAYBACK = True  # override
+    EXAMPLE_URLS = (
+        "https://mtgmeta.io/articles/deck-primer-legacy-oops-all-spells/",
+    )
 
     @staticmethod
     @override

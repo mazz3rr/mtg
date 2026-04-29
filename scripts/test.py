@@ -25,21 +25,10 @@ _log = logging.getLogger(__name__)
 # TODO: finish curating the URLs
 TEST_URLS = [
     # CURATED ABOVE / UNCURATED BELOW
-    'https://www.hareruyamtg.com/en/deck/result?player=pg8',
-    'https://article.hareruyamtg.com/article/91861/?lang=en',
-    'https://article.hareruyamtg.com/article/author/piotrglogowski_en/?lang=en',
     'https://magic.wizards.com/en/news/archive?author=1iuVapWGRdDkVKUHT2xffq',
     'https://magic.wizards.com/en/news/feature/upgrading-the-miracle-worker-duskmourn-house-of-horror-commander-deck',
-    'https://magicblogs.de/blog/9893-in-a-land-before-the-monkey-aggro-5-5-sliver/',
     'https://magicjank.com/magicjank-explorer-best-decks/',
-    'https://manastack.com/user/kxdx1157/decks',
-    'https://www.manatraders.com/decks?format_id=4&search_name=kasa',
-    'https://melee.gg/Profile/Index/MAJH81996',
-    'https://moxfield.com/decks/public?q=eyJmaWx0ZXIiOiJwb2cyNTAxIn0%3D',
-    'https://mtgazone.com/author/mtghero/',
-    'https://mtgcircle.com/articles/standard-banner-goblins',
     'https://mtgcircle.com/creators/numbskull/articles',
-    'https://mtgcircle.com/decks/standard/mono-red-aggro-decklist-by-cunicoligoblin?id=679b6f7fbcc7d768c3123f7c',
     'https://mtgdecks.net/authors/skura',
     'https://www.mtggoldfish.com/articles/search?author=93',
     'https://mtgmeta.io/articles/author/vertyx/'

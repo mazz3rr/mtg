@@ -17,7 +17,11 @@ from mtg.constants import Json
 from mtg.deck.abc import DeckTagParser
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper
 from mtg.lib.common import ParsingError
-from mtg.lib.scrape.core import ScrapingError, find_previous_sibling_tag, strip_url_query
+from mtg.lib.scrape.core import (
+    ScrapingError, find_previous_sibling_tag, get_netloc_domain,
+    get_path_segments, strip_url_query,
+)
+from mtg.scryfall import all_formats
 
 _log = logging.getLogger(__name__)
 URL_PREFIX = "https://mtgdecks.net"
@@ -79,11 +83,19 @@ class MtgDecksNetDeckScraper(DeckScraper):
         "brawl": "standardbrawl",
         "historic-brawl": "brawl",
     }
+    EXAMPLE_URLS = (
+        "https://mtgdecks.net/Commander/glarb-calamity-s-augur-decklist-by-mitch-k-2910912",
+        "https://mtgdecks.net/Modern/living-end-decklist-by-sultai-living-end-2910946",
+
+    )
 
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return "mtgdecks.net/" in url.lower() and "-decklist-" in url.lower()
+        url = url.lower()
+        domain = get_netloc_domain(url)
+        fmt, segment, *_ = get_path_segments(url)
+        return domain == "mtgdecks.net" and fmt in all_formats() and "-decklist-" in segment
 
     @staticmethod
     @override
@@ -121,11 +133,17 @@ class MtgDecksNetTournamentScraper(DeckUrlsContainerScraper):
     CONTAINER_NAME = "MTGDecks.net tournament"  # override
     DECK_SCRAPER_TYPES = MtgDecksNetDeckScraper,  # override
     DECK_URL_PREFIX = URL_PREFIX  # override
+    EXAMPLE_URLS = (
+        "https://mtgdecks.net/Premodern/premodern-european-championship-2024-tournament-170455",
+    )
 
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return "mtgdecks.net/" in url.lower() and "-tournament-" in url.lower()
+        url = url.lower()
+        domain = get_netloc_domain(url)
+        fmt, segment, *_ = get_path_segments(url)
+        return domain == "mtgdecks.net" and fmt in all_formats() and "-tournament-" in segment
 
     @staticmethod
     @override
@@ -153,6 +171,13 @@ class MtgDecksNetArticleScraper(HybridContainerScraper):
     DECK_TAG_PARSER_TYPE = MtgDecksNetDeckTagParser  # override
     CONTAINER_SCRAPER_TYPES = MtgDecksNetTournamentScraper,  # override
     CONTAINER_URL_PREFIX = URL_PREFIX  # override
+    EXAMPLE_URLS = (
+        "https://mtgdecks.net/guides/modern-broodscale-combo-deck-tech-sideboard-guide-mtg-340",
+        "https://mtgdecks.net/meta/aetherdrift-meta-winners-3-must-watch-standard-decks-mtg-337",
+        "https://mtgdecks.net/meta/20-years-of-power-creep-mtg-338",
+        "https://mtgdecks.net/spoilers/challenger-decks-2022-complete-decklists-mtg-28",
+        "https://mtgdecks.net/theory/innovation-and-perfomance-in-magic-dash-method-mtg-163",
+    )
 
     def __init__(self, url: str, metadata: Json | None = None) -> None:
         super().__init__(url, metadata)
@@ -161,9 +186,11 @@ class MtgDecksNetArticleScraper(HybridContainerScraper):
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        tokens = ("/guides/", "/meta/", "/spoilers/", "/theory/", "/news/", "/profiles/")
-        tokens = {f"mtgdecks.net{t}" for t in tokens}
-        return any(t in url.lower() for t in tokens)
+        tokens = "guides", "meta", "spoilers", "theory", "news", "profiles"
+        url = url.lower()
+        domain = get_netloc_domain(url)
+        cat, *_ = get_path_segments(url)
+        return domain == "mtgdecks.net" and cat in tokens
 
     @staticmethod
     @override

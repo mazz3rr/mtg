@@ -436,6 +436,9 @@ class DeckUrlsContainerScraper(ContainerScraper):
                     continue
                 # skipping/adding to scraped/failed is already handled in deck scrapers
 
+        if not decks:
+            self._session.add_failed_url(self.url)
+
         return decks
 
     @timed("deck URLs container scraping")

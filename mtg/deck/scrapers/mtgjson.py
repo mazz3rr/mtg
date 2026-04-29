@@ -29,7 +29,6 @@ _log = logging.getLogger(__name__)
 URL = "https://mtgjson.com/api/v5/decks/"
 
 
-@DeckScraper.registered
 class MtgJsonDeckScraper(DeckScraper):
     """Scraper of MTGJSON decks page.
     """

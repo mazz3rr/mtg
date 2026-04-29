@@ -59,7 +59,7 @@ class MtgCircleDeckJsonParser(DeckJsonParser):
         if arena_mode := self._deck_json.get("gameMode"):
             self._metadata.setdefault("arena", {})["mode"] = arena_mode
 
-    def _parse_card(self, card_json: Json) -> list[Card]:
+    def _parse_card_json(self, card_json: Json) -> list[Card]:
         name = card_json["name"]
         qty = card_json["quantity"]
         setcode, collector_number = card_json.get("set", ""), card_json.get("collector_number", "")
@@ -73,13 +73,13 @@ class MtgCircleDeckJsonParser(DeckJsonParser):
         for card_json in self._deck_json["cards"]:
             match card_json["deckPos"]:
                 case "mainDeck":
-                    self._maindeck += self._parse_card(card_json)
+                    self._maindeck += self._parse_card_json(card_json)
                 case "sideboard":
-                    self._sideboard += self._parse_card(card_json)
+                    self._sideboard += self._parse_card_json(card_json)
                 case "commander":
-                    self._set_commander(self._parse_card(card_json)[0])
+                    self._set_commander(self._parse_card_json(card_json)[0])
                 case "companion":
-                    self._companion = self._parse_card(card_json)[0]
+                    self._companion = self._parse_card_json(card_json)[0]
                 case _:
                     pass
 
@@ -116,6 +116,9 @@ class MtgCircleVideoDeckScraper(DeckScraper):
                  "'quantity')]",
         "headers": {"Referer": "https://www.youtube.com/"}  # FIXME: try passing a cookie (#443)
     }
+    EXAMPLE_URLS = (
+        "https://mtgcircle.com/videos/explorer/mono-white-aggro-by-khat-vs-rakdos-aggro-by-eirande?id=72aa9465-b1fa-4b94-9623-ba2e703c1ee1",
+    )
 
     @staticmethod
     @override
@@ -156,8 +159,10 @@ class MtgCircleVideoDeckScraper(DeckScraper):
         fmt_tags = self._soup.select("nav > ol > li > a")
         if fmt_tag := from_iterable(
                 fmt_tags,
-                lambda t: "#" not in t.attrs["href"] and t.text != "Videos"
-                          and t.text.lower() in all_formats()):
+                lambda t: "#" not in t.attrs["href"]
+                          and t.text != "Videos"
+                          and t.text.lower() in all_formats()
+        ):
             self._update_fmt(fmt_tag.text)
 
     @override
@@ -171,6 +176,10 @@ class MtgCircleVideoDeckScraper(DeckScraper):
 class MtgCircleRegularDeckScraper(MtgCircleVideoDeckScraper):
     """Scraper of MTGCircle regular decklist page.
     """
+    EXAMPLE_URLS = (
+        "https://mtgcircle.com/decks/standard/mono-red-aggro-decklist-by-cunicoligoblin?id=679b6f7fbcc7d768c3123f7c",
+    )
+
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
@@ -183,8 +192,10 @@ class MtgCircleRegularDeckScraper(MtgCircleVideoDeckScraper):
     def _retrieve_deck_data(self, data: Json) -> Json:
         node = Node(data)
         deck = node.find(
-            lambda n: isinstance(n.data, dict) and "cards" in n.data
-                      and "variations" in n.parent.name )
+            lambda n: isinstance(n.data, dict)
+                      and "cards" in n.data
+                      and "variations" in n.parent.name
+        )
         if deck is None:
             raise ScrapingError("Deck data not found", scraper=type(self), url=self.url)
         return deck.data
@@ -199,6 +210,9 @@ class MtgCircleArticleScraper(HybridContainerScraper):
     DECK_JSON_PARSER_TYPE = MtgCircleDeckJsonParser  # override
     THROTTLING = _THROTTLING  # override
     SELENIUM_PARAMS = MtgCircleVideoDeckScraper.SELENIUM_PARAMS  # override
+    EXAMPLE_URLS = (
+        "https://mtgcircle.com/articles/standard-banner-goblins",
+    )
 
     @staticmethod
     @override

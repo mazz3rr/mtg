@@ -100,6 +100,11 @@ class MtgaZoneDeckTagParser(DeckTagParser):
 class MtgaZoneDeckScraper(DeckScraper):
     """Scraper of MTG Arena Zone decklist page.
     """
+    EXAMPLE_URLS = (
+        "https://mtgazone.com/user-decks/wxw3gkoddxqybfmgca2k/",
+        "https://mtgazone.com/deck/bo1-standard-jeskai-control/",
+    )
+
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
@@ -131,8 +136,11 @@ class MtgaZoneDeckScraper(DeckScraper):
 class MtgaZoneArticleScraper(HybridContainerScraper):
     """Scraper of MTG Arena Zone article page.
     """
-    CONTAINER_NAME = "MTGAZone article"
+    CONTAINER_NAME = "MTGAZone article"  # override
     DECK_TAG_PARSER_TYPE = MtgaZoneDeckTagParser  # override
+    EXAMPLE_URLS = (
+        "https://mtgazone.com/standard-azorius-control-deck-guide/",
+    )
 
     @staticmethod
     @override
@@ -173,6 +181,10 @@ class MtgaZoneAuthorScraper(HybridContainerScraper):
     CONTAINER_NAME = "MTGAZone author"  # override
     DECK_SCRAPER_TYPES = MtgaZoneDeckScraper,  # override
     CONTAINER_SCRAPER_TYPES = MtgaZoneArticleScraper,  # override
+    EXAMPLE_URLS = (
+        "https://mtgazone.com/author/skura/",
+        "https://mtgazone.com/author/mtghero/",
+    )
 
     @staticmethod
     @override
