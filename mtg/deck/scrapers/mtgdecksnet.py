@@ -93,8 +93,11 @@ class MtgDecksNetDeckScraper(DeckScraper):
     @override
     def is_valid_url(url: str) -> bool:
         url = url.lower()
-        domain = get_netloc_domain(url)
-        fmt, segment, *_ = get_path_segments(url)
+        domain = get_netloc_domain(url, naked=True)
+        try:
+            fmt, segment, *_ = get_path_segments(url)
+        except ValueError:
+            return False
         return domain == "mtgdecks.net" and fmt in all_formats() and "-decklist-" in segment
 
     @staticmethod
@@ -141,8 +144,11 @@ class MtgDecksNetTournamentScraper(DeckUrlsContainerScraper):
     @override
     def is_valid_url(url: str) -> bool:
         url = url.lower()
-        domain = get_netloc_domain(url)
-        fmt, segment, *_ = get_path_segments(url)
+        domain = get_netloc_domain(url, naked=True)
+        try:
+            fmt, segment, *_ = get_path_segments(url)
+        except ValueError:
+            return False
         return domain == "mtgdecks.net" and fmt in all_formats() and "-tournament-" in segment
 
     @staticmethod
@@ -188,8 +194,11 @@ class MtgDecksNetArticleScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         tokens = "guides", "meta", "spoilers", "theory", "news", "profiles"
         url = url.lower()
-        domain = get_netloc_domain(url)
-        cat, *_ = get_path_segments(url)
+        domain = get_netloc_domain(url, naked=True)
+        try:
+            cat, *_ = get_path_segments(url)
+        except ValueError:
+            return False
         return domain == "mtgdecks.net" and cat in tokens
 
     @staticmethod

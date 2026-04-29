@@ -20,7 +20,7 @@ from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper, HybridC
 from mtg.lib.common import ParsingError, from_iterable
 from mtg.lib.text import sanitize_whitespace
 from mtg.lib.numbers import extract_int
-from mtg.lib.scrape.core import ScrapingError, strip_url_query
+from mtg.lib.scrape.core import ScrapingError, get_path_segments, strip_url_query
 from mtg.scryfall import COMMANDER_FORMATS
 
 _log = logging.getLogger(__name__)
@@ -102,17 +102,23 @@ class ScgDeckTagParser(DeckTagParser):
 class ScgDeckScraper(DeckScraper):
     """Scraper of StarCityGames decklist page.
     """
-    # FIXME: use `get_path_segments()` instead (#394)
+    EXAMPLE_URLS = (
+        "https://old.starcitygames.com/decks/159800",
+    )
+
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
         if "old.starcitygames.com/decks/" not in url.lower():
             return False
-        url = url.removesuffix("/")
-        _, end = url.split("/decks/", maxsplit=1)
-        if all(ch.isdigit() for ch in end):
-            return True
-        return False
+        try:
+            segments = get_path_segments(url)
+            decks_idx = segments.index("decks")
+            if all(ch.isdigit() for ch in segments[decks_idx + 1]):
+                return True
+            return False
+        except (ValueError, IndexError):
+            return False
 
     @staticmethod
     @override
@@ -149,22 +155,27 @@ class ScgEventScraper(DeckUrlsContainerScraper):
     """
     CONTAINER_NAME = "StarCityGames event"  # override
     DECK_SCRAPER_TYPES = ScgDeckScraper,  # override
+    EXAMPLE_URLS = (
+        "https://old.starcitygames.com/decks/Star_City_Games_Invitational/2021-10-31_modern_Roanoke_VA_US/1/?_ga=2.221755741.477210246.1635997429-547990958.1635787420",
+        "https://old.starcitygames.com/decks/Mythic_Championship_Qualifier/2021-10-31_modern_Roanoke_VA_0/1/",
+    )
 
-    # FIXME: use `get_path_segments()` instead (#394)
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
         if "old.starcitygames.com/decks/" not in url.lower():
             return False
-        url = url.removesuffix("/")
-        _, end = url.split("/decks/", maxsplit=1)
-        if "/" in end:
-            if _is_player_url(url):
-                return False
-            # this will also catch arbitrary deck query results, e.g.:
-            # https://old.starcitygames.com/decks/results/format/1-28-70/event_ID/49/[...]/start_num/0/
-            return True
-        return False
+        if _is_player_url(url):
+            return False
+        try:
+            _, segments = get_path_segments(url)
+            if 3 >= len(segments) >= 2:
+                # this will filter out too long deck query results, e.g.:
+                # https://old.starcitygames.com/decks/results/format/1-28-70/event_ID/49/[...]/start_num/0/
+                return True
+            return False
+        except ValueError:
+            return False
 
     @staticmethod
     @override
@@ -189,6 +200,9 @@ class ScgPlayerScraper(ScgEventScraper):
     """Scraper of StarCityGames player search page.
     """
     CONTAINER_NAME = "StarCityGames player"  # override
+    EXAMPLE_URLS = (
+        "https://old.starcitygames.com/decks/results/p_first/Jonathan/p_last/Suarez",
+    )
 
     @staticmethod
     def is_valid_url(url: str) -> bool:
@@ -201,6 +215,9 @@ class ScgDatabaseScraper(DeckUrlsContainerScraper):
     """
     CONTAINER_NAME = "StarCityGames author's deck database"  # override
     DECK_SCRAPER_TYPES = ScgDeckScraper,  # override
+    EXAMPLE_URLS = (
+        "https://old.starcitygames.com/content/bennie-smith-decks",
+    )
 
     @staticmethod
     @override
@@ -261,6 +278,9 @@ class ScgArticleScraper(HybridContainerScraper):
     CONTAINER_NAME = "StarCityGames article"  # override
     DECK_TAG_PARSER_TYPE = ScgArticleDeckTagParser  # override
     CONTAINER_SCRAPER_TYPES = ScgEventScraper,  # override
+    EXAMPLE_URLS = (
+        "https://articles.starcitygames.com/magic-the-gathering/commander-vs-417-artifacts-and-rabbits-and-lands-oh-my/",
+    )
 
     @staticmethod
     @override

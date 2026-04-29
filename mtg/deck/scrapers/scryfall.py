@@ -26,6 +26,10 @@ _log = logging.getLogger(__name__)
 class ScryfallDeckScraper(DeckScraper):
     """Scraper of Scryfall decklist page.
     """
+    EXAMPLE_URLS = (
+        "https://scryfall.com/@MTGBudgetBrew/decks/4f54de61-96ac-475c-8071-215a82b72975?as=list&with=usd",
+    )
+
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:

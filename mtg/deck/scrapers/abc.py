@@ -215,20 +215,27 @@ class DeckScraper(NestedDeckParser):
         return set(cls._REGISTRY)
 
     @classmethod
-    def test(cls) -> tuple[bool, Exception | None]:
+    def test(cls) -> tuple[str | None, bool, Exception | None]:
+        """Test this scraper against its example URLs.
+
+        Returns:
+            passed/failed, exception or None
+        """
         if not cls.EXAMPLE_URLS:
             raise ValueError("No example URLs defined")
+        last_url = None
         try:
             for url in cls.EXAMPLE_URLS:
-                _log.info(f"Testing URL: {url!r}...")
+                last_url = url
+                _log.info(f"Testing {cls.__name__!r}...")
                 scraper = cls(url)
-                deck = scraper.scrape()
-                if not deck:
-                    return False, None
+                decks = scraper.scrape()
+                if not decks:
+                    return last_url, False, None
         except Exception as e:
-            return False, e
+            return last_url, False, e
         else:
-            return True, None
+            return None, True, None
 
 
 _THROTTLED_DECK_SCRAPER_TYPES = set()
@@ -331,20 +338,22 @@ class ContainerScraper(DeckScraper):
 
     @classmethod
     @override
-    def test(cls) -> tuple[bool, Exception | None]:
+    def test(cls) -> tuple[str | None, bool, Exception | None]:
         if not cls.EXAMPLE_URLS:
             raise ValueError("No example URLs defined")
+        last_url = None
         try:
             for url in cls.EXAMPLE_URLS:
-                _log.info(f"Testing URL: {url!r}...")
+                last_url = url
+                _log.info(f"Testing {cls.__name__!r}...")
                 scraper = cls(url)
                 decks = scraper.scrape_decks()
                 if not decks:
-                    return False, None
+                    return last_url, False, None
         except Exception as e:
-            return False, e
+            return last_url, False, e
         else:
-            return True, None
+            return None, True, None
 
 
 _FOLDER_CONTAINER_SCRAPER_TYPES = set()

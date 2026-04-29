@@ -94,12 +94,12 @@ def test_scrapers():
     for i, scraper in enumerate(scrapers, start=1):
         name = scraper.__name__
         _log.info(f"Testing {i}/{len(scrapers)} scraper: {name!r}...")
-        result, exc = scraper.test()
+        result, url, exc = scraper.test()
         if result:
             _log.info(f"✓ {name!r} scraper: PASSED")
             passed.append(scraper)
         else:
-            _log.warning(f"✗ {name!r} scraper: FAILED - {exc or 'no decks scraped'}")
+            _log.warning(f"✗ {name!r} scraper: FAILED on {url!r} - {exc or 'no decks scraped'}")
             failed.append(scraper)
 
         _log.info(f"{len(passed)} scrapers passed. {len(failed)} scrapers failed.")

@@ -27,6 +27,9 @@ class MtgRocksArticleScraper(HybridContainerScraper):
     """Scraper of MTGRocks article page.
     """
     CONTAINER_NAME = "MTGRocks article"  # override
+    EXAMPLE_URLS = (
+        "https://mtgrocks.com/dredgers-insight-mtg/",
+    )
 
     @staticmethod
     @override
@@ -89,6 +92,9 @@ class MtgRocksAuthorScraper(HybridContainerScraper):
     """
     CONTAINER_NAME = "MTGRocks author"  # override
     CONTAINER_SCRAPER_TYPES = MtgRocksArticleScraper,  # override
+    EXAMPLE_URLS = (
+        "https://mtgrocks.com/author/zachary-fink/"
+    )
 
     @staticmethod
     @override

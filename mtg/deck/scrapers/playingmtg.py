@@ -32,6 +32,10 @@ class PlayingMtgDeckScraper(DeckScraper):
     SELENIUM_PARAMS = {  # override
         "xpath": '//article//div/a[contains(@href, "/playingmtg.com/cards/")]'
     }
+    EXAMPLE_URLS = (
+        "https://playingmtg.com/decks/dimir-midrange-t0wk2",
+        "https://playingmtg.com/decks/thurid-mare-of-destiny-equine-copy-00w7t/",
+    )
 
     @staticmethod
     @override
@@ -119,6 +123,9 @@ class PlayingMtgTournamentScraper(DeckUrlsContainerScraper):
     CONTAINER_NAME = "PlayingMTG tournament"  # override
     DECK_SCRAPER_TYPES = PlayingMtgDeckScraper,  # override
     DECK_URL_PREFIX = URL_PREFIX  # override
+    EXAMPLE_URLS = (
+        "https://playingmtg.com/tournaments/mtgo-league-3164/",
+    )
 
     @staticmethod
     @override
@@ -192,6 +199,9 @@ class PlayingMtgArticleScraper(HybridContainerScraper):
     CONTAINER_NAME = "PlayingMTG article"  # override
     CONTAINER_SCRAPER_TYPES = PlayingMtgTournamentScraper,  # override
     CONTAINER_URL_PREFIX = URL_PREFIX  # override
+    EXAMPLE_URLS = (
+        "https://playingmtg.com/pro-tour-aetherdrift-top-8-standard-decklists/",
+    )
 
     @staticmethod
     @override

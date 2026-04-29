@@ -24,6 +24,9 @@ class MtgSearchItDeckScraper(DeckScraper):
     SELENIUM_PARAMS = {  # override
         "xpath": "//div[contains(@class, 'tags') and contains(@class, 'mt10')]"
     }
+    EXAMPLE_URLS = (
+        "https://mtgsearch.it/decks/jeskai-convoke",
+    )
     # TODO: detect presence of this trolling and attempt to click with Selenium
     # XPATH_UNBLOCK = "//a[@href='/access/unblock']"
 

@@ -376,14 +376,19 @@ def strip_url_query(url: str, keep_fragment=False) -> str:
     return stripped_url.removesuffix("/")
 
 
-def get_netloc_domain(url: str) -> str:
+def get_netloc_domain(url: str, naked=False) -> str:
     """Return the netloc domain of the supplied URL.
 
     E.g. supplying 'https://www.hareruyamtg.com/decks/1043414?utm_source=video' results in:
-        'www.hareruyamtg.com'
+        'www.hareruyamtg.com'. If 'naked' is True, then only `hareruyamtg.com` is returned.
+
+    Note: this function supports only naive `naked` parameter. The alternative is using an
+    external lib that in turn relies on external list of domains to parse everything (mostly)
+    reliably. More on this: https://share.google/aimode/y9e6p3RsuKeRrGJZ8
     """
     try:
-        return urllib.parse.urlsplit(url).netloc
+        netloc = urllib.parse.urlsplit(url).netloc
+        return netloc.removeprefix("www.") if naked else netloc
     except ValueError:
         return ""
 

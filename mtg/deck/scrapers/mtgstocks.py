@@ -17,7 +17,10 @@ from mtg.constants import Json
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
 from mtg.scryfall import Card
 from mtg.lib.common import from_iterable
-from mtg.lib.scrape.core import ScrapingError, find_links, prepend_url, strip_url_query
+from mtg.lib.scrape.core import (
+    ScrapingError, find_links, get_path_segments, prepend_url,
+    strip_url_query,
+)
 
 _log = logging.getLogger(__name__)
 URL_PREFIX = "https://mtgstocks.com"
@@ -28,6 +31,9 @@ class MtgStocksDeckScraper(DeckScraper):
     """Scraper of MTGStocks decklist page.
     """
     JSON_FROM_SOUP = True  # override
+    EXAMPLE_URLS = (
+        "https://www.mtgstocks.com/decks/481330",
+    )
 
     def __init__(self, url: str, metadata: Json | None = None) -> None:
         super().__init__(url, metadata)
@@ -44,16 +50,13 @@ class MtgStocksDeckScraper(DeckScraper):
         url = strip_url_query(url)
         return url.replace("/visual/", "/")
 
-    # FIXME: use `get_path_segments()` instead (#394)
     def _parse_deck_id(self) -> int:
         try:
-            _, id_part = self.url.split("mtgstocks.com/decks/", maxsplit=1)
-            if "/" in id_part:
-                id_, _ = id_part.split("/", maxsplit=1)
-                return int(id_)
-            return int(id_part)
+            _, deck_id = get_path_segments(self.url)
+            return int(deck_id)
         except ValueError:
-            raise ScrapingError(f"Deck ID missing from URL", scraper=type(self), url=self.url)
+            raise ScrapingError(
+                f"Failed to extract deck ID from URL", scraper=type(self), url=self.url)
 
     def _get_json_from_soup(self) -> Json:
         script_tag = self._soup.find("script", id="ng-state")
@@ -96,6 +99,10 @@ class MtgStocksArticleScraper(DeckUrlsContainerScraper):
     """Scraper of MTGStocks article page.
     """
     CONTAINER_NAME = "MTGStocks article"  # override
+    EXAMPLE_URLS = (
+        "https://www.mtgstocks.com/news/1061-weekly-winners-2021---20",
+        "https://www.mtgstocks.com/news/15416-weekly-winners-2025---02",
+    )
 
     @staticmethod
     @override

@@ -15,7 +15,10 @@ from bs4 import Tag
 
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
 from mtg.scryfall import Card
-from mtg.lib.scrape.core import ScrapingError, fetch_soup, find_links, strip_url_query
+from mtg.lib.scrape.core import (
+    ScrapingError, fetch_soup, find_links, get_netloc_domain,
+    get_path_segments, strip_url_query,
+)
 
 _log = logging.getLogger(__name__)
 
@@ -24,6 +27,11 @@ _log = logging.getLogger(__name__)
 class MtgVaultDeckScraper(DeckScraper):
     """Scraper of MTGVault decklist page.
     """
+    EXAMPLE_URLS = (
+        "https://www.mtgvault.com/rogib/decks/edh-for-fun-special-garruk/",
+        "https://www.mtgvault.com/lemonadas/decks/athreos-shroud-veiled/",
+    )
+
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
@@ -84,15 +92,19 @@ class MtgVaultUserScraper(DeckUrlsContainerScraper):
     CONTAINER_NAME = "MTGVault user"  # override
     DECK_SCRAPER_TYPES = MtgVaultDeckScraper,  # override
     DECK_URL_PREFIX = "https://www.mtgvault.com"  # override
+    EXAMPLE_URLS = (
+        "https://www.mtgvault.com/ahendra/",
+    )
 
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return (
-            "mtgvault.com/" in url.lower()
-            and "/decks/" not in url.lower()
-            and "/ViewDeck.aspx" not in url
-        )
+        try:
+            domain = get_netloc_domain(url, naked=True)
+            segment, *_ = get_path_segments(url)
+        except ValueError:
+            return False
+        return domain == "mtgvault.com" and segment != "decks" and "/ViewDeck.aspx" not in url
 
     @override
     def _parse_input_for_decks_data(self) -> None:

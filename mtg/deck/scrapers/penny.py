@@ -17,7 +17,10 @@ from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
 from mtg.scryfall import Card
 from mtg.lib.common import from_iterable
 from mtg.lib.time import get_date_from_ago_text, get_date_from_month_text
-from mtg.lib.scrape.core import ScrapingError, fetch_json, fetch_soup, strip_url_query
+from mtg.lib.scrape.core import (
+    ScrapingError, fetch_json, fetch_soup, get_path_segments,
+    strip_url_query,
+)
 
 _log = logging.getLogger(__name__)
 URL_PREFIX = "https://pennydreadfulmagic.com"
@@ -27,6 +30,11 @@ URL_PREFIX = "https://pennydreadfulmagic.com"
 class PennyDreadfulMagicDeckScraper(DeckScraper):
     """Scraper of PennyDreadfulMagic decklist page.
     """
+    EXAMPLE_URLS = (
+        "https://pennydreadfulmagic.com/decks/245226/",
+        "https://pennydreadfulmagic.com/decks/245223/",
+    )
+
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
@@ -95,6 +103,9 @@ class PennyDreadfulMagicCompetitionScraper(DeckUrlsContainerScraper):
     )  # override
     DECK_SCRAPER_TYPES = PennyDreadfulMagicDeckScraper,  # override
     DECK_URL_PREFIX = URL_PREFIX  # override
+    EXAMPLE_URLS = (
+        "https://pennydreadfulmagic.com/competitions/4764/",
+    )
 
     @staticmethod
     @override
@@ -134,28 +145,31 @@ class PennyDreadfulMagicUserScraper(DeckUrlsContainerScraper):
     )  # override
     DECK_SCRAPER_TYPES = PennyDreadfulMagicDeckScraper,  # override
     DECK_URL_PREFIX = URL_PREFIX  # override
+    EXAMPLE_URLS = (
+        "https://pennydreadfulmagic.com/seasons/33/people/id/2999/",
+        "https://pennydreadfulmagic.com/people/id/2668/",
+    )
 
     @property
     def _ids_in_url(self) -> bool:
-        return "/seasons/" in self.url.lower() and "/id/" in self.url.lower()
+        segments = set(get_path_segments(self.url.lower()))
+        return "/seasons/" in segments and "/id/" in segments
 
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return "pennydreadfulmagic.com" in url.lower() and "/people/" in url.lower()
+        return "pennydreadfulmagic.com/" in url.lower() and "/people/" in url.lower()
 
     @staticmethod
     @override
     def normalize_url(url: str) -> str:
         return strip_url_query(url)
 
-    # FIXME: use `get_path_segments()` instead (#394)
     @staticmethod
     def _parse_url_for_ids(url: str) -> tuple[str, str]:
-        url = url.removesuffix("/")
-        _, last = url.split("seasons/", maxsplit=1)
-        season_id, user_id = last.split("/people/id/", maxsplit=1)
-        return season_id, user_id
+        segments = get_path_segments(url.lower())
+        seasons_idx, id_idx = segments.index("seasons"), segments.index("id")
+        return segments[seasons_idx + 1], segments[id_idx + 1]
 
     def _find_ids(self) -> tuple[str, str] | None:
         soup = fetch_soup(self.url)
@@ -190,7 +204,7 @@ class PennyDreadfulMagicUserScraper(DeckUrlsContainerScraper):
             season_id, user_id = ids
         else:
             raise ScrapingError(
-                "Relevant query parameters missing from API URL", scraper=type(self), url=self.url)
+                "Parameters needed for API missing from the URL", scraper=type(self), url=self.url)
         json_data = fetch_json(self.API_URL_TEMPLATE.format(user_id, season_id))
         if not json_data or not json_data.get("objects"):
             raise ScrapingError("No decks data", scraper=type(self), url=self.url)

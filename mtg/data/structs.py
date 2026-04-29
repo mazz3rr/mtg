@@ -61,7 +61,8 @@ class VideoData:
     @property
     def domains(self) -> list[str]:
         domains = [
-            get_netloc_domain(url).lower().removeprefix("www.") for url in self.featured_urls]
+            get_netloc_domain(url, naked=True).lower() for url in self.featured_urls
+        ]
         return sorted({domain for domain in domains if domain})
 
     @property

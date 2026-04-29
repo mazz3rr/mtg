@@ -32,6 +32,11 @@ _STATES = {
 class PauperMtgDeckScraper(DeckScraper):
     """Scraper of PauperMTG decklist page.
     """
+    EXAMPLE_URLS = (
+        "https://paupermtg.com/deck/241206_ur_post/",
+        "https://paupermtg.com/edhdeck/pdh240101_halsin/",
+    )
+
     def __init__(self, url: str, metadata: Json | None = None) -> None:
         super().__init__(url, metadata)
         self._main_tag, self._tags = None, {}

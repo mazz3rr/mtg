@@ -92,17 +92,23 @@ class PauperwaveArticleScraper(HybridContainerScraper):
         "Novembre",
         "Dicembre",
     ]
+    EXAMPLE_URLS = (
+        "https://blog.pauperwave.org/articles/2026-04-26-pauperancino",  # decklist
+        "https://blog.pauperwave.org/articles/2026-03-31-dennis-garbati-paupergeddon-spring-2026" # report
+        "https://blog.pauperwave.org/articles/2025-12-06-tutorial-pingers"  # tutorial
+    )
 
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return is_more_than_root_path(url, "pauperwave.com")
+        return is_more_than_root_path(url, "blog.pauperwave.org/articles/")
 
     @staticmethod
     @override
     def normalize_url(url: str) -> str:
         return strip_url_query(url)
 
+    # TODO: as a result of the site's overhaul the below no longer work (#470)
     @override
     def _parse_input_for_metadata(self) -> None:
         if event_tag := self._soup.find("p", class_="has-medium-font-size"):

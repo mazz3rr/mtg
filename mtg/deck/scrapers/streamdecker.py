@@ -26,6 +26,9 @@ class StreamdeckerDeckScraper(DeckScraper):
     """Scraper of Streamdecker deck page.
     """
     API_URL_TEMPLATE = "https://www.streamdecker.com/api/deck/{}"  # override
+    EXAMPLE_URLS = (
+        "https://www.streamdecker.com/deck/ESysr7yWC",
+    )
 
     @staticmethod
     @override
@@ -92,6 +95,9 @@ class StreamdeckerUserScraper(DeckUrlsContainerScraper):
     API_URL_TEMPLATE = "https://www.streamdecker.com/api/userdecks/{}"  # override
     DECK_SCRAPER_TYPES = StreamdeckerDeckScraper,  # override
     DECK_URL_PREFIX = "https://www.streamdecker.com/deck/"  # override
+    EXAMPLE_URLS = (
+        "https://www.streamdecker.com/decks/togoresmtg",
+    )
 
     @staticmethod
     @override

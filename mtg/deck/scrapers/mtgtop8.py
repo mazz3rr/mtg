@@ -27,6 +27,10 @@ EVENT_RANKS = "minor", "regular", "major"  # indicated by number of stars (1, 2,
 class MtgTop8DeckScraper(DeckScraper):
     """Scraper of MTGTop8 decklist page.
     """
+    EXAMPLE_URLS = (
+        "https://mtgtop8.com/event?e=1989&d=214164&f=MO",
+    )
+
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
@@ -102,6 +106,9 @@ class MtgTop8EventScraper(DeckUrlsContainerScraper):
     CONTAINER_NAME = "MTGTop8 event"  # override
     DECK_SCRAPER_TYPES = MtgTop8DeckScraper,  # override
     DECK_URL_PREFIX = "https://www.mtgtop8.com/event"  # override
+    EXAMPLE_URLS = (
+        "https://mtgtop8.com/event?e=1989&",
+    )
 
     @staticmethod
     @override
