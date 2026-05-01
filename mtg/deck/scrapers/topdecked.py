@@ -56,6 +56,9 @@ class TopDeckedRegularDeckScraper(DeckScraper):
         "//span[contains(@class, 'prefix') and contains(@class, 'text-none') and "
         "contains(@class, 'ng-star-inserted')]"
     )
+    EXAMPLE_URLS = (
+        "https://www.topdecked.com/decks/brightflame-is-as-close-as-razia-gets-to-this-deck/ae0d8e00-87c1-44f3-89e3-9d48f25c174e",
+    )
 
     @classmethod
     @override
@@ -168,6 +171,9 @@ class TopDeckedMetaDeckScraper(TopDeckedRegularDeckScraper):
     _META_SHARE_XPATH = (
         "//span[contains(@class, 'text-medium') and contains(@class, 'subtext') "
         "and contains(text(), 'of meta')]"
+    )
+    EXAMPLE_URLS = (
+        "https://www.topdecked.com/metagame/standard/decks/mono-green-landfall/b97f6ca7-1335-4064-9d3a-8f6064a36c17",
     )
 
     @classmethod

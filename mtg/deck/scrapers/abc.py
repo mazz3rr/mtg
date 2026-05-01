@@ -450,6 +450,8 @@ class DeckUrlsContainerScraper(ContainerScraper):
                     _log.warning("Unable to click on a deck link with Selenium. Skipping...")
                     self._session.add_failed_url(normalized_deck_url)
                     continue
+                if deck:
+                    decks.append(deck)
                 # skipping/adding to scraped/failed is already handled in deck scrapers
 
         if not decks:

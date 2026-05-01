@@ -100,11 +100,11 @@ class MtgDecksNetDeckScraper(DeckScraper):
             return False
         return domain == "mtgdecks.net" and fmt in all_formats() and "-decklist-" in segment
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        url = strip_url_query(url)
-        return url.removesuffix("/visual")
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
+        return strip_url_query(url).removesuffix("/visual")
 
     def _get_sub_parser(self) -> MtgDecksNetDeckTagParser:
         deck_tag = self._soup.select_one("div.deck.shadow")

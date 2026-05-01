@@ -33,6 +33,10 @@ _log = logging.getLogger(__name__)
 class TopDeckDeckScraper(DeckScraper):
     """Scraper of TopDeck.gg decklist page.
     """
+    EXAMPLE_URLS = (
+        "https://topdeck.gg/deck/jeweled-lotus-lattenkamp-2025/VXJvfKI8RrPtKdYYC2zMBbuAPgu1",
+    )
+
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
@@ -114,6 +118,9 @@ class TopDeckBracketScraper(HybridContainerScraper):
     """
     CONTAINER_NAME = "TopDeck.gg bracket"  # override
     DECK_JSON_PARSER_TYPE = TopDeckBracketDeckJsonParser  # override
+    EXAMPLE_URLS = (
+        "https://topdeck.gg/bracket/D1NrlZYtYPr8HZgygm2G",
+    )
 
     @classmethod
     @override
@@ -236,6 +243,9 @@ class TopDeckProfileScraper(DecksJsonContainerScraper):
     """
     CONTAINER_NAME = "TopDeck.gg profile"  # override
     DECK_JSON_PARSER_TYPE = TopDeckProfileDeckJsonParser  # override
+    EXAMPLE_URLS = (
+        "https://topdeck.gg/profile/XThcd3jrjqTHleEtnr9FAm3kIIv1",
+    )
 
     @classmethod
     @override

@@ -9,6 +9,7 @@
 """
 import logging
 import sys
+from operator import attrgetter
 
 from mtg.lib.time import timed
 from mtg.logging import init_log
@@ -78,6 +79,7 @@ TEST_URLS = [
 ]
 
 
+# TODO: report
 @timed("testing scrapers")
 def test_scrapers():
     """Test all registered scrapers with their example URLs.
@@ -91,18 +93,18 @@ def test_scrapers():
     scrapers += DeckTagsContainerScraper.get_registered_scrapers()
     scrapers += HybridContainerScraper.get_registered_scrapers()
 
-    for i, scraper in enumerate(scrapers, start=1):
+    for i, scraper in enumerate(sorted(scrapers, key=attrgetter("__name__")), start=1):
         name = scraper.__name__
         _log.info(f"Testing {i}/{len(scrapers)} scraper: {name!r}...")
-        result, url, exc = scraper.test()
-        if result:
+        url, is_success, exc = scraper.test()
+        if is_success:
             _log.info(f"✓ {name!r} scraper: PASSED")
             passed.append(scraper)
         else:
             _log.warning(f"✗ {name!r} scraper: FAILED on {url!r} - {exc or 'no decks scraped'}")
             failed.append(scraper)
 
-        _log.info(f"{len(passed)} scrapers passed. {len(failed)} scrapers failed.")
+    _log.info(f"{len(passed)} scrapers passed. {len(failed)} scrapers failed.")
 
 
 if __name__ == '__main__':

@@ -72,7 +72,7 @@ class TappedoutDeckScraper(DeckScraper):
         "https://tappedout.net/mtg-decks/rakdos-orc-sac/?cb=1687559977",
         "https://tappedout.net/mtg-decks/pias-myr-deck/",
     )
-    THROTTLING = DeckScraper.THROTTLING * 3
+    THROTTLING = DeckScraper.THROTTLING * 6
 
     @classmethod
     @override

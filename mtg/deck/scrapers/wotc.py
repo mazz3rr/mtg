@@ -80,6 +80,10 @@ class WotCArticleScraper(HybridContainerScraper):
     """
     CONTAINER_NAME = "WotC article"  # override
     DECK_TAG_PARSER_TYPE = WotCDeckTagParser  # override
+    EXAMPLE_URLS = (
+        "https://magic.wizards.com/en/news/feature/upgrading-the-miracle-worker-duskmourn-house-of-horror-commander-deck",
+        "https://magic.wizards.com/en/news/feature/the-great-foundations-build-off-decklists",
+    )
 
     @classmethod
     @override

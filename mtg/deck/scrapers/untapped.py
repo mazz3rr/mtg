@@ -31,6 +31,9 @@ class UntappedProfileDeckScraper(DeckScraper):
         "//div[text()='No games have been played with this deck in the selected time frame']"
     )
     PRIVATE_XPATH = "//div[text()='This profile is private']"
+    EXAMPLE_URLS = (
+        "https://mtga.untapped.gg/profile/1ebb0626-01d1-46e1-9de9-8fe0e44cf0bf/TYDMHO3B7ZBKVHKYYX34JLSSXA/deck/8fd8ce80-01a3-4df8-aafc-a0aa0f90969f?gameType=constructed&constructedType=ranked&constructedFormat=standard",
+    )
 
     @classmethod
     @override
@@ -77,6 +80,9 @@ class UntappedRegularDeckScraper(DeckScraper):
         "consent_xpath": CONSENT_XPATH,
         "clipboard_xpath": CLIPBOARD_XPATH
     }
+    EXAMPLE_URLS = (
+        "https://mtga.untapped.gg/decks/AAQAAQmMBQHVBIy6JZiVBMC7BNixA7SDB_IDBpnSAe6FKNMBrf4D2PEK3QwJuQeH_yzxVgkDzPMDgIYErf8CVQPTmAGquDDegQQAAgikLsWWFJ2UFZ6kAePaAi-J7gOMgQcCv4AtoNAEAdMRAAADAr-ALchXAd_QMQHTEQAAAA",
+    )
 
     @classmethod
     @override
@@ -111,15 +117,23 @@ class UntappedMetaDeckScraper(DeckScraper):
         "consent_xpath": CONSENT_XPATH,
         "clipboard_xpath": CLIPBOARD_XPATH
     }
-
+    EXAMPLE_URLS = (
+        "https://mtga.untapped.gg/constructed/standard/decks/304/mono-white-auras/AAQAAQAAAArnvwKJkSry7gS6Ch8EJ-nrDtDxAc4BARSIBQA",
+        "https://mtga.untapped.gg/meta/decks/510/mono-red-aggro/AAQAAQPiqiH7mQQMAq7iAsOnHwAIstMCy9odZgu21wE2970DBAEV4gkA?tab=overview",
+    )
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return "mtga.untapped.gg/meta/decks/" in url.lower()
+        url = url.lower()
+        return (
+            "mtga.untapped.gg/meta/decks/" in url
+            or ("mtga.untapped.gg/constructed/" in url and "decks" in url)
+        )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -173,6 +187,10 @@ class UntappedProfileScraper(DeckUrlsContainerScraper):
     CONTAINER_NAME = "Untapped profile"  # override
     DECK_SCRAPER_TYPES = UntappedProfileDeckScraper,  # override
     DECK_URL_PREFIX = "https://mtga.untapped.gg"  # override
+    EXAMPLE_URLS = (
+        "https://mtga.untapped.gg/profile/390de354-4ae6-4ea5-9991-2f650825ba18/8D5B7E0B33092E80",
+        "https://mtga.untapped.gg/profile/d2b05c8d-0b0b-45c7-b108-f520cb235225/C237D55E2E6FD774",
+    )
 
     @classmethod
     @override

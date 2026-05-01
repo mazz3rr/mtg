@@ -30,6 +30,9 @@ class TcgRocksDeckScraper(DeckScraper):
     """Scraper of TCGRocks decklist page.
     """
     JSON_FROM_SOUP = True  # override
+    EXAMPLE_URLS = (
+        "https://tcgrocks.com/mtg/deck-builder/embed/627c8696-51db-4f09-8c28-5f263f8713e1",
+    )
 
     @classmethod
     @override

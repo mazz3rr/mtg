@@ -311,7 +311,6 @@ class TcgPlayerInfinitePlayerScraper(DeckUrlsContainerScraper):
     VALID_URL_HOOK = "magic-the-gathering/decks/player/"
     EXAMPLE_URLS = (
         "https://infinite.tcgplayer.com/magic-the-gathering/decks/player/SBMTGDev/",
-        "https://www.tcgplayer.com/content/magic-the-gathering/decks/player/SBMTGDev/",
     )
 
     @classmethod
@@ -355,6 +354,9 @@ class TcgPlayerInfiniteAuthorSearchScraper(TcgPlayerInfinitePlayerScraper):
     """Scraper of TCG Player Infinite author search page.
     """
     CONTAINER_NAME = "TCGPlayer Infinite author search"  # override
+    EXAMPLE_URLS = (
+        "https://www.tcgplayer.com/content/magic-the-gathering/decks/advanced-search/?author=SBMTGDev&p=1",
+    )
 
     @classmethod
     @override

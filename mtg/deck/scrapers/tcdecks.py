@@ -121,6 +121,9 @@ class TCDecksEventScraper(DeckUrlsContainerScraper):
     HEADERS = HEADERS  # override
     DECK_SCRAPER_TYPES = TCDecksDeckScraper,  # override
     DECK_URL_PREFIX = "https://www.tcdecks.net/"  # override
+    EXAMPLE_URLS = (
+        "https://www.tcdecks.net/deck.php?id=38058",
+    )
 
     @classmethod
     @override
