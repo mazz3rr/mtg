@@ -29,9 +29,9 @@ class ManaStackDeckScraper(DeckScraper):
         "https://manastack.com/deck/esper-transcendent-4",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "manastack.com/deck/" in url.lower()
 
     @classmethod
@@ -94,9 +94,9 @@ class ManaStackUserScraper(DeckUrlsContainerScraper):
         "https://manastack.com/user/kxdx1157/decks",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "manastack.com/user/" in url.lower()
 
     @classmethod

@@ -35,9 +35,9 @@ class MtgArenaProDeckScraper(DeckScraper):
         "https://mtgarena.pro/decks/doomed-snapper-pauper-1/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgarena.pro/decks/" in url.lower() or f"{ALT_DOMAIN}/decks/" in url.lower()
 
     @staticmethod

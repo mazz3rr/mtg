@@ -38,9 +38,9 @@ class DraftsimDeckScraper(DeckScraper):
         "https://draftsim.com/decks/polymorph/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return is_more_than_root_path(url, "draftsim.com/decks/")
 
     @classmethod
@@ -128,9 +128,9 @@ class DraftsimArticleScraper(HybridContainerScraper):
         "https://draftsim.com/mtg-dft-commander-decks/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         tokens = "/decks/", "/author/", "/blog", "/ratings/", "/all-sets", "/arenatutor"
         return (
             is_more_than_root_path(url, "draftsim.com")
@@ -191,9 +191,9 @@ class DraftsimAuthorScraper(HybridContainerScraper):
         "https://draftsim.com/author/darthjacen/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "draftsim.com/" in url.lower() and "/author/" in url.lower()
 
     @classmethod

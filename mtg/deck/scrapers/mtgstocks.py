@@ -39,9 +39,9 @@ class MtgStocksDeckScraper(DeckScraper):
         super().__init__(url, metadata)
         self._deck_id = self._parse_deck_id()
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         if "mtgstocks.com/decks/" not in url.lower():
             return False
         try:
@@ -107,9 +107,9 @@ class MtgStocksArticleScraper(DeckUrlsContainerScraper):
         "https://www.mtgstocks.com/news/15416-weekly-winners-2025---02",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgstocks.com/news/" in url.lower()
 
     @classmethod

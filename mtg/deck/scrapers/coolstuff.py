@@ -183,9 +183,9 @@ class CoolStuffIncArticleScraper(HybridContainerScraper):
         "https://www.coolstuffinc.com/a/jimdavis-05152023-a-new-two-card-infinite-combo-in-standard",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             is_more_than_root_path(url, "coolstuffinc.com/a/")
             and "action=search" not in url.lower()
@@ -232,9 +232,9 @@ class CoolStuffIncAuthorScraper(HybridContainerScraper):
         "https://www.coolstuffinc.com/a/?action=search&page=1&author%5B%5D=Carlos%20Gutierrez",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         tokens = "coolstuffinc.com/a/", "action=search", "author"
         return all(t in url.lower() for t in tokens)
 

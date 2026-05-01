@@ -37,9 +37,9 @@ class PlayingMtgDeckScraper(DeckScraper):
         "https://playingmtg.com/decks/thurid-mare-of-destiny-equine-copy-00w7t/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return is_more_than_root_path(url, "playingmtg.com/decks")
 
     @classmethod
@@ -128,9 +128,9 @@ class PlayingMtgTournamentScraper(DeckUrlsContainerScraper):
         "https://playingmtg.com/tournaments/mtgo-league-3164/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return is_more_than_root_path(url, "playingmtg.com/tournaments")
 
     def _parse_input_for_metadata(self) -> None:
@@ -204,9 +204,9 @@ class PlayingMtgArticleScraper(HybridContainerScraper):
         "https://playingmtg.com/pro-tour-aetherdrift-top-8-standard-decklists/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         tokens = (
             "decks", "tournaments", "wp-content", "news", "mtg-arena", "spoilers", "commander",
             "standard", "modern", "pioneer", "collection", "prices", "products", "schedule",

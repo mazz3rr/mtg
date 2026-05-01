@@ -159,9 +159,9 @@ class GoldfishDeckScraper(DeckScraper):
         "https://www.mtggoldfish.com/archetype/standard-mono-green-landfall-woe#paper"
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         return (
             ("mtggoldfish.com/deck/" in url or "mtggoldfish.com/archetype/" in url)
@@ -209,9 +209,9 @@ class GoldfishTournamentScraper(DeckUrlsContainerScraper):
         "https://www.mtggoldfish.com/tournament/pauper-league-2024-11-05#online",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtggoldfish.com/tournament/" in url.lower()
 
     @classmethod
@@ -241,9 +241,9 @@ class GoldfishPlayerScraper(DeckUrlsContainerScraper):
         "https://www.mtggoldfish.com/deck_searches/create?utf8=%E2%9C%93&deck_search%5Bname%5D=&deck_search%5Bformat%5D=&deck_search%5Btypes%5D%5B%5D=&deck_search%5Btypes%5D%5B%5D=tournament&deck_search%5Btypes%5D%5B%5D=user&deck_search%5Bplayer%5D=Eliott_Dragon&deck_search%5Bdate_range%5D=01%2F26%2F2022+-+02%2F09%2F2022&deck_search%5Bdeck_search_card_filters_attributes%5D%5B0%5D%5Bcard%5D=&deck_search%5Bdeck_search_card_filters_attributes%5D%5B0%5D%5Bquantity%5D=1&deck_search%5Bdeck_search_card_filters_attributes%5D%5B0%5D%5Btype%5D=maindeck&deck_search%5Bdeck_search_card_filters_attributes%5D%5B1%5D%5Bcard%5D=&deck_search%5Bdeck_search_card_filters_attributes%5D%5B1%5D%5Bquantity%5D=1&deck_search%5Bdeck_search_card_filters_attributes%5D%5B1%5D%5Btype%5D=maindeck&counter=2&commit=Search",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             "mtggoldfish.com/deck_searches/create?" in url.lower()
             and "deck_search%5Bplayer%5D=" in url
@@ -274,9 +274,9 @@ class GoldfishArticleScraper(HybridContainerScraper):
         "https://www.mtggoldfish.com/articles/much-abrew-hammer-time-axe-time-modern",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return f"mtggoldfish.com/articles/" in url.lower() and "/search" not in url.lower()
 
     @classmethod
@@ -313,9 +313,9 @@ class GoldfishAuthorScraper(HybridContainerScraper):
         "https://www.mtggoldfish.com/articles/search?author=93",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtggoldfish.com/articles/search?" in url.lower() and "author=" in url
 
     @override

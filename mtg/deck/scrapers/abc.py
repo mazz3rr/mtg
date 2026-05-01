@@ -80,9 +80,9 @@ class DeckScraper(NestedDeckParser):
         if url and not cls.is_valid_url(url):
             raise ValueError(f"Invalid URL: {url!r}")
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         raise NotImplementedError
 
     @classmethod
@@ -285,10 +285,10 @@ class ContainerScraper(DeckScraper):
         self._metadata["container_url"] = self.url
 
     # DeckScraper API
-    @staticmethod
+    @classmethod
     @abstractmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         raise NotImplementedError
 
     @override
@@ -395,10 +395,10 @@ class DeckUrlsContainerScraper(ContainerScraper):
         super().__init__(url, metadata, session)
         self._deck_urls: list[str] = []
 
-    @staticmethod
+    @classmethod
     @abstractmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         raise NotImplementedError
 
     @classmethod
@@ -484,10 +484,10 @@ class DeckTagsContainerScraper(ContainerScraper):
             self._metadata["url"] = self.url
         self._deck_tags: list[Tag] = []
 
-    @staticmethod
+    @classmethod
     @abstractmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         raise NotImplementedError
 
     @abstractmethod
@@ -554,10 +554,10 @@ class DecksJsonContainerScraper(ContainerScraper):
             self._metadata["url"] = self.url
         self._decks_json: Json = []
 
-    @staticmethod
+    @classmethod
     @abstractmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         raise NotImplementedError
 
     @abstractmethod
@@ -630,10 +630,10 @@ class HybridContainerScraper(
         super().__init__(url, metadata, session)
         self._container_urls: list[str] = []
 
-    @staticmethod
+    @classmethod
     @abstractmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         raise NotImplementedError
 
     @abstractmethod

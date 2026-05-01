@@ -32,9 +32,9 @@ class MtgoTradersDeckScraper(DeckScraper):
         "https://www.mtgotraders.com/deck/#/view?deck=3118",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "www.mtgotraders.com/deck/" in url.lower() and "?deck=" in url.lower()
 
     @override

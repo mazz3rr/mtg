@@ -98,9 +98,9 @@ class PauperwaveArticleScraper(HybridContainerScraper):
         "https://blog.pauperwave.org/articles/2025-12-06-tutorial-pingers"  # tutorial
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return is_more_than_root_path(url, "blog.pauperwave.org/articles/")
 
     @classmethod

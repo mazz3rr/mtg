@@ -43,9 +43,9 @@ class DeckboxDeckScraper(DeckScraper):
         "https://deckbox.org/sets/3581335",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "deckbox.org/sets/" in url.lower()
 
     @classmethod
@@ -118,9 +118,9 @@ class DeckboxUserScraper(DeckUrlsContainerScraper):
         "https://deckbox.org/users/Odekar",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "deckbox.org/users/" in url.lower()
 
     @classmethod
@@ -149,9 +149,9 @@ class DeckboxEventScraper(DeckUrlsContainerScraper):
         "https://deckbox.org/communities/mtg_competitive_events/events/1989",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "deckbox.org/communities/" in url.lower() and "/events/" in url.lower()
 
     @classmethod

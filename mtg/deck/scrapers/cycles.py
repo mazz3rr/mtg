@@ -115,9 +115,9 @@ class CyclesGamingArticleScraper(HybridContainerScraper):
         "https://cyclesgaming.com/keeping-modern-janky-duskmourn-glimmers/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return is_more_than_root_path(url, "cyclesgaming.com")
 
     @classmethod

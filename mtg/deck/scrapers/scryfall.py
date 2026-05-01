@@ -30,9 +30,9 @@ class ScryfallDeckScraper(DeckScraper):
         "https://scryfall.com/@MTGBudgetBrew/decks/4f54de61-96ac-475c-8071-215a82b72975?as=list&with=usd",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "scryfall.com/@" in url.lower() and "/decks/" in url.lower()
 
     @classmethod

@@ -18,7 +18,7 @@ from mtg.constants import SECRETS
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
 from mtg.scryfall import Card
 from mtg.lib.numbers import extract_int
-from mtg.lib.scrape.core import ScrapingError
+from mtg.lib.scrape.core import ScrapingError, get_netloc_domain, get_query_data
 
 _log = logging.getLogger(__name__)
 
@@ -47,15 +47,23 @@ class TCDecksDeckScraper(DeckScraper):
     """Scraper of TCDecks decklist page.
     """
     HEADERS = HEADERS  # override
+    EXAMPLE_URLS = (
+        "https://www.tcdecks.net/deck.php?id=38058&iddeck=347793",
+    )
 
     def __init__(self, url: str, metadata: Json | None = None) -> None:
         super().__init__(url, metadata)
         self._deck_tag: Tag | None = None
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
-        return "tcdecks.net/deck.php?id=" in url.lower() and "&iddeck=" in url.lower()
+    def is_valid_url(cls, url: str) -> bool:
+        url = url.lower()
+        query_params = get_query_data(url)
+        return (
+            get_netloc_domain(url, naked=True) == "tcdecks.net"
+            and all(param in query_params for param in ("id", "iddeck"))
+        )
 
     @override
     def _parse_input_for_metadata(self) -> None:
@@ -114,10 +122,16 @@ class TCDecksEventScraper(DeckUrlsContainerScraper):
     DECK_SCRAPER_TYPES = TCDecksDeckScraper,  # override
     DECK_URL_PREFIX = "https://www.tcdecks.net/"  # override
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:  # override
-        return "tcdecks.net/deck.php?id=" in url.lower() and "&iddeck=" not in url.lower()
+    def is_valid_url(cls, url: str) -> bool:  # override
+        url = url.lower()
+        query_params = get_query_data(url)
+        return (
+            get_netloc_domain(url, naked=True) == "tcdecks.net"
+            and "id" in query_params
+            and "iddeck" not in query_params
+        )
 
     @override
     def _parse_input_for_decks_data(self) -> None:  # override

@@ -43,9 +43,9 @@ class CardhoarderDeckScraper(DeckScraper):
         "https://www.cardhoarder.com/d/kpy674jn6ekerj5",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "cardhoarder.com/d/" in url.lower()
 
     @classmethod

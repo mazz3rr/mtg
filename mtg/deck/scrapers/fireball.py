@@ -29,6 +29,9 @@ from mtg.yt.discover import UrlHook
 # regular TCGPlayer Infinite API domain is used.
 
 
+# TODO: #471
+
+
 _log = logging.getLogger(__name__)
 FIREBALL_URL_PREFIX = "https://www.channelfireball.com"
 URL_HOOKS = (
@@ -59,9 +62,9 @@ class ChannelFireballDeckScraper(TcgPlayerInfiniteDeckScraper):
         "https://www.channelfireball.com/magic-the-gathering/deck/Timeless-Grixis/481595?external=undefined",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "channelfireball.com/magic-the-gathering/deck/" in url.lower()
 
 
@@ -76,9 +79,9 @@ class ChannelFireballPlayerScraper(TcgPlayerInfinitePlayerScraper):
         "https://www.channelfireball.com/magic-the-gathering/decks/player/Martin%20Juza",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "channelfireball.com/magic-the-gathering/decks/player/" in url.lower()
 
 
@@ -91,9 +94,9 @@ class ChannelFireballArticleScraper(TcgPlayerInfiniteArticleScraper):
         "https://www.channelfireball.com/article/MTG-Deck-Guide-Standard-Gruul-Aggro/bd06ac65-bb14-442c-aed5-cb9195861496/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return f"channelfireball.com/article/" in url.lower()
 
 
@@ -108,7 +111,7 @@ class ChannelFireballAuthorScraper(TcgPlayerInfiniteAuthorScraper):
         "https://www.channelfireball.com/author/Frank-Karsten/7f203152-211a-478d-8fee-464c2aeca2cd",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "channelfireball.com/author/" in url.lower() and not url.lower().endswith("/decks")

@@ -37,9 +37,9 @@ class MtgMetaIoDeckScraper(DeckScraper):
         "https://mtgmeta.io/decks/26293",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgmeta.io/decks/" in url.lower()
 
     @classmethod
@@ -117,9 +117,9 @@ class MtgMetaIoTournamentScraper(DeckUrlsContainerScraper):
         "https://mtgmeta.io/tournaments/4214",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgmeta.io/tournaments/" in url.lower()
 
     @classmethod
@@ -173,9 +173,9 @@ class MtgMetaIoArticleScraper(HybridContainerScraper):
         "https://mtgmeta.io/articles/deck-primer-legacy-oops-all-spells/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgmeta.io/articles/" in url.lower()
 
     @classmethod

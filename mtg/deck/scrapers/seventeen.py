@@ -31,9 +31,9 @@ class SeventeenLandsDeckScraper(DeckScraper):
         "https://www.17lands.com/user/deck/eba7a011b7e84f8cb286492312cf4241/85624423/1734473634",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "17lands.com/user/deck/" in url.lower()
 
     @classmethod

@@ -30,9 +30,9 @@ class StreamdeckerDeckScraper(DeckScraper):
         "https://www.streamdecker.com/deck/ESysr7yWC",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "www.streamdecker.com/deck/" in url.lower()
 
     @classmethod
@@ -100,9 +100,9 @@ class StreamdeckerUserScraper(DeckUrlsContainerScraper):
         "https://www.streamdecker.com/decks/togoresmtg",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "streamdecker.com/decks/" in url.lower()
 
     @classmethod

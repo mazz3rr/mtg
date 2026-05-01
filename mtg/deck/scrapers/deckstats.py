@@ -73,9 +73,9 @@ class DeckstatsDeckScraper(DeckScraper):
         "https://deckstats.net/decks/115134/1283677-kaya-s-scourge",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         if "deckstats.net/decks/" not in url.lower():
             return False
         try:
@@ -191,9 +191,9 @@ class DeckstatsUserScraper(DeckUrlsContainerScraper):
         "https://deckstats.net/decks/202938/?lng=fr",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         if "deckstats.net/decks/" not in url.lower():
             return False
         try:

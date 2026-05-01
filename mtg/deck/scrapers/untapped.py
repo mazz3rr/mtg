@@ -32,9 +32,9 @@ class UntappedProfileDeckScraper(DeckScraper):
     )
     PRIVATE_XPATH = "//div[text()='This profile is private']"
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtga.untapped.gg/profile/" in url.lower() and "/deck/" in url.lower()
 
     @classmethod
@@ -78,9 +78,9 @@ class UntappedRegularDeckScraper(DeckScraper):
         "clipboard_xpath": CLIPBOARD_XPATH
     }
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtga.untapped.gg/decks/" in url.lower()
 
     @classmethod
@@ -112,9 +112,9 @@ class UntappedMetaDeckScraper(DeckScraper):
         "clipboard_xpath": CLIPBOARD_XPATH
     }
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtga.untapped.gg/meta/decks/" in url.lower()
 
     @staticmethod
@@ -174,9 +174,9 @@ class UntappedProfileScraper(DeckUrlsContainerScraper):
     DECK_SCRAPER_TYPES = UntappedProfileDeckScraper,  # override
     DECK_URL_PREFIX = "https://mtga.untapped.gg"  # override
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtga.untapped.gg/profile/" in url.lower() and "/deck/" not in url.lower()
 
     @classmethod

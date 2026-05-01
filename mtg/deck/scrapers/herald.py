@@ -85,9 +85,9 @@ class CommandersHeraldArticleScraper(HybridContainerScraper):
         "https://commandersherald.com/dueling-deck-techs-equipment/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         tokens = (
             '/all-edh-deck-guides', '/articles', '/author/', '/cedh-deck-guides',
             '/games/', "/category/", '/about-us','/contact-us', '/privacy-policy',
@@ -144,9 +144,9 @@ class CommandersHeraldAuthorScraper(HybridContainerScraper):
         "https://commandersherald.com/author/cody-collins/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "commandersherald.com/author/" in url.lower()
 
     @override

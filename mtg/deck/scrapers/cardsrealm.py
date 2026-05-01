@@ -83,9 +83,9 @@ class CardsrealmDeckScraper(DeckScraper):
         "https://mtg.cardsrealm.com/en-us/decks/io11-bg-harvest?utm_source=monarchs&utm_medium=affiliate&utm_campaign=podcast",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         positives = ("cardsrealm.com/", "/decks/")
         negatives = ("/profile/", "/folder/")
         return (
@@ -147,9 +147,9 @@ class CardsrealmProfileScraper(DeckUrlsContainerScraper):
         "https://mtg.cardsrealm.com/en-us/profile/mateus-queiroz-n35/decks",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         positives = ("cardsrealm.com/", "/profile/", "/decks")
         negatives = ("/folder/", )
         return (
@@ -185,9 +185,9 @@ class CardsrealmFolderScraper(CardsrealmProfileScraper):
         "https://mtg.cardsrealm.com/en-us/decks/folder/1l7-pauper",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         positives = ("cardsrealm.com/", "/decks/folder/")
         negatives = ("/profile/", )
         return (
@@ -212,9 +212,9 @@ class CardsrealmMetaTournamentScraper(DeckUrlsContainerScraper):
         "https://mtg.cardsrealm.com/en-us/meta-decks/pauper/tournaments/1k27j-pauper-royale-220",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return all(t in url.lower() for t in ("cardsrealm.com/", "/meta-decks/", "/tournaments/"))
 
     @classmethod
@@ -254,9 +254,9 @@ class CardsrealmRegularTournamentScraper(DeckUrlsContainerScraper):
         "https://mtg.cardsrealm.com/en-us/tournament/1k27j-pauper-royale-220",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             all(t in url.lower() for t in ("cardsrealm.com/", "/tournament/"))
             and "/meta-decks/" not in url.lower()
@@ -326,9 +326,9 @@ class CardsrealmArticleScraper(HybridContainerScraper):
         "https://mtg.cardsrealm.com/en-us/articles/explorer-mono-blue-tempo-deck-tech-sideboard-guide",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         positives = ("cardsrealm.com/", "/articles/")
         negatives = ("/search/", "/author/", *NEGATIVE_DOMAINS)
         return (
@@ -362,9 +362,9 @@ class CardsrealmAuthorScraper(HybridContainerScraper):
         "https://cardsrealm.com/en-us/articles/author/humberto2151",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         positives = ("cardsrealm.com/", "/articles/author/")
         negatives = ("/search/", *NEGATIVE_DOMAINS)
         return (
@@ -392,9 +392,9 @@ class CardsrealmArticleSearchScraper(HybridContainerScraper):
         "https://cardsrealm.com/en-us/articles/search/?keyword=humberto2151",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         positives = ("cardsrealm.com/", "/articles/search/", "keyword=")
         return (
             all(p in url.lower() for p in positives)

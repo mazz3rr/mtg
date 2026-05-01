@@ -57,9 +57,9 @@ class TopDeckedRegularDeckScraper(DeckScraper):
         "contains(@class, 'ng-star-inserted')]"
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "www.topdecked.com/decks/" in url.lower()
 
     @classmethod
@@ -170,9 +170,9 @@ class TopDeckedMetaDeckScraper(TopDeckedRegularDeckScraper):
         "and contains(text(), 'of meta')]"
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "www.topdecked.com/metagame/" in url.lower() and "/decks/" in url.lower()
 
     @override

@@ -419,6 +419,22 @@ def get_query_values(url: str, param: str) -> list[str]:
     return urllib.parse.parse_qs(query).get(param, []) if query else []
 
 
+def get_query_data(url: str) -> dict[str, str]:
+    """Return query parameter data from supplied URL. If URL is invalid, or on any other failure,
+    return an empty dict.
+
+    E.g. supplying 'https://www.tcdecks.net/deck.php?id=38058&iddeck=347793' results in:
+        {
+        "deck_Walker735": {
+        }
+    """
+    try:
+        query = urllib.parse.urlsplit(url).query
+    except ValueError:
+        return {}
+    return urllib.parse.parse_qs(query) if query else {}
+
+
 def get_path_segments(url: str) -> list[str]:
     """Return path segments from supplied URL.
 
@@ -585,4 +601,4 @@ def parse_keywords(tag_or_text: Tag | str) -> list[str]:
 
 
 def normalize_url(url: str) -> str:
-    return url.rstrip("/").lower()
+    return url.strip().rstrip("/").lower()

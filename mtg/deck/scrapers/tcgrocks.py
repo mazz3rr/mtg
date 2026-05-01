@@ -31,9 +31,9 @@ class TcgRocksDeckScraper(DeckScraper):
     """
     JSON_FROM_SOUP = True  # override
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "tcgrocks.com/mtg/deck-builder/embed/" in url.lower()
 
     @classmethod

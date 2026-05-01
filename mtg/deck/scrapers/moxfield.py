@@ -35,9 +35,9 @@ class MoxfieldDeckScraper(DeckScraper):
         "https://moxfield.com/decks/y98F6TIUmkmfJ0_6AOIcYw",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         tokens = "public?q=", "/personal"  # deck search, private page
         return "moxfield.com/decks/" in url and all(t not in url for t in tokens)
@@ -127,9 +127,9 @@ class MoxfieldListScraper(DeckUrlsContainerScraper):
         "https://www.moxfield.com/bookmarks/enD41-decks-i-currently-play",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         if not ("moxfield.com/bookmarks/" in url.lower() or "moxfield.com/lists/" in url.lower()):
             return False
         try:
@@ -180,9 +180,9 @@ class MoxfieldUserScraper(DeckUrlsContainerScraper):
         "https://moxfield.com/users/OCHiveMind",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "moxfield.com/users/" in url.lower()
 
     @classmethod
@@ -223,9 +223,9 @@ class MoxfieldDeckSearchScraper(DeckUrlsContainerScraper):
         "https://moxfield.com/decks/public?q=eyJmaWx0ZXIiOiJwb2cyNTAxIn0%3D",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "moxfield.com/decks/public?q=" in url.lower()
 
     @override

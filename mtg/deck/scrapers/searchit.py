@@ -30,9 +30,9 @@ class MtgSearchItDeckScraper(DeckScraper):
     # TODO: detect presence of this trolling and attempt to click with Selenium
     # XPATH_UNBLOCK = "//a[@href='/access/unblock']"
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgsearch.it/decks/" in url.lower()
 
     @classmethod

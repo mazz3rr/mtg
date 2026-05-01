@@ -35,9 +35,9 @@ class PennyDreadfulMagicDeckScraper(DeckScraper):
         "https://pennydreadfulmagic.com/decks/245223/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "pennydreadfulmagic.com/decks/" in url.lower()
 
     @classmethod
@@ -108,9 +108,9 @@ class PennyDreadfulMagicCompetitionScraper(DeckUrlsContainerScraper):
         "https://pennydreadfulmagic.com/competitions/4764/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         if "pennydreadfulmagic.com/competitions/" not in url.lower():
             return False
         try:
@@ -165,9 +165,9 @@ class PennyDreadfulMagicUserScraper(DeckUrlsContainerScraper):
         segments = set(get_path_segments(self.url.lower()))
         return "seasons" in segments and "id" in segments
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "pennydreadfulmagic.com/" in url.lower() and "/people/" in url.lower()
 
     @classmethod

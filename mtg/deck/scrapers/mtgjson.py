@@ -32,9 +32,9 @@ URL = "https://mtgjson.com/api/v5/decks/"
 class MtgJsonDeckScraper(DeckScraper):
     """Scraper of MTGJSON decks page.
     """
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgjson.com/api/v5/decks/" in url.lower() and url.lower().endswith(".json")
 
     @override

@@ -89,9 +89,9 @@ class MtgDecksNetDeckScraper(DeckScraper):
 
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         domain = get_netloc_domain(url, naked=True)
         try:
@@ -140,9 +140,9 @@ class MtgDecksNetTournamentScraper(DeckUrlsContainerScraper):
         "https://mtgdecks.net/Premodern/premodern-european-championship-2024-tournament-170455",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         domain = get_netloc_domain(url, naked=True)
         try:
@@ -190,9 +190,9 @@ class MtgDecksNetArticleScraper(HybridContainerScraper):
         super().__init__(url, metadata)
         self._article_tag: Tag | None = None
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         tokens = "guides", "meta", "spoilers", "theory", "news", "profiles"
         url = url.lower()
         domain = get_netloc_domain(url, naked=True)

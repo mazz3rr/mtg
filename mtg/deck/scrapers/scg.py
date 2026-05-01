@@ -106,9 +106,9 @@ class ScgDeckScraper(DeckScraper):
         "https://old.starcitygames.com/decks/159800",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         if "old.starcitygames.com/decks/" not in url.lower():
             return False
         try:
@@ -161,9 +161,9 @@ class ScgEventScraper(DeckUrlsContainerScraper):
         "https://old.starcitygames.com/decks/Mythic_Championship_Qualifier/2021-10-31_modern_Roanoke_VA_0/1/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         if "old.starcitygames.com/decks/" not in url.lower():
             return False
         if _is_player_url(url):
@@ -221,9 +221,9 @@ class ScgDatabaseScraper(DeckUrlsContainerScraper):
         "https://old.starcitygames.com/content/bennie-smith-decks",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "starcitygames.com/content/" in url.lower() and "-decks" in url.lower()
 
     @classmethod
@@ -285,9 +285,9 @@ class ScgArticleScraper(HybridContainerScraper):
         "https://articles.starcitygames.com/magic-the-gathering/commander-vs-417-artifacts-and-rabbits-and-lands-oh-my/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "articles.starcitygames.com/" in url.lower() and "/author/" not in url.lower()
 
     @classmethod

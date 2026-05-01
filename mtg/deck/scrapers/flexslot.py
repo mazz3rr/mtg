@@ -121,9 +121,9 @@ class FlexslotDeckScraper(DeckScraper):
         "https://flexslot.gg/decks/243fc88f-1fca-41ae-a81a-9503347ce85c",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return is_more_than_root_path(url, "flexslot.gg/decks/")
 
     @classmethod
@@ -162,9 +162,9 @@ class FlexslotSideboardScraper(DecksJsonContainerScraper):
         "https://flexslot.gg/sideboards/7861",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return is_more_than_root_path(url, "flexslot.gg/sideboards/")
 
     @classmethod
@@ -200,9 +200,9 @@ class FlexslotArticleScraper(HybridContainerScraper):
         "https://flexslot.gg/articles/a3222f36-64f1-43b1-9b5a-94dffa76459a",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return is_more_than_root_path(url, "flexslot.gg/article/")
 
     @classmethod
@@ -264,9 +264,9 @@ class FlexslotUserScraper(HybridContainerScraper):
         super().__init__(url, metadata)
         self._decks_json, self._sideboards_json = None, None
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "flexslot.gg/u/" in url.lower()
 
     @classmethod

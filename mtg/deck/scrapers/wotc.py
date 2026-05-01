@@ -81,9 +81,9 @@ class WotCArticleScraper(HybridContainerScraper):
     CONTAINER_NAME = "WotC article"  # override
     DECK_TAG_PARSER_TYPE = WotCDeckTagParser  # override
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "magic.wizards.com/" in url.lower() and "/news/" in url.lower()
 
     @classmethod

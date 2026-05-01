@@ -31,9 +31,9 @@ class MtgRocksArticleScraper(HybridContainerScraper):
         "https://mtgrocks.com/dredgers-insight-mtg/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         tokens = (
             "/mtg-arena-codes/", "/deck-builder/", "/category/", "/sitemap/", "/about-us/",
             "/editorial-policy/", "/privacy-policy/"
@@ -97,9 +97,9 @@ class MtgRocksAuthorScraper(HybridContainerScraper):
         "https://mtgrocks.com/author/zachary-fink/"
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgrocks.com/author/" in url.lower()
 
     @override

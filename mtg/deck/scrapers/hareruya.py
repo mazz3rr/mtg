@@ -74,9 +74,9 @@ class InternationalHareruyaDeckScraper(DeckScraper):
         "https://www.hareruyamtg.com/en/deck/515432/show/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         return (
             "hareruyamtg.com" in url
@@ -220,9 +220,9 @@ class JapaneseHareruyaDeckScraper(DeckScraper):
         "https://deck.hareruyamtg.com/deck/443536"
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         return (
             (
@@ -304,9 +304,9 @@ class HareruyaEventScraper(DeckUrlsContainerScraper):
         "&eventName=Players+Convention+Shizuoka2024+-+Modern+Open",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return all(t in url for t in {"hareruyamtg.com", "/deck", "/result?", "eventName="})
 
     @override
@@ -328,9 +328,9 @@ class HareruyaPlayerScraper(DeckUrlsContainerScraper):
         "https://www.hareruyamtg.com/en/deck/result?player=pg8",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         return all(t in url for t in {"hareruyamtg.com", "/deck", "/result?", "player="})
 
@@ -491,9 +491,9 @@ class HareruyaArticleScraper(HybridContainerScraper):
         "https://article.hareruyamtg.com/article/21533/?lang=en",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         try:
             url = strip_url_query(url).lower()
             return (
@@ -553,9 +553,9 @@ class HareruyaArticleDeckScraper(DeckScraper):
         "https://article.hareruyamtg.com/article/44666/#4",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         try:
             url = strip_url_query(url, keep_fragment=True).lower()
             return (
@@ -596,9 +596,9 @@ class HareruyaAuthorScraper(HybridContainerScraper):
         "https://article.hareruyamtg.com/article/author/piotrglogowski_en/?lang=en",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "article.hareruyamtg.com/article/author/" in url.lower()
 
     @override

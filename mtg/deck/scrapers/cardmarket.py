@@ -152,9 +152,9 @@ class CardmarketArticleScraper(HybridContainerScraper):
         "https://www.cardmarket.com/en/Insight/Articles/quest-for-the-best-pioneer-deck-ever",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             "cardmarket.com/" in url.lower()
             and "/insight/articles/" in url.lower()
@@ -215,9 +215,9 @@ class CardmarketWriterScraper(HybridContainerScraper):
         "https://www.cardmarket.com/en/Insight/Writers/tobi-henke",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "cardmarket.com/" in url.lower() and "/insight/writers/" in url.lower()
 
     @override

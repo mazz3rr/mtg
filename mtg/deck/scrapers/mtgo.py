@@ -144,9 +144,9 @@ class MtgoDeckScraper(DeckScraper):
         super().__init__(url, metadata)
         self._player_name = self._parse_player_name()
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return f"mtgo.com/decklist/" in url.lower() and get_fragment(url).startswith("deck_")
 
     @classmethod
@@ -197,9 +197,9 @@ class MtgoEventScraper(DecksJsonContainerScraper):
         "https://www.mtgo.com/decklist/pauper-challenge-32-2024-11-0312703226",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         if (fragment := get_fragment(url)) and fragment.startswith("deck_"):
             return False
         return f"mtgo.com/decklist/" in url.lower()

@@ -97,9 +97,9 @@ class EdhrecPreviewDeckScraper(DeckScraper):
         cards += self._maindeck
         return cards
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "edhrec.com/" in url.lower() and "/deckpreview/" in url.lower()
 
     @classmethod
@@ -160,9 +160,9 @@ class EdhrecAverageDeckScraper(DeckScraper):
         "https://edhrec.com/average-decks/honest-rutstein",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             "edhrec.com/" in url.lower()
             and ("/average-decks/" in url.lower() or "/commanders/" in url.lower())
@@ -250,9 +250,9 @@ class EdhrecArticleScraper(HybridContainerScraper):
         "https://edhrec.com/articles/living-energy-precon-review-aetherdrift",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             ("edhrec.com/articles/" in url.lower() or "articles.edhrec.com/" in url.lower())
             and "/author/" not in url.lower()
@@ -312,9 +312,9 @@ class EdhrecAuthorScraper(HybridContainerScraper):
         "https://articles.edhrec.com/author/joseph-schultz",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             ("edhrec.com/articles/" in url.lower() or "articles.edhrec.com/" in url.lower())
             and "/author/" in url.lower()
@@ -345,9 +345,9 @@ class EdhrecArticleSearchScraper(EdhrecAuthorScraper):
         "https://edhrec.com/articles/search/tyler%20bucks",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             ("edhrec.com/articles/" in url.lower() or "articles.edhrec.com/" in url.lower())
             and "/search/" in url.lower()

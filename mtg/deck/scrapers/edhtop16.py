@@ -49,9 +49,9 @@ class EdhTop16TournamentScraper(DeckUrlsContainerScraper):
         super().__init__(url, metadata)
         self._arena_decklists = []
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "edhtop16.com/tournament/" in url.lower()
 
     @classmethod
@@ -141,9 +141,9 @@ class EdhTop16CommanderScraper(EdhTop16TournamentScraper):
         "https://edhtop16.com/commander/Niv-Mizzet%2C%20Visionary",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "edhtop16.com/commander/" in url.lower()
 
     @override

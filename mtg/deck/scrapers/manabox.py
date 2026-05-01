@@ -27,9 +27,9 @@ class ManaBoxDeckScraper(DeckScraper):
         "https://manabox.app/decks/rx5CcxGfTJqBx7mQSqVb4A",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "manabox.app/decks/" in url.lower()
 
     @override

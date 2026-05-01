@@ -32,7 +32,7 @@ from mtg.lib.time import get_date_from_ago_text
 _log = logging.getLogger(__name__)
 URL_PREFIX = "https://tappedout.net"
 _MAX_TRIES = 6
-_HEADERS = {
+HEADERS = {
     "Host": "tappedout.net",
     "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -74,9 +74,9 @@ class TappedoutDeckScraper(DeckScraper):
     )
     THROTTLING = DeckScraper.THROTTLING * 3
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "tappedout.net/mtg-decks/" in url.lower()
 
     @classmethod
@@ -94,7 +94,7 @@ class TappedoutDeckScraper(DeckScraper):
         on_backoff=_backoff_handler,
     )
     def _get_response(self) -> Response | None:
-        return fetch(self.url, handle_http_errors=False, headers=_HEADERS)
+        return fetch(self.url, handle_http_errors=False, headers=HEADERS)
 
     @override
     def _fetch_soup(self) -> None:
@@ -161,9 +161,9 @@ class TappedoutUserScraper(DeckUrlsContainerScraper):
         "https://tappedout.net/users/ChuckWagonMTG/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         if "tappedout.net/users/" not in url.lower():
             return False
         try:
@@ -224,9 +224,9 @@ class TappedoutFolderScraper(DeckUrlsContainerScraper):
         "https://tappedout.net/mtg-deck-folders/commanders-of-myr-edh-decks/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "tappedout.net/mtg-deck-folders/" in url.lower()
 
     @classmethod
@@ -271,9 +271,9 @@ class TappedoutUserFolderScraper(TappedoutUserScraper):
         "https://tappedout.net/users/PDHPals/deck-folders/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "tappedout.net/users/" in url.lower() and "/deck-folders" in url.lower()
 
     @override

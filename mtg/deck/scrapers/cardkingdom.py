@@ -56,9 +56,9 @@ class CardKingdomArticleScraper(HybridContainerScraper):
         "https://blog.cardkingdom.com/river-song-commander-deck-tech/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         tokens = "/category/", '/tag/', '/submissions/', '/updates/', '/author/'
         return (
             is_more_than_root_path(url, "blog.cardkingdom.com")
@@ -108,9 +108,9 @@ class CardKingdomAuthorScraper(HybridContainerScraper):
         "https://blog.cardkingdom.com/author/kgregory/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "blog.cardkingdom.com/author/" in url.lower()
 
     @override

@@ -32,9 +32,9 @@ class MtgVaultDeckScraper(DeckScraper):
         "https://www.mtgvault.com/lemonadas/decks/athreos-shroud-veiled/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgvault.com/" in url.lower() and "/decks/" in url.lower()
 
     @classmethod
@@ -97,9 +97,9 @@ class MtgVaultUserScraper(DeckUrlsContainerScraper):
         "https://www.mtgvault.com/ahendra/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         try:
             domain = get_netloc_domain(url, naked=True)
             segment, *_ = get_path_segments(url)

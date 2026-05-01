@@ -38,9 +38,9 @@ class CardBoardLiveDeckScraper(DeckScraper):
         "https://app.cardboard.live/shared-deck/e75ebecd-6bec-11ec-8b34-12f15ef2af51?channel_id=38054155",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "app.cardboard.live/shared-deck/" in url.lower()
 
     @classmethod

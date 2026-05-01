@@ -167,9 +167,9 @@ class MagicGgDeckScraper(DeckScraper):
         super().__init__(url, metadata)
         self._decklist_id = self._parse_decklist_id()
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         if f"magic.gg/decklists/" not in url:
             return False
@@ -211,9 +211,9 @@ class MagicGgEventScraper(DeckTagsContainerScraper):
         "https://magic.gg/decklists/arena-championship-7-standard-decklists",  # new kind
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "magic.gg/decklists/" in url.lower() and "?decklist=" not in url.lower()
 
     @classmethod
@@ -269,7 +269,7 @@ class MagicGgArticleScraper(MagicGgEventScraper):
         "https://www.magic.gg/news/the-spiciest-decklists-of-magic-world-championship-31",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "magic.gg/news/" in url.lower() and "?decklist=" not in url.lower()

@@ -26,7 +26,10 @@ from mtg.deck.scrapers.abc import (
     HybridContainerScraper,
 )
 from mtg.lib.numbers import extract_int
-from mtg.lib.scrape.core import ScrapingError, fetch_json, strip_url_query, throttle
+from mtg.lib.scrape.core import (
+    ScrapingError, fetch_json, get_path_segments, get_query_data, get_query_values,
+    strip_url_query, throttle,
+)
 from mtg.lib.scrape.dynamic import SCROLL_DOWN_TIMES, fetch_dynamic_soup
 from mtg.scryfall import Card
 
@@ -51,16 +54,24 @@ HEADERS = {
 }
 
 
+# TODO: TCGPlayer ceased to support old-style pages. Now, old deck page routes to a general
+#  "Decks and Event" page and old player page routes to an author page. The new-style pages
+#  ceased to be called "TCGPlayer Infinite" (#471)
+
+
 @DeckScraper.registered
 class TcgPlayerDeckScraper(DeckScraper):
     """Scraper of TCG Player (old-site) decklist page.
     """
     HEADERS = HEADERS
+    EXAMPLE_URLS = (
+        "https://decks.tcgplayer.com/magic/standard/sbmtgdev/mono-red-mouse/1426437",
+    )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
-        return "decks.tcgplayer.com/" in url.lower() and "/search" not in url.lower()
+    def is_valid_url(cls, url: str) -> bool:
+        return "decks.tcgplayer.com/magic/" in url.lower() and "/search" not in url.lower()
 
     @classmethod
     @override
@@ -107,6 +118,7 @@ class TcgPlayerDeckScraper(DeckScraper):
                 self._maindeck = self._process_deck_tag(deck_tag)
 
 
+# TODO: now routes to (new) TCGPlayer Author page
 @DeckUrlsContainerScraper.registered
 class TcgPlayerPlayerScraper(DeckUrlsContainerScraper):
     """Scraper of TCG Player (old-site) player search page.
@@ -115,10 +127,13 @@ class TcgPlayerPlayerScraper(DeckUrlsContainerScraper):
     CONTAINER_NAME = "TCGPlayer (old-site) player"  # override
     DECK_SCRAPER_TYPES = TcgPlayerDeckScraper,  # override
     DECK_URL_PREFIX = "https://decks.tcgplayer.com"  # override
+    EXAMPLE_URLS = (
+        "https://decks.tcgplayer.com/magic/deck/search?player=the-commander-s-quarters",
+    )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             "decks.tcgplayer.com/magic/deck/search?" in url.lower()
             and "player=" in url.lower()
@@ -199,9 +214,7 @@ class TcgPlyerInfiniteDeckJsonParser(DeckJsonParser):
 def _get_deck_data_from_api(
         url: str, api_url_template: str,
         scraper: Type[DeckScraper] | Type[DecksJsonContainerScraper]) -> Json:
-    *_, decklist_id = url.split("/")
-    if not all(ch.isdigit() for ch in decklist_id):
-        raise ScrapingError(f"Invalid decklist ID: {decklist_id!r}. Must be an integer string")
+    *_, decklist_id = get_path_segments(url)
     json_data, tries = {}, 0
     try:
         json_data = fetch_json(api_url_template.format(decklist_id), handle_http_errors=False)
@@ -233,20 +246,38 @@ class TcgPlayerInfiniteDeckScraper(DeckScraper):
         "https://infinite-api.tcgplayer.com/deck/magic/{}/?source=infinite-"
         "content&subDecks=true&cards=true&stats=true"
     )  # override
+    REPLACE_URL_HOOKS = (
+        "infinite.tcgplayer.com/magic-the-gathering/",
+        "www.tcgplayer.com/content/magic-the-gathering/",
+    )
+    EXAMPLE_URLS = (
+        "https://infinite.tcgplayer.com/magic-the-gathering/deck/Izzet-Prowess/534825",
+        "https://www.tcgplayer.com/content/magic-the-gathering/deck/Izzet-Prowess/534825",
+    )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
-        return (
-            "infinite.tcgplayer.com/magic-the-gathering/deck/" in url.lower()
-            or "tcgplayer.com/content/magic-the-gathering/deck/" in url.lower()
-        )
+    def is_valid_url(cls, url: str) -> bool:
+        url = url.lower()
+        if not (
+            "infinite.tcgplayer.com/magic-the-gathering/deck/" in url
+            or "tcgplayer.com/content/magic-the-gathering/deck/" in url
+        ):
+            return False
+        try:
+            *_, decklist_id = get_path_segments(url)
+            if all(ch.isdigit() for ch in decklist_id):
+                return True
+            return False
+        except ValueError:
+            return False
 
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
         url = super().normalize_url(url)
-        return strip_url_query(url)
+        url = strip_url_query(url)
+        return url.replace(*cls.REPLACE_URL_HOOKS)
 
     @override
     def _get_json_from_api(self) -> Json:
@@ -277,25 +308,36 @@ class TcgPlayerInfinitePlayerScraper(DeckUrlsContainerScraper):
     )  # override
     DECK_SCRAPER_TYPES = TcgPlayerInfiniteDeckScraper,  # override
     DECK_URL_PREFIX = INFINITE_URL_PREFIX  # override
+    VALID_URL_HOOK = "magic-the-gathering/decks/player/"
+    EXAMPLE_URLS = (
+        "https://infinite.tcgplayer.com/magic-the-gathering/decks/player/SBMTGDev/",
+        "https://www.tcgplayer.com/content/magic-the-gathering/decks/player/SBMTGDev/",
+    )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
-        return (
-            "infinite.tcgplayer.com/magic-the-gathering/decks/player/" in url.lower()
-            or "tcgplayer.com/content/magic-the-gathering/decks/player/" in url.lower()
-        )
+    def is_valid_url(cls, url: str) -> bool:
+        hook = cls.VALID_URL_HOOK
+        if not (
+            f"infinite.tcgplayer.com/{hook}" in url.lower()
+            or f"tcgplayer.com/content/{hook}" in url.lower()
+        ):
+            return False
+        try:
+            *_, name = get_path_segments(url)
+            return True
+        except ValueError:
+            return False
 
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
-        return strip_url_query(url)
+        return TcgPlayerInfiniteDeckScraper.normalize_url(url)
 
     @override
     def _get_json_from_api(self) -> Json:
-        *_, player_name = self.url.split("/")
-        return fetch_json(self.API_URL_TEMPLATE.format(player_name))
+        *_, name = get_path_segments(self.url)
+        return fetch_json(self.API_URL_TEMPLATE.format(name))
 
     @override
     def _validate_json(self) -> None:
@@ -314,26 +356,27 @@ class TcgPlayerInfiniteAuthorSearchScraper(TcgPlayerInfinitePlayerScraper):
     """
     CONTAINER_NAME = "TCGPlayer Infinite author search"  # override
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
+        url = url.lower()
+        query_params = get_query_data(url)
         return (
             (
-                "infinite.tcgplayer.com/magic-the-gathering/decks/advanced-search" in url.lower()
-                or "tcgplayer.com/content/magic-the-gathering/decks/advanced-search" in url.lower()
-            ) and "author=" in url.lower()
+                "infinite.tcgplayer.com/magic-the-gathering/decks/advanced-search" in url
+                or "tcgplayer.com/content/magic-the-gathering/decks/advanced-search" in url
+            ) and "author" in query_params
         )
 
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        return DeckScraper.normalize_url(url)
+        url = DeckScraper.normalize_url(url)
+        return url.replace(*TcgPlayerInfiniteDeckScraper.REPLACE_URL_HOOKS)
 
     @override
     def _get_json_from_api(self) -> Json:
-        *_, author = self.url.split("author=")
-        if "&" in author:
-            author, *_ = author.split("&")
+        [author] = get_query_values(self.url, "author")
         return fetch_json(self.API_URL_TEMPLATE.format(author))
 
 
@@ -347,14 +390,10 @@ class TcgPlayerInfiniteEventScraper(TcgPlayerInfinitePlayerScraper):
         "https://infinite-api.tcgplayer.com/content/decks/magic?source="
         "infinite-content&rows=200&eventNames={}"
     )  # override
-
-    @staticmethod
-    @override
-    def is_valid_url(url: str) -> bool:
-        return (
-            "infinite.tcgplayer.com/magic-the-gathering/events/event/" in url.lower()
-            or "tcgplayer.com/content/magic-the-gathering/events/event/" in url.lower()
-        )
+    VALID_URL_HOOK = "magic-the-gathering/decks/events/event/"  # override
+    EXAMPLE_URLS = (
+        "https://www.tcgplayer.com/content/magic-the-gathering/events/event/MTGO%20Standard%20Challenge%2032%20-%2011-12-2024/",
+    )
 
 
 @DecksJsonContainerScraper.registered
@@ -375,6 +414,9 @@ class TcgPlayerInfiniteArticleScraper(DecksJsonContainerScraper):
     # NOTE: this doesn't override API_URL_TEMPLATE on purpose (not to skip soup fetching)
     ARTICLE_API_URL_TEMPLATE = TcgPlayerInfiniteDeckScraper.API_URL_TEMPLATE
     DECK_JSON_PARSER_TYPE = TcgPlyerInfiniteDeckJsonParser  # override
+    EXAMPLE_URLS = (
+        "https://www.tcgplayer.com/content/article/Critical-Role-Plays-Commander/aaa4eb52-0670-4a1f-9eda-87c0784c3c8f/",
+    )
 
     @property
     def _scroll_down_times(self) -> int:
@@ -386,9 +428,9 @@ class TcgPlayerInfiniteArticleScraper(DecksJsonContainerScraper):
             doubled = True
         return 3 * SCROLL_DOWN_TIMES if doubled else SCROLL_DOWN_TIMES
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             f"infinite.tcgplayer.com/article/" in url.lower()
             or "tcgplayer.com/content/article/" in url.lower()
@@ -397,8 +439,7 @@ class TcgPlayerInfiniteArticleScraper(DecksJsonContainerScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
-        return strip_url_query(url)
+        return TcgPlayerInfiniteDeckScraper.normalize_url(url)
 
     @override
     def _fetch_soup(self) -> None:
@@ -408,7 +449,6 @@ class TcgPlayerInfiniteArticleScraper(DecksJsonContainerScraper):
         except TimeoutException:
             raise ScrapingError(self._selenium_timeout_msg, scraper=type(self), url=self.url)
 
-    # FIXME: use `get_path_segments()` instead (#394)
     @staticmethod
     def _naive_strip_url_query(url: str) -> str:
         if "?" in url:
@@ -449,10 +489,13 @@ class TcgPlayerInfiniteAuthorScraper(HybridContainerScraper):
     )  # override
     CONTAINER_SCRAPER_TYPES = TcgPlayerInfiniteArticleScraper,  # override
     CONTAINER_URL_PREFIX = INFINITE_URL_PREFIX  # override
+    EXAMPLE_URLS = (
+        "https://www.tcgplayer.com/content/author/Critical-Role",
+    )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             (
                 "infinite.tcgplayer.com/author/" in url.lower()
@@ -463,8 +506,7 @@ class TcgPlayerInfiniteAuthorScraper(HybridContainerScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
-        return strip_url_query(url)
+        return TcgPlayerInfiniteDeckScraper.normalize_url(url)
 
     @override
     def _pre_parse(self) -> None:
@@ -517,10 +559,13 @@ class TcgPlayerInfiniteAuthorDecksPaneScraper(DeckUrlsContainerScraper):
     )  # override
     DECK_SCRAPER_TYPES = TcgPlayerInfiniteDeckScraper,  # override
     DECK_URL_PREFIX = INFINITE_URL_PREFIX  # override
+    EXAMPLE_URLS = (
+        "https://www.tcgplayer.com/content/author/Reid-Duke/decks/",
+    )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             (
                 "infinite.tcgplayer.com/author/" in url.lower()
@@ -531,8 +576,7 @@ class TcgPlayerInfiniteAuthorDecksPaneScraper(DeckUrlsContainerScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
-        return strip_url_query(url)
+        return TcgPlayerInfiniteDeckScraper.normalize_url(url)
 
     @override
     def _pre_parse(self) -> None:

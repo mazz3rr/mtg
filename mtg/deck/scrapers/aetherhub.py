@@ -137,9 +137,9 @@ class AetherhubDeckScraper(DeckScraper):
         "https://aetherhub.com/Deck/tmnt-boros-ascension",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         tokens = "export/", "/mydecks", "/builder"
         return ("aetherhub.com/" in url and "/deck/" in url
@@ -248,9 +248,9 @@ class AetherhubWriteupDeckScraper(AetherhubDeckScraper):
         "https://aetherhub.com/Decks/Writeups/Traditional-Standard/shenanigans-two-day-dec-21-22-std-rcq",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "aetherhub.com/decks/writeups/" in url.lower()
 
     @classmethod
@@ -284,9 +284,9 @@ class AetherhubUserScraper(DeckUrlsContainerScraper):
         "https://aetherhub.com/User/LegenVD/Decks/Standard-BO1",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "aetherhub.com/user/" in url.lower()
 
     @classmethod
@@ -324,9 +324,9 @@ class AetherhubEventScraper(DeckUrlsContainerScraper):
         "https://aetherhub.com/Events/Standard/10838",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "aetherhub.com/events/" in url.lower()
 
     @classmethod
@@ -365,9 +365,9 @@ class AetherhubArticleScraper(HybridContainerScraper):
         "https://aetherhub.com/Article/First-Tournament-decklists-post-Oko-ban",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "aetherhub.com/article/" in url.lower()
 
     @classmethod

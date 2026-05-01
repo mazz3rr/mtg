@@ -62,9 +62,9 @@ class ArchidektDeckScraper(DeckScraper):
         "https://archidekt.com/decks/16069812/zombie_horde",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "archidekt.com/decks/" in url.lower()
 
     @classmethod
@@ -141,9 +141,9 @@ class ArchidektSnapshotScraper(ArchidektDeckScraper):
         "https://archidekt.com/snapshots/47613",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "archidekt.com/snapshots/" in url.lower()
 
 
@@ -158,9 +158,9 @@ class ArchidektFolderScraper(DeckUrlsContainerScraper):
         "https://archidekt.com/folders/42773?orderBy=name&dir=asc",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "archidekt.com/folders/" in url.lower()
 
     @classmethod
@@ -188,9 +188,9 @@ class ArchidektUserScraper(DeckUrlsContainerScraper):
         "https://archidekt.com/search/decks?owner=BacaIhau&ownerexact=true",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         return (
             "archidekt.com/u/" in url

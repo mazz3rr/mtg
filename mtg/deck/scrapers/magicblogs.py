@@ -94,9 +94,9 @@ class MagicBlogsArticleScraper(HybridContainerScraper):
         "https://magicblogs.de/blog/9893-in-a-land-before-the-monkey-aggro-5-5-sliver/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return f"magicblogs.de/blog/" in url.lower()
 
     @classmethod

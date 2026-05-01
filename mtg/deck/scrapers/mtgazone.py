@@ -105,9 +105,9 @@ class MtgaZoneDeckScraper(DeckScraper):
         "https://mtgazone.com/deck/bo1-standard-jeskai-control/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgazone.com/user-decks/" in url.lower() or "mtgazone.com/deck/" in url.lower()
 
     @classmethod
@@ -143,9 +143,9 @@ class MtgaZoneArticleScraper(HybridContainerScraper):
         "https://mtgazone.com/standard-azorius-control-deck-guide/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return (
             is_more_than_root_path(url, "mtgazone.com")
             and not any(t in url.lower() for t in (
@@ -188,9 +188,9 @@ class MtgaZoneAuthorScraper(HybridContainerScraper):
         "https://mtgazone.com/author/mtghero/",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgazone.com/author/" in url.lower()
 
     @classmethod

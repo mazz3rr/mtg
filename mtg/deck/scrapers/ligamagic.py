@@ -56,9 +56,9 @@ class LigaMagicDeckScraper(DeckScraper):
         self._tags = defaultdict(list)
 
     # TODO: take care of LigaMagic's own: `lig.ae` shortener URLs
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return all(t in url.lower() for t in ("ligamagic.com.br", "/deck", "&id="))
 
     @override
@@ -139,9 +139,9 @@ class LigaMagicEventScraper(DeckUrlsContainerScraper):
         "https://www.ligamagic.com.br/?view=dks/evento&id=297747",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return all(t in url.lower() for t in ("ligamagic.com.br", "/evento", "&id="))
 
     @override

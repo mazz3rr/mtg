@@ -120,9 +120,9 @@ class MtgCircleVideoDeckScraper(DeckScraper):
         "https://mtgcircle.com/videos/explorer/mono-white-aggro-by-khat-vs-rakdos-aggro-by-eirande?id=72aa9465-b1fa-4b94-9623-ba2e703c1ee1",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         if "mtgcircle.com/videos/" not in url or "/draft/" in url:
             return False
@@ -180,9 +180,9 @@ class MtgCircleRegularDeckScraper(MtgCircleVideoDeckScraper):
         "https://mtgcircle.com/decks/standard/mono-red-aggro-decklist-by-cunicoligoblin?id=679b6f7fbcc7d768c3123f7c",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         if "mtgcircle.com/decks/" not in url or "/draft/" in url:
             return False
@@ -214,9 +214,9 @@ class MtgCircleArticleScraper(HybridContainerScraper):
         "https://mtgcircle.com/articles/standard-banner-goblins",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return "mtgcircle.com/articles/" in url.lower()
 
     def _retrieve_date_data(self, data: Json) -> Json:

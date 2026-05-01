@@ -29,9 +29,9 @@ class ManatradersDeckScraper(DeckScraper):
         "https://www.manatraders.com/webshop/deck/6712289",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         if "manatraders.com/webshop/personal/" in url.lower():
             return True
         if "manatraders.com/webshop/deck/" in url.lower():
@@ -91,9 +91,9 @@ class ManatradersUserScraper(DeckUrlsContainerScraper):
         "https://www.manatraders.com/decks?format_id=4&search_name=kasa",
     )
 
-    @staticmethod
+    @classmethod
     @override
-    def is_valid_url(url: str) -> bool:
+    def is_valid_url(cls, url: str) -> bool:
         return all(t in url.lower() for t in ("manatraders.com/decks?", "search_name"))
 
     @override
