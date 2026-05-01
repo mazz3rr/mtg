@@ -218,22 +218,24 @@ class DeckScraper(NestedDeckParser):
         return set(cls._REGISTRY)
 
     @classmethod
+    @timed("scraper testing")
     def test(cls) -> tuple[str | None, bool, Exception | None]:
         """Test this scraper against its example URLs.
 
         Returns:
-            passed/failed, exception or None
+            last tested URL or None, passed/failed, exception or None
         """
         if not cls.EXAMPLE_URLS:
             raise ValueError("No example URLs defined")
+        _log.info(f"Testing {cls.__name__!r}...")
         last_url = None
         try:
             for url in cls.EXAMPLE_URLS:
+                _log.info(f"Testing URL {url!r}...")
                 last_url = url
-                _log.info(f"Testing {cls.__name__!r}...")
                 scraper = cls(url)
-                decks = scraper.scrape()
-                if not decks:
+                deck = scraper.scrape()
+                if not deck:
                     return last_url, False, None
         except Exception as e:
             return last_url, False, e
@@ -244,15 +246,15 @@ class DeckScraper(NestedDeckParser):
 _THROTTLED_DECK_SCRAPER_TYPES = set()
 
 
-def throttled_deck_scraper(
+def video_throttled_deck_scraper(
         scraper_type: Type[DeckScraper]) -> Type[DeckScraper]:
-    """Register this deck scraper as a throttled one.
+    """Register this deck scraper for video scraping to add an extra throttle.
     """
     register_type(_THROTTLED_DECK_SCRAPER_TYPES, scraper_type, DeckScraper)
     return scraper_type
 
 
-def get_throttled_deck_scraper_types() -> set[Type[DeckScraper]]:
+def get_video_throttled_deck_scraper_types() -> set[Type[DeckScraper]]:
     return set(_THROTTLED_DECK_SCRAPER_TYPES)
 
 
@@ -341,14 +343,16 @@ class ContainerScraper(DeckScraper):
 
     @classmethod
     @override
+    @timed("scraper testing")
     def test(cls) -> tuple[str | None, bool, Exception | None]:
         if not cls.EXAMPLE_URLS:
             raise ValueError("No example URLs defined")
+        _log.info(f"Testing {cls.__name__!r}...")
         last_url = None
         try:
             for url in cls.EXAMPLE_URLS:
+                _log.info(f"Testing URL {url!r}...")
                 last_url = url
-                _log.info(f"Testing {cls.__name__!r}...")
                 scraper = cls(url)
                 decks = scraper.scrape_decks()
                 if not decks:

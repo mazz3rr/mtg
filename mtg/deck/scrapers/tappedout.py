@@ -15,21 +15,40 @@ import backoff
 from bs4 import BeautifulSoup
 from requests import Response
 
-from mtg.constants import Json
+from mtg.constants import Json, SECRETS
+from mtg.deck.core import Deck
 from mtg.deck.scrapers.abc import (
     DeckScraper, DeckUrlsContainerScraper, folder_container_scraper,
-    throttled_deck_scraper,
+    video_throttled_deck_scraper,
 )
+from mtg.lib.common import ParsingError
 from mtg.lib.numbers import extract_int
 from mtg.lib.scrape.core import (
-    ScrapingError, fetch, fetch_json, fetch_soup, prepend_url,
+    ScrapingError, fetch, fetch_json, fetch_soup, get_path_segments, prepend_url,
     strip_url_query, throttle,
 )
 from mtg.lib.time import get_date_from_ago_text
 
 _log = logging.getLogger(__name__)
 URL_PREFIX = "https://tappedout.net"
-_MAX_TRIES = 3
+_MAX_TRIES = 6
+_HEADERS = {
+    "Host": "tappedout.net",
+    "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br, zstd",
+    "Sec-GPC": "1",
+    "Connection": "keep-alive",
+    "Cookie": SECRETS["tappedout"]["cookie"],
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "If-Modified-Since": "Sun, 21 Sep 2025 01:16:30 GMT",
+    "Priority": "u=0, i",
+    "TE": "trailers",
+}
 
 
 def _backoff_predicate(response: Response) -> bool:
@@ -44,11 +63,17 @@ def _backoff_handler(details: dict) -> None:
     _log.info("Backing off {wait:0.1f} seconds after {tries} tries...".format(**details))
 
 
-@throttled_deck_scraper
+@video_throttled_deck_scraper
 @DeckScraper.registered
 class TappedoutDeckScraper(DeckScraper):
     """Scraper of TappedOut decklist page.
     """
+    EXAMPLE_URLS = (
+        "https://tappedout.net/mtg-decks/rakdos-orc-sac/?cb=1687559977",
+        "https://tappedout.net/mtg-decks/pias-myr-deck/",
+    )
+    THROTTLING = DeckScraper.THROTTLING * 3
+
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
@@ -69,7 +94,7 @@ class TappedoutDeckScraper(DeckScraper):
         on_backoff=_backoff_handler,
     )
     def _get_response(self) -> Response | None:
-        return fetch(self.url, handle_http_errors=False)
+        return fetch(self.url, handle_http_errors=False, headers=_HEADERS)
 
     @override
     def _fetch_soup(self) -> None:
@@ -118,6 +143,11 @@ class TappedoutDeckScraper(DeckScraper):
         self._decklist = "\n".join(lines)
         self._metadata["name"] = name_line.removeprefix("Name ")
 
+    @override
+    def scrape(
+        self, throttled=False, suppressed_errors=(ParsingError, ScrapingError)) -> Deck | None:
+        return super().scrape(True, suppressed_errors)
+
 
 @DeckUrlsContainerScraper.registered
 class TappedoutUserScraper(DeckUrlsContainerScraper):
@@ -127,11 +157,20 @@ class TappedoutUserScraper(DeckUrlsContainerScraper):
     # override
     API_URL_TEMPLATE = "https://tappedout.net/api/users/{}/deck-list/?p={}&o=-date_updated"
     DECK_SCRAPER_TYPES = TappedoutDeckScraper,  # override
+    EXAMPLE_URLS = (
+        "https://tappedout.net/users/ChuckWagonMTG/",
+    )
 
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return "tappedout.net/users/" in url.lower() and "/deck-folders" not in url.lower()
+        if "tappedout.net/users/" not in url.lower():
+            return False
+        try:
+            _, user_name = get_path_segments(url)
+            return True
+        except ValueError:
+            return False
 
     @classmethod
     @override
@@ -147,11 +186,9 @@ class TappedoutUserScraper(DeckUrlsContainerScraper):
     def _validate_json(self) -> None:
         pass
 
-    # FIXME: use `get_path_segments()` instead (#394)
     def _get_user_name(self) -> str:
-        url = self.url.removeprefix("https://").removeprefix("http://")
-        first, second, user, *_ = url.split("/")
-        return user
+        _, user_name = get_path_segments(self.url)
+        return user_name
 
     @override
     def _parse_input_for_decks_data(self) -> None:
@@ -159,7 +196,7 @@ class TappedoutUserScraper(DeckUrlsContainerScraper):
         collected, total, page = [], 1, 1
         while len(collected) < total:
             if page != 1:
-                throttle(*DeckScraper.THROTTLING)
+                throttle(*TappedoutDeckScraper.THROTTLING)
             json_data = fetch_json(self.API_URL_TEMPLATE.format(username, page))
             if not json_data or not json_data.get("results") or not json_data.get("total_decks"):
                 if not collected:
@@ -183,6 +220,9 @@ class TappedoutFolderScraper(DeckUrlsContainerScraper):
     API_URL_TEMPLATE = "https://tappedout.net/api/folder/{}/detail/"  # override
     DECK_SCRAPER_TYPES = TappedoutDeckScraper,  # override
     DECK_URL_PREFIX = URL_PREFIX  # override
+    EXAMPLE_URLS = (
+        "https://tappedout.net/mtg-deck-folders/commanders-of-myr-edh-decks/",
+    )
 
     @staticmethod
     @override
@@ -227,6 +267,9 @@ class TappedoutUserFolderScraper(TappedoutUserScraper):
     """
     CONTAINER_NAME = "Tappedout user folder"  # override
     API_URL_TEMPLATE = "https://tappedout.net/api/folder/{}/list/?page_num={}"  # override
+    EXAMPLE_URLS = (
+        "https://tappedout.net/users/PDHPals/deck-folders/",
+    )
 
     @staticmethod
     @override
@@ -234,12 +277,17 @@ class TappedoutUserFolderScraper(TappedoutUserScraper):
         return "tappedout.net/users/" in url.lower() and "/deck-folders" in url.lower()
 
     @override
+    def _get_user_name(self) -> str:
+        _, user_name, *_ = get_path_segments(self.url)
+        return user_name
+
+    @override
     def _parse_input_for_decks_data(self) -> None:
         username = self._get_user_name()
         collected, has_next, page = [], True, 1
         while has_next:
             if page != 1:
-                throttle(*DeckScraper.THROTTLING)
+                throttle(*TappedoutDeckScraper.THROTTLING)
             json_data = fetch_json(self.API_URL_TEMPLATE.format(username, page))
             if not json_data or not json_data.get("results"):
                 if not collected:

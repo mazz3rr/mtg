@@ -539,5 +539,6 @@ class ArenaParser(DeckParser):
             deck.replace_metadata(self._metadata)
             return deck
         deck = super()._build_deck()
-        _cached_decks[self._decklist_hash] = deck
+        if deck:
+            _cached_decks[self._decklist_hash] = deck
         return deck

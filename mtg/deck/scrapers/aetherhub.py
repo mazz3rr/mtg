@@ -17,7 +17,7 @@ from mtg.deck.abc import DeckTagParser
 from mtg.deck.core import Mode
 from mtg.deck.scrapers.abc import (
     DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper,
-    throttled_deck_scraper,
+    video_throttled_deck_scraper,
 )
 from mtg.lib.common import from_iterable
 from mtg.lib.numbers import extract_float, extract_int
@@ -99,7 +99,7 @@ class AetherhubDeckTagParser(DeckTagParser):
                         self._companion = cards[0]
 
 
-@throttled_deck_scraper
+@video_throttled_deck_scraper
 @DeckScraper.registered
 class AetherhubDeckScraper(DeckScraper):
     """Scraper of Aetherhub decklist page.

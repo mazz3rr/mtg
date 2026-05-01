@@ -18,7 +18,7 @@ from mtg.constants import Json, SECRETS
 from mtg.deck.abc import DeckJsonParser, DeckTagParser
 from mtg.deck.scrapers.abc import (
     DeckScraper, DeckUrlsContainerScraper,
-    HybridContainerScraper, throttled_deck_scraper,
+    HybridContainerScraper, video_throttled_deck_scraper,
 )
 from mtg.deck.scrapers.goldfish import HEADERS as GOLDFISH_HEADERS
 from mtg.lib.common import ParsingError
@@ -64,7 +64,7 @@ URL_HOOKS = (
 )
 
 
-@throttled_deck_scraper
+@video_throttled_deck_scraper
 @DeckScraper.registered
 class InternationalHareruyaDeckScraper(DeckScraper):
     """Scraper of international Hareruya decklist page.
@@ -208,7 +208,7 @@ class JapaneseHareruyaDeckJsonParser(DeckJsonParser):
             self._parse_json_card(card)
 
 
-@throttled_deck_scraper
+@video_throttled_deck_scraper
 @DeckScraper.registered
 class JapaneseHareruyaDeckScraper(DeckScraper):
     """Scraper of Japanese Hareruya decklist page.

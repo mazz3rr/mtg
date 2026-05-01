@@ -17,7 +17,7 @@ from mtg.deck.abc import DeckTagParser
 from mtg.deck.core import Deck, Mode
 from mtg.deck.scrapers.abc import (
     DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper,
-    throttled_deck_scraper,
+    video_throttled_deck_scraper,
 )
 from mtg.lib.common import ParsingError
 from mtg.lib.numbers import extract_int
@@ -145,7 +145,7 @@ class GoldfishDeckTagParser(DeckTagParser):
         self._parse_decklist_tag(decklist_tag)
 
 
-@throttled_deck_scraper
+@video_throttled_deck_scraper
 @DeckScraper.registered
 class GoldfishDeckScraper(DeckScraper):
     """Scraper of MTGGoldfish decklist page.

@@ -35,7 +35,7 @@ from mtg.deck.arena import ArenaParser, LinesParser
 from mtg.deck.core import Deck, DeckParser
 from mtg.deck.scrapers.abc import (
     DeckTagsContainerScraper, DecksJsonContainerScraper,
-    get_throttled_deck_scraper_types,
+    get_video_throttled_deck_scraper_types,
 )
 from mtg.lib.common import Noop, find_longest_seqs, from_iterable, logging_disabled
 from mtg.lib.files import get_dir, sanitize_filename
@@ -298,7 +298,7 @@ class VideoScraper:
                 _log.info(f"Skipping already failed deck URL: {normalized_link!r}...")
                 return None
             try:
-                deck = scraper.scrape(throttled=type(scraper) in get_throttled_deck_scraper_types())
+                deck = scraper.scrape(throttled=type(scraper) in get_video_throttled_deck_scraper_types())
             except ReadTimeout:
                 _log.warning(f"Back-offed scraping of {link!r} failed with read timeout")
         return deck
