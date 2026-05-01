@@ -120,9 +120,10 @@ class TopDeckBracketScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "topdeck.gg/bracket/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -241,11 +242,11 @@ class TopDeckProfileScraper(DecksJsonContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "topdeck.gg/profile/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        url = strip_url_query(url)
-        return url.removesuffix("/stats")
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
+        return strip_url_query(url).removesuffix("/stats")
 
     @override
     def _pre_parse(self) -> None:

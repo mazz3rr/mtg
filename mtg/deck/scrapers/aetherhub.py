@@ -145,15 +145,16 @@ class AetherhubDeckScraper(DeckScraper):
         return ("aetherhub.com/" in url and "/deck/" in url
                 and not any(t in url.lower() for t in tokens))
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         url = strip_url_query(url)
-        if "/gallery/" in url.lower():
-            url = url.replace("/Gallery/", "/Public/").replace("/gallery/", "/public/")
-        elif url.lower().endswith("/gallery"):
-            url = url.removesuffix("/Gallery").removesuffix("/gallery")
-        return url.removesuffix("/")
+        if "/gallery/" in url:
+            url = url.replace("/gallery/", "/public/")
+        elif url.endswith("/gallery"):
+            url = url.removesuffix("/gallery")
+        return url
 
     @override
     def _is_page_inaccessible(self) -> bool:
@@ -252,9 +253,10 @@ class AetherhubWriteupDeckScraper(AetherhubDeckScraper):
     def is_valid_url(url: str) -> bool:
         return "aetherhub.com/decks/writeups/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -287,13 +289,14 @@ class AetherhubUserScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "aetherhub.com/user/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         url = strip_url_query(url)
         # links like: https://aetherhub.com/User/LegenVD/Decks/Standard-BO1 are already OK
         # links like: https://aetherhub.com/User/LegenVD/ need sanitization
-        if "/decks/" not in url.lower() and not url.lower().endswith("/decks"):
+        if "/decks/" not in url and not url.endswith("/decks"):
             return f"{url}/decks"
         return url
 
@@ -326,9 +329,10 @@ class AetherhubEventScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "aetherhub.com/events/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -366,9 +370,10 @@ class AetherhubArticleScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "aetherhub.com/article/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

@@ -102,9 +102,10 @@ class EdhrecPreviewDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "edhrec.com/" in url.lower() and "/deckpreview/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -168,9 +169,10 @@ class EdhrecAverageDeckScraper(DeckScraper):
             and "/month" not in url.lower()
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         url = strip_url_query(url)
         return url.replace("/commanders/", "/average-decks/")
 
@@ -257,9 +259,10 @@ class EdhrecArticleScraper(HybridContainerScraper):
             and "/search/" not in url.lower()
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -317,9 +320,10 @@ class EdhrecAuthorScraper(HybridContainerScraper):
             and "/author/" in url.lower()
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

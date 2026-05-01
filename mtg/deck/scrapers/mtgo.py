@@ -19,7 +19,7 @@ from mtg.deck.abc import DeckJsonParser
 from mtg.deck.scrapers.abc import DeckScraper, DecksJsonContainerScraper
 from mtg.lib.common import from_iterable
 from mtg.lib.numbers import get_ordinal_suffix
-from mtg.lib.scrape.core import ScrapingError, dissect_js, strip_url_query
+from mtg.lib.scrape.core import ScrapingError, dissect_js, get_fragment, strip_url_query
 from mtg.scryfall import all_formats
 
 _log = logging.getLogger(__name__)
@@ -144,21 +144,20 @@ class MtgoDeckScraper(DeckScraper):
         super().__init__(url, metadata)
         self._player_name = self._parse_player_name()
 
-    # FIXME: use `get_path_segments()` instead (#394)
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return f"mtgo.com/decklist/" in url.lower() and "#deck_" in url.lower()
+        return f"mtgo.com/decklist/" in url.lower() and get_fragment(url).startswith("deck_")
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url, keep_fragment=True)
 
     def _parse_player_name(self) -> str:
-        *_, rest = self.url.split("/")
-        _, rest = rest.split("#")
-        return rest.removeprefix("deck_")
+        fragment = get_fragment(self.url)
+        return fragment.removeprefix("deck_")
 
     @override
     def _get_json_from_soup(self) -> Json:
@@ -198,15 +197,17 @@ class MtgoEventScraper(DecksJsonContainerScraper):
         "https://www.mtgo.com/decklist/pauper-challenge-32-2024-11-0312703226",
     )
 
-    # FIXME: use `get_path_segments()` instead (#394)
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return f"mtgo.com/decklist/" in url.lower() and "#deck_" not in url.lower()
+        if (fragment := get_fragment(url)) and fragment.startswith("deck_"):
+            return False
+        return f"mtgo.com/decklist/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

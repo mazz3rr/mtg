@@ -151,10 +151,11 @@ class MtgDecksNetTournamentScraper(DeckUrlsContainerScraper):
             return False
         return domain == "mtgdecks.net" and fmt in all_formats() and "-tournament-" in segment
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        return url.removesuffix("/").removesuffix("/winrates")
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
+        return strip_url_query(url).removesuffix("/winrates")
 
     @override
     def _parse_input_for_decks_data(self) -> None:
@@ -201,9 +202,10 @@ class MtgDecksNetArticleScraper(HybridContainerScraper):
             return False
         return domain == "mtgdecks.net" and cat in tokens
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     def _parse_article_tag_for_metadata(self) -> None:

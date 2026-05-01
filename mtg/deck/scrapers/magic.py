@@ -20,7 +20,7 @@ from mtg.constants import Json
 from mtg.deck.abc import DeckTagParser
 from mtg.deck.scrapers.abc import DeckScraper, DeckTagsContainerScraper
 from mtg.lib.common import ParsingError
-from mtg.lib.scrape.core import ScrapingError, strip_url_query
+from mtg.lib.scrape.core import ScrapingError, get_query_values, strip_url_query
 from mtg.lib.scrape.dynamic import fetch_dynamic_soup
 from mtg.lib.text import sanitize_whitespace
 
@@ -170,12 +170,17 @@ class MagicGgDeckScraper(DeckScraper):
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return f"magic.gg/decklists/" in url.lower() and "?decklist=" in url.lower()
+        url = url.lower()
+        if f"magic.gg/decklists/" not in url:
+            return False
+        values = get_query_values(url, "decklist")
+        if values and len(values) == 1:
+            return True
+        return False
 
-    # FIXME: use `get_path_segments()` instead (#394)
     def _parse_decklist_id(self) -> str:
-        *_, id_ = self.url.split("?decklist=")
-        return id_
+        [decklist_id] = get_query_values(self.url, "decklist")
+        return decklist_id
 
     @override
     def _get_sub_parser(self) -> MagicGgOldDeckTagParser:
@@ -211,9 +216,10 @@ class MagicGgEventScraper(DeckTagsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "magic.gg/decklists/" in url.lower() and "?decklist=" not in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

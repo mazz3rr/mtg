@@ -43,9 +43,10 @@ class DraftsimDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return is_more_than_root_path(url, "draftsim.com/decks/")
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -136,9 +137,10 @@ class DraftsimArticleScraper(HybridContainerScraper):
             and not any(t in url.lower() for t in tokens)
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -194,9 +196,10 @@ class DraftsimAuthorScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "draftsim.com/" in url.lower() and "/author/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @classmethod

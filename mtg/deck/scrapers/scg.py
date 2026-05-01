@@ -120,9 +120,10 @@ class ScgDeckScraper(DeckScraper):
         except (ValueError, IndexError):
             return False
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -177,9 +178,10 @@ class ScgEventScraper(DeckUrlsContainerScraper):
         except ValueError:
             return False
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -224,9 +226,10 @@ class ScgDatabaseScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "starcitygames.com/content/" in url.lower() and "-decks" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -287,9 +290,10 @@ class ScgArticleScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "articles.starcitygames.com/" in url.lower() and "/author/" not in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

@@ -120,9 +120,10 @@ class CyclesGamingArticleScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         return is_more_than_root_path(url, "cyclesgaming.com")
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

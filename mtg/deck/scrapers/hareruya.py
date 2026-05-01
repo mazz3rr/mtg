@@ -25,7 +25,7 @@ from mtg.lib.common import ParsingError
 from mtg.lib.numbers import extract_int
 from mtg.lib.scrape.core import (
     ScrapingError, fetch, fetch_json, find_next_sibling_tag,
-    get_path_segments, get_query_values, is_more_than_root_path, strip_url_query,
+    get_fragment, get_path_segments, get_query_values, is_more_than_root_path, strip_url_query,
 )
 from mtg.yt.discover import UrlHook
 
@@ -87,9 +87,10 @@ class InternationalHareruyaDeckScraper(DeckScraper):
             and "/metagame" not in url
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return url.replace("/ja/","/en/")
 
     @override
@@ -231,9 +232,10 @@ class JapaneseHareruyaDeckScraper(DeckScraper):
             ) and not any(t in url for t in ("/user/", "/tile/", "/search"))
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         if "deck.hareruyamtg.com/deck/" in url:
             return url.replace("deck.hareruyamtg.com/deck/", "www.hareruyamtg.com/decks/")
         return url
@@ -497,7 +499,7 @@ class HareruyaArticleScraper(HybridContainerScraper):
             return (
                 is_more_than_root_path(url, "article.hareruyamtg.com/article/")
                 and not any(t in url for t in ("/page/", "/author/", "/category/", "/coverage/"))
-                and not urllib.parse.urlsplit(url).fragment
+                and not get_fragment(url)
             )
         except ValueError:
             return False
@@ -555,18 +557,18 @@ class HareruyaArticleDeckScraper(DeckScraper):
     @override
     def is_valid_url(url: str) -> bool:
         try:
-            url = strip_url_query(url).lower()
+            url = strip_url_query(url, keep_fragment=True).lower()
             return (
                 is_more_than_root_path(url, "article.hareruyamtg.com/article/")
                 and not any(t in url for t in ("/page/", "/author/", "/category/", "/coverage/"))
-                and urllib.parse.urlsplit(url).fragment
+                and bool(get_fragment(url))
             )
         except ValueError:
             return False
 
     @override
     def _get_sub_parser(self) -> HareruyaArticleDeckTagParser:
-        did = urllib.parse.urlsplit(self.url).fragment
+        did = get_fragment(self.url)
         deck_tag = self._soup.find("div", class_="MediaDeckList",  id=did)
         if deck_tag is None:
             raise ScrapingError(

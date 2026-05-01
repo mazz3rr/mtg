@@ -126,9 +126,10 @@ class FlexslotDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return is_more_than_root_path(url, "flexslot.gg/decks/")
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url).removesuffix("/view")
 
     @override
@@ -166,9 +167,9 @@ class FlexslotSideboardScraper(DecksJsonContainerScraper):
     def is_valid_url(url: str) -> bool:
         return is_more_than_root_path(url, "flexslot.gg/sideboards/")
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
         return FlexslotDeckScraper.normalize_url(url)
 
     @override
@@ -204,9 +205,9 @@ class FlexslotArticleScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         return is_more_than_root_path(url, "flexslot.gg/article/")
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
         return FlexslotDeckScraper.normalize_url(url)
 
     @override
@@ -268,9 +269,10 @@ class FlexslotUserScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "flexslot.gg/u/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

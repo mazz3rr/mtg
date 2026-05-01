@@ -36,11 +36,11 @@ class MtgTop8DeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "mtgtop8.com/event?e=" in url.lower() and "&d=" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        return url.removesuffix("/").replace("&switch=visual", "").replace(
-            "&switch=text", "") + "&switch=text"
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
+        return url.replace("&switch=visual", "").replace("&switch=text", "") + "&switch=text"
 
     def _validate_soup(self) -> None:
         super()._validate_soup()
@@ -115,9 +115,9 @@ class MtgTop8EventScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "mtgtop8.com/event?e=" in url.lower() and "&d=" not in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
         return MtgTop8DeckScraper.normalize_url(url)
 
     @override

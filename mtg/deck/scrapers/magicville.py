@@ -32,9 +32,10 @@ class MagicVilleDeckScraper(DeckScraper):
         url = url.lower()
         return "magic-ville.com/" in url and "decks/showdeck" in url
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return f"{url}&decklanglocal=eng"
 
     @override

@@ -36,9 +36,10 @@ class SeventeenLandsDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "17lands.com/user/deck/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         url = strip_url_query(url).removesuffix("/primer").removesuffix("/history")
         return url.rstrip(".,")
 

@@ -110,9 +110,10 @@ class MtgaZoneDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "mtgazone.com/user-decks/" in url.lower() or "mtgazone.com/deck/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -152,9 +153,10 @@ class MtgaZoneArticleScraper(HybridContainerScraper):
             ))
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     def _collect_urls(self) -> tuple[list[str], list[str]]:
@@ -191,9 +193,10 @@ class MtgaZoneAuthorScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "mtgazone.com/author/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

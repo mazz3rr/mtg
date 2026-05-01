@@ -35,9 +35,10 @@ class ScryfallDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "scryfall.com/@" in url.lower() and "/decks/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         url = strip_url_query(url)
         return f"{url}?as=list&with=usd"
 

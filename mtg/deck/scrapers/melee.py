@@ -53,9 +53,10 @@ class MeleeGgDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "melee.gg/decklist/" in url.lower() or f"{ALT_DOMAIN}/decklist/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return url.replace(ALT_DOMAIN, "melee.gg")
 
     @override
@@ -128,6 +129,11 @@ class MeleeGgTournamentScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "melee.gg/tournament/" in url.lower() or f"{ALT_DOMAIN}/tournament/" in url.lower()
 
+    @classmethod
+    @override
+    def normalize_url(cls, url: str) -> str:
+        return MeleeGgDeckScraper.normalize_url(url)
+
     @override
     def _parse_input_for_decks_data(self) -> None:
         game_tag = self._soup.find("p", id="tournament-headline-game")
@@ -157,6 +163,11 @@ class MeleeGgProfileScraper(DeckUrlsContainerScraper):
     @override
     def is_valid_url(url: str) -> bool:
         return "melee.gg/profile/" in url.lower() or f"{ALT_DOMAIN}/profile/" in url.lower()
+
+    @classmethod
+    @override
+    def normalize_url(cls, url: str) -> str:
+        return MeleeGgDeckScraper.normalize_url(url)
 
     @override
     def _parse_input_for_decks_data(self) -> None:

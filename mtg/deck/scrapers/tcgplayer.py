@@ -62,9 +62,10 @@ class TcgPlayerDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "decks.tcgplayer.com/" in url.lower() and "/search" not in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -118,8 +119,10 @@ class TcgPlayerPlayerScraper(DeckUrlsContainerScraper):
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return ("decks.tcgplayer.com/magic/deck/search?" in url.lower()
-                and"player=" in url)
+        return (
+            "decks.tcgplayer.com/magic/deck/search?" in url.lower()
+            and "player=" in url.lower()
+        )
 
     @override
     def _parse_input_for_decks_data(self) -> None:
@@ -239,9 +242,10 @@ class TcgPlayerInfiniteDeckScraper(DeckScraper):
             or "tcgplayer.com/content/magic-the-gathering/deck/" in url.lower()
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -282,9 +286,10 @@ class TcgPlayerInfinitePlayerScraper(DeckUrlsContainerScraper):
             or "tcgplayer.com/content/magic-the-gathering/decks/player/" in url.lower()
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -319,10 +324,10 @@ class TcgPlayerInfiniteAuthorSearchScraper(TcgPlayerInfinitePlayerScraper):
             ) and "author=" in url.lower()
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        return url.removesuffix("/")
+    def normalize_url(cls, url: str) -> str:
+        return DeckScraper.normalize_url(url)
 
     @override
     def _get_json_from_api(self) -> Json:
@@ -385,13 +390,14 @@ class TcgPlayerInfiniteArticleScraper(DecksJsonContainerScraper):
     @override
     def is_valid_url(url: str) -> bool:
         return (
-                f"infinite.tcgplayer.com/article/" in url.lower()
-                or "tcgplayer.com/content/article/" in url.lower()
+            f"infinite.tcgplayer.com/article/" in url.lower()
+            or "tcgplayer.com/content/article/" in url.lower()
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -454,9 +460,10 @@ class TcgPlayerInfiniteAuthorScraper(HybridContainerScraper):
             ) and not strip_url_query(url.lower()).endswith("/decks")
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -521,9 +528,10 @@ class TcgPlayerInfiniteAuthorDecksPaneScraper(DeckUrlsContainerScraper):
             ) and strip_url_query(url.lower()).endswith("/decks")
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

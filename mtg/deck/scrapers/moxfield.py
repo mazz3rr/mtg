@@ -18,7 +18,7 @@ from mtg.deck.scrapers.abc import (
     DeckScraper, DeckUrlsContainerScraper, folder_container_scraper,
     throttled_deck_scraper,
 )
-from mtg.lib.scrape.core import ScrapingError, Soft404Error, strip_url_query
+from mtg.lib.scrape.core import ScrapingError, Soft404Error, get_path_segments, strip_url_query
 from mtg.lib.scrape.dynamic import fetch_dynamic_soup, fetch_selenium_json
 from mtg.scryfall import Card
 
@@ -42,9 +42,10 @@ class MoxfieldDeckScraper(DeckScraper):
         tokens = "public?q=", "/personal"  # deck search, private page
         return "moxfield.com/decks/" in url and all(t not in url for t in tokens)
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         url = strip_url_query(
             url).removesuffix("/primer").removesuffix("/history").removesuffix(
             "/settings").removesuffix("/goldfish")
@@ -129,14 +130,26 @@ class MoxfieldListScraper(DeckUrlsContainerScraper):
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return "moxfield.com/bookmarks/" in url.lower() or "moxfield.com/lists/" in url.lower()
+        if not ("moxfield.com/bookmarks/" in url.lower() or "moxfield.com/lists/" in url.lower()):
+            return False
+        try:
+            _, bookmark_id_text = get_path_segments(url)
+            return True
+        except ValueError:
+            return False
+
+    @classmethod
+    @override
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
+        return url.replace("moxfield.com/bookmarks/", "moxfield.com/lists/")
 
     def _get_bookmark_id(self) -> str:
-        *_, last = self.url.split("/")
-        if "-" in last:
-            id_, *_ = last.split("-")
+        _, bookmark_id_text = get_path_segments(self.url)
+        if "-" in bookmark_id_text:
+            id_, *_ = bookmark_id_text.split("-")
             return id_
-        return last
+        return bookmark_id_text
 
     @override
     def _get_json_from_api(self) -> Json:
@@ -172,9 +185,10 @@ class MoxfieldUserScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "moxfield.com/users/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

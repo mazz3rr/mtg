@@ -20,8 +20,10 @@ from mtg.constants import Json
 from mtg.deck.abc import DeckJsonParser, NestedDeckParser, DeckTagParser
 from mtg.deck.core import CardNotFound, Deck, InvalidDeck
 from mtg.lib.common import Noop, ParsingError, register_type
-from mtg.lib.scrape.core import InaccessiblePage, ScrapingError, Soft404Error, Throttling, \
-    fetch_soup, find_links, prepend_url, throttle
+from mtg.lib.scrape.core import (
+    InaccessiblePage, ScrapingError, Soft404Error, Throttling,
+    fetch_soup, find_links, normalize_url, prepend_url, throttle,
+)
 from mtg.lib.scrape.dynamic import fetch_dynamic_soup
 from mtg.lib.scrape.wayback import fetch_wayback_soup
 from mtg.lib.time import timed
@@ -33,8 +35,10 @@ _log = logging.getLogger(__name__)
 class DeckScraper(NestedDeckParser):
     """Abstract deck scraper.
 
-    Deck scrapers process a single, decklist and metadata holding, URL and return a Deck
-    object (if able).
+    Deck scrapers process a single URL for decklist and metadata and return a Deck object (if able).
+
+    Fetching data to parse from a remote location via URL is a fundamental distinction between
+    deck scrapers and mere deck parsers.
     """
     _REGISTRY: set[Type[Self]] = set()
     SELENIUM_PARAMS = {}
@@ -81,10 +85,9 @@ class DeckScraper(NestedDeckParser):
     def is_valid_url(url: str) -> bool:
         raise NotImplementedError
 
-    # FIXME: this should be a classmethod to enable a re-use of the default logic in subclasses
-    @staticmethod
-    def normalize_url(url: str) -> str:
-        return url.removesuffix("/")
+    @classmethod
+    def normalize_url(cls, url: str) -> str:
+        return normalize_url(url)
 
     def _fetch_soup(self) -> None:
         if self.SELENIUM_PARAMS:

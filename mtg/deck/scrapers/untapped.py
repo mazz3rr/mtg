@@ -37,9 +37,10 @@ class UntappedProfileDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "mtga.untapped.gg/profile/" in url.lower() and "/deck/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     def _fetch_soup(self) -> None:
@@ -82,11 +83,11 @@ class UntappedRegularDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "mtga.untapped.gg/decks/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        url = strip_url_query(url)
-        return url.replace("input/", "") if "/input/" in url else url
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
+        return strip_url_query(url)
 
     @override
     def _parse_input_for_metadata(self) -> None:
@@ -178,9 +179,10 @@ class UntappedProfileScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "mtga.untapped.gg/profile/" in url.lower() and "/deck/" not in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

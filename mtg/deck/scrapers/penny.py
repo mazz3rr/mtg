@@ -40,9 +40,10 @@ class PennyDreadfulMagicDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "pennydreadfulmagic.com/decks/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -110,16 +111,25 @@ class PennyDreadfulMagicCompetitionScraper(DeckUrlsContainerScraper):
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return "pennydreadfulmagic.com/competitions/" in url.lower()
+        if "pennydreadfulmagic.com/competitions/" not in url.lower():
+            return False
+        try:
+            _, competition_id = get_path_segments(url)
+            if all(ch.isdigit() for ch in competition_id):
+                return True
+            return False
+        except ValueError:
+            return False
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
     def _get_json_from_api(self) -> Json:
-        *_, competition_id = self.url.split("/")
+        *_, competition_id = get_path_segments(self.url)
         return fetch_json(self.API_URL_TEMPLATE.format(competition_id))
 
     @override
@@ -153,16 +163,17 @@ class PennyDreadfulMagicUserScraper(DeckUrlsContainerScraper):
     @property
     def _ids_in_url(self) -> bool:
         segments = set(get_path_segments(self.url.lower()))
-        return "/seasons/" in segments and "/id/" in segments
+        return "seasons" in segments and "id" in segments
 
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
         return "pennydreadfulmagic.com/" in url.lower() and "/people/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @staticmethod

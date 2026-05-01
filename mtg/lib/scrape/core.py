@@ -393,6 +393,18 @@ def get_netloc_domain(url: str, naked=False) -> str:
         return ""
 
 
+def get_fragment(url: str) -> str:
+    """Return the fragment part the supplied URL.
+
+    E.g. supplying '"https://www.mtgo.com/decklist/pauper-challenge-32-2024-11-0312703226#deck_Walker735"' results in:
+        'deck_Walker735'.
+    """
+    try:
+        return urllib.parse.urlsplit(url).fragment
+    except ValueError:
+        return ""
+
+
 def get_query_values(url: str, param: str) -> list[str]:
     """Return query parameter values from supplied URL. If URL is invalid, or on any other failure,
     return an empty list.
@@ -573,4 +585,4 @@ def parse_keywords(tag_or_text: Tag | str) -> list[str]:
 
 
 def normalize_url(url: str) -> str:
-    return url.removesuffix("/").lower()
+    return url.rstrip("/").lower()

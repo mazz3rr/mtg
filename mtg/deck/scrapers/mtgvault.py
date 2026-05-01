@@ -37,9 +37,10 @@ class MtgVaultDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "mtgvault.com/" in url.lower() and "/decks/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(
             url.removesuffix("/proxy/").removesuffix("/stats/").removesuffix("/sample-hand/"))
 

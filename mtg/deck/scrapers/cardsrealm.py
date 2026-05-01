@@ -93,9 +93,10 @@ class CardsrealmDeckScraper(DeckScraper):
             and not any(n in url.lower() for n in negatives)
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         url = strip_url_query(url)
         return to_eng_url(url, "decks")
 
@@ -156,9 +157,10 @@ class CardsrealmProfileScraper(DeckUrlsContainerScraper):
             and not any(n in url.lower() for n in negatives)
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         url = strip_url_query(url)
         return to_eng_url(url, "profile")
 
@@ -193,11 +195,10 @@ class CardsrealmFolderScraper(CardsrealmProfileScraper):
             and not any(n in url.lower() for n in negatives)
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        url = strip_url_query(url)
-        return to_eng_url(url, "decks")
+    def normalize_url(cls, url: str) -> str:
+        return CardsrealmDeckScraper.normalize_url(url)
 
 
 @DeckUrlsContainerScraper.registered
@@ -216,9 +217,10 @@ class CardsrealmMetaTournamentScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return all(t in url.lower() for t in ("cardsrealm.com/", "/meta-decks/", "/tournaments/"))
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         url = strip_url_query(url)
         return to_eng_url(url, "meta-decks")
 
@@ -260,9 +262,10 @@ class CardsrealmRegularTournamentScraper(DeckUrlsContainerScraper):
             and "/meta-decks/" not in url.lower()
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         url = strip_url_query(url)
         return to_eng_url(url, "tournament")
 
@@ -333,9 +336,10 @@ class CardsrealmArticleScraper(HybridContainerScraper):
             and not any(n in url.lower() for n in negatives)
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         url = strip_url_query(url)
         return to_eng_url(url, "articles")
 
@@ -368,9 +372,9 @@ class CardsrealmAuthorScraper(HybridContainerScraper):
             and not any(n in url.lower() for n in negatives)
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
         return CardsrealmArticleScraper.normalize_url(url)
 
     @override
@@ -397,10 +401,10 @@ class CardsrealmArticleSearchScraper(HybridContainerScraper):
             and not any(n in url.lower() for n in NEGATIVE_DOMAINS)
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        return to_eng_url(url, "articles")
+    def normalize_url(cls, url: str) -> str:
+        return CardsrealmArticleScraper.normalize_url(url)
 
     @override
     def _parse_input_for_decks_data(self) -> None:

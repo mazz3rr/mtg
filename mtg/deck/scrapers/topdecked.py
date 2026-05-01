@@ -62,9 +62,10 @@ class TopDeckedRegularDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "www.topdecked.com/decks/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     def _process_metadata_with_selenium(self, driver: webdriver.Chrome) -> None:

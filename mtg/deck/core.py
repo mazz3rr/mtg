@@ -1083,6 +1083,7 @@ class DeckParser(ABC):
             return remove_furigana(text)
         return text
 
+    # main deck parser API
     @abstractmethod
     def _pre_parse(self) -> None:
         """Do anything that is needed before parsing here (like obtaining a remote data from an
@@ -1098,7 +1099,7 @@ class DeckParser(ABC):
 
     @abstractmethod
     def _parse_input_for_decklist(self) -> None:
-        """Parse the input data for deck data.
+        """Parse the input data for decklist data.
         """
         raise NotImplementedError
 
@@ -1115,7 +1116,7 @@ class DeckParser(ABC):
         This happens in four distinct and defined stages:
             * pre-parsing
             * parsing metadata from the input data
-            * parsing deck data from the input data
+            * parsing decklist data from the input data
             * building a Deck object
 
         Args:

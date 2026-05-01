@@ -42,21 +42,24 @@ class MtgStocksDeckScraper(DeckScraper):
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
-        return "mtgstocks.com/decks/" in url.lower()
+        if "mtgstocks.com/decks/" not in url.lower():
+            return False
+        try:
+            _, deck_id = get_path_segments(url)
+            int(deck_id)
+            return True
+        except ValueError:
+            return False
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        url = strip_url_query(url)
-        return url.replace("/visual/", "/")
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
+        return strip_url_query(url).replace("/visual/", "/")
 
     def _parse_deck_id(self) -> int:
-        try:
-            _, deck_id = get_path_segments(self.url)
-            return int(deck_id)
-        except ValueError:
-            raise ScrapingError(
-                f"Failed to extract deck ID from URL", scraper=type(self), url=self.url)
+        _, deck_id = get_path_segments(self.url)
+        return int(deck_id)
 
     def _get_json_from_soup(self) -> Json:
         script_tag = self._soup.find("script", id="ng-state")
@@ -109,9 +112,10 @@ class MtgStocksArticleScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "mtgstocks.com/news/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     def _collect_other_urls(self) -> list[str]:

@@ -42,9 +42,10 @@ class MtgMetaIoDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "mtgmeta.io/decks/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     def _get_json_from_soup(self) -> Json:
@@ -121,9 +122,10 @@ class MtgMetaIoTournamentScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "mtgmeta.io/tournaments/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -176,9 +178,10 @@ class MtgMetaIoArticleScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "mtgmeta.io/articles/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

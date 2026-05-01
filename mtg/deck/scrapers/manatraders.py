@@ -38,9 +38,10 @@ class ManatradersDeckScraper(DeckScraper):
             return True
         return False
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override

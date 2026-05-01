@@ -19,7 +19,7 @@ from requests import Response
 from mtg.constants import Json
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper, throttled_deck_scraper
 from mtg.lib.scrape.core import (
-    ScrapingError, dissect_js, fetch, fetch_json, strip_url_query,
+    ScrapingError, dissect_js, fetch, fetch_json, get_path_segments, strip_url_query,
     throttle,
 )
 from mtg.scryfall import Card
@@ -73,23 +73,25 @@ class DeckstatsDeckScraper(DeckScraper):
         "https://deckstats.net/decks/115134/1283677-kaya-s-scourge",
     )
 
-    # FIXME: use `get_path_segments()` instead (#394)
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
         if "deckstats.net/decks/" not in url.lower():
             return False
-        url = strip_url_query(url)
-        url = url.removeprefix("https://").removeprefix("http://")
-        if url.count("/") == 3:
-            domain, _, user_id, deck_id = url.split("/")
-            if all(ch.isdigit() for ch in user_id) and "-" in deck_id:
+        try:
+            segments = get_path_segments(url)
+            _, user_id, deck_id_text = segments
+            deck_id, *_ = deck_id_text.split("-")
+            if all(ch.isdigit() for token in (user_id, deck_id) for ch in token):
                 return True
-        return False
+            return False
+        except ValueError:
+            return False
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @backoff.on_predicate(
@@ -178,9 +180,10 @@ class DeckstatsUserScraper(DeckUrlsContainerScraper):
     """
     THROTTLING = DeckUrlsContainerScraper.THROTTLING * 1.33  # override
     CONTAINER_NAME = "Deckstats user"  # override
-    API_URL_TEMPLATE = ("https://deckstats.net/api.php?action=user_folder_get&result_type="
-                        "folder%3Bdecks%3Bparent_tree%3Bsubfolders&owner_id={}&folder_id=0&"
-                        "decks_page={}")  # override
+    API_URL_TEMPLATE = (
+        "https://deckstats.net/api.php?action=user_folder_get&result_type="
+        "folder%3Bdecks%3Bparent_tree%3Bsubfolders&owner_id={}&folder_id=0&decks_page={}"
+    )  # override
     DECK_SCRAPER_TYPES = DeckstatsDeckScraper,  # override
     EXAMPLE_URLS = (
         "https://deckstats.net/decks/30513",
@@ -188,30 +191,27 @@ class DeckstatsUserScraper(DeckUrlsContainerScraper):
         "https://deckstats.net/decks/202938/?lng=fr",
     )
 
-    # FIXME: use `get_path_segments()` instead (#394)
     @staticmethod
     @override
     def is_valid_url(url: str) -> bool:
         if "deckstats.net/decks/" not in url.lower():
             return False
-        url = strip_url_query(url)
-        url = url.removeprefix("https://").removeprefix("http://")
-        if url.count("/") != 2:
+        try:
+            _, user_id = get_path_segments(url)
+            if all(ch.isdigit() for ch in user_id):
+                return True
             return False
-        domain, _, user_id = url.split("/")
-        if all(ch.isdigit() for ch in user_id):
-            return True
-        return False
+        except ValueError:
+            return False
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
-    # FIXME: use `get_path_segments()` instead (#394)
     def _get_user_id(self) -> str:
-        url = self.url.removeprefix("https://").removeprefix("http://")
-        *_, user_id = url.split("/")
+        *_, user_id = get_path_segments(self.url)
         return user_id
 
     @override
@@ -242,4 +242,3 @@ class DeckstatsUserScraper(DeckUrlsContainerScraper):
             self._deck_urls += [f'https:{d["url_neutral"]}' for d in json_data["folder"]["decks"]]
             page += 1
             last_seen = json_data
-

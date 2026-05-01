@@ -168,13 +168,11 @@ class GoldfishDeckScraper(DeckScraper):
             and "/custom/" not in url
         )
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        url = strip_url_query(url)
-        if "/visual/" in url:
-            url = url.replace("/visual/", "/")
-        return url
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
+        return strip_url_query(url).replace("/visual/", "/")
 
     # FIXME: this is never reached when faced with a Soft404 page as Selenium fails with timeout
     #  exception sooner than that (#378)
@@ -216,14 +214,11 @@ class GoldfishTournamentScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "mtggoldfish.com/tournament/" in url.lower()
 
-    # FIXME: use `get_path_segments()` instead (#394)
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        if "#" in url:
-            url, _ = url.rsplit("#", maxsplit=1)
-            return url
-        return url
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
+        return strip_url_query(url)
 
     @override
     def _parse_input_for_decks_data(self) -> None:
@@ -284,9 +279,10 @@ class GoldfishArticleScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         return f"mtggoldfish.com/articles/" in url.lower() and "/search" not in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     def _collect_urls(self) -> tuple[list[str], list[str]]:

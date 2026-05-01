@@ -54,9 +54,10 @@ class TappedoutDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return "tappedout.net/mtg-decks/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @backoff.on_predicate(
@@ -132,9 +133,10 @@ class TappedoutUserScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "tappedout.net/users/" in url.lower() and "/deck-folders" not in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
@@ -187,9 +189,10 @@ class TappedoutFolderScraper(DeckUrlsContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "tappedout.net/mtg-deck-folders/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     def _get_folder_id(self) -> int:

@@ -86,10 +86,11 @@ class WotCArticleScraper(HybridContainerScraper):
     def is_valid_url(url: str) -> bool:
         return "magic.wizards.com/" in url.lower() and "/news/" in url.lower()
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
-        locale = from_iterable(_LOCALES, lambda l: l in url)
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
+        locale = from_iterable(_LOCALES, lambda l: l in url, "")
         url = url.replace(locale, "/en/") if locale else url
         return strip_url_query(url)
 

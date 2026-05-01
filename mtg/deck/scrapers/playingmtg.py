@@ -42,9 +42,10 @@ class PlayingMtgDeckScraper(DeckScraper):
     def is_valid_url(url: str) -> bool:
         return is_more_than_root_path(url, "playingmtg.com/decks")
 
-    @staticmethod
+    @classmethod
     @override
-    def normalize_url(url: str) -> str:
+    def normalize_url(cls, url: str) -> str:
+        url = super().normalize_url(url)
         return strip_url_query(url)
 
     @override
