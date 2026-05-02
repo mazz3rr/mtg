@@ -69,7 +69,7 @@ YT videos descriptions).
         * [Streamdecker](https://www.streamdecker.com/landing)
         * [TappedOut](https://tappedout.net)
         * [TCDecks](https://www.tcdecks.net/index.php)
-        * [TCGPlayer](https://infinite.tcgplayer.com)
+        * [TCGPlayer](https://www.tcgplayer.com)
         * [TCGRocks](https://tcgrocks.com)
         * [TopDeck](https://topdeck.gg)
         * [TopDecked](https://www.topdecked.com)
@@ -86,7 +86,7 @@ YT videos descriptions).
     * Both EDHREC decklist types featured in YT videos are supported: preview deck and average deck
     * Both MTGCircle decklist types featured in YT videos are supported: video deck and regular deck
     * All Untapped decklist types featured in YT videos are supported: regular, profile and meta deck
-    * Both old TCGPlayer site and TCGPlayer Infinite are supported
+    * Both old TCGPlayer old-site (via Wayback Machine) and TCGPlayer are supported
     * Both international and native Hareruya sites are supported 
     * All those mentioned above work even if they are behind shortener links and need unshortening first
     * Sites that need it are scraped using [Selenium](https://github.com/SeleniumHQ/Selenium)
@@ -140,8 +140,7 @@ YT videos descriptions).
         * Streamdecker users
         * TappedOut users, folders, and user folders
         * TCDecks events
-        * TCGPlayer (old-site) players
-        * TCGPlayer Infinite players, authors, author searches, author deck panes, events and articles
+        * TCGPlayer players, authors, author searches, author deck panes, events and articles
         * TopDeck.gg brackets and profiles
         * Untapped profiles
         * [WotC (official MTG site)](https://magic.wizards.com/en) articles

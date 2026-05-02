@@ -353,7 +353,7 @@ class InvalidDeck(ParsingError):
 def normalize_deck_source(src: str) -> str:
     src = src.lower().removeprefix("www.")
     if "cardsrealm.com" in src:
-        return "mtg.cardsrealm.com"
+        return "cardsrealm.com"
     if "edhrec.com" in src:
         return "edhrec.com"
     if "hareruyamtg.com" in src:
@@ -608,7 +608,7 @@ class Deck:
     def url_to_source(cls, url: str | None) -> str:
         if not url:
             return "arena.decklist"
-        return normalize_deck_source(get_netloc_domain(url))
+        return normalize_deck_source(get_netloc_domain(url, naked=True))
 
     def __init__(
             self, maindeck: Iterable[Card], sideboard: Iterable[Card] | None = None,

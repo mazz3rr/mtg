@@ -32,7 +32,6 @@ from mtg.deck.scrapers.deckstats import DeckScraper
 from mtg.deck.scrapers.draftsim import DeckScraper
 from mtg.deck.scrapers.edhrec import DeckScraper
 from mtg.deck.scrapers.abc import DeckUrlsContainerScraper, HybridContainerScraper
-from mtg.deck.scrapers.fireball import DeckScraper
 from mtg.deck.scrapers.flexslot import DeckScraper
 from mtg.deck.scrapers.goldfish import DeckScraper
 from mtg.deck.scrapers.hareruya import DeckScraper
