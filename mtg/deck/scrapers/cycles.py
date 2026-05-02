@@ -9,6 +9,7 @@
 """
 import contextlib
 import logging
+import re
 from typing import override
 
 import dateutil.parser
@@ -42,39 +43,46 @@ class CyclesGamingDeckTagParser(DeckTagParser):
 
     @staticmethod
     def _parse_text_for_quantity(text: str) -> int:
-        qty = 1
-        if " " in text:
-            qty_str, _ = text.split(maxsplit=1)
-            if qty_str.isdigit():
-                qty = int(qty_str)
-        if "(" in text:
-            _, qty_str = text.rsplit("(", maxsplit=1)
-            qty_str = qty_str.removesuffix(")")
-            if qty_str.isdigit():
-                qty = int(qty_str)
-        return qty
+        # matches a number at the start OR a number inside (brackets) at the end
+        match = re.search(r'^(\d+)| \((\d+)\)$', text)
+
+        if match:
+            # return whichever group (start or end) found the number
+            count = match.group(1) or match.group(2)
+            return int(count)
+
+        return 1  # default to 1 if no quantity is specified
+
+    def _parse_tag_for_playset(self, tag: Tag) -> None:
+        name = tag.text.strip()
+        previous = tag.previous_sibling.text if isinstance(
+            tag.previous_sibling, NavigableString) else ""
+        next_ = tag.next_sibling.text if isinstance(
+            tag.next_sibling, NavigableString) else ""
+        qty_text = previous + tag.text + next_
+        qty = self._parse_text_for_quantity(qty_text.strip())
+        card = self.find_card(name)
+        if card.is_multifaced:
+            if card in self._parsed_multifaced:
+                return
+            self._parsed_multifaced.add(card)
+        playset = self.get_playset(card, qty)
+        if self._state.is_commander:
+            for card in playset:
+                self._set_commander(card)
+        elif self._state.is_maindeck:
+            self._maindeck += playset
+        elif self._state.is_sideboard:
+            self._sideboard += playset
 
     def _parse_table(self, table: Tag) -> None:
         for row in table.find_all("tr"):
             td_tag, *_ = row.find_all("td")
             if not td_tag.text:
                 continue
-            a_tag = td_tag.find("a")
-            name = a_tag.text.strip()
-            qty = self._parse_text_for_quantity(td_tag.text.strip())
-            card = self.find_card(name)
-            if card.is_multifaced:
-                if card in self._parsed_multifaced:
-                    continue
-                self._parsed_multifaced.add(card)
-            playset = self.get_playset(card, qty)
-            if self._state.is_commander:
-                for card in playset:
-                    self._set_commander(card)
-            elif self._state.is_maindeck:
-                self._maindeck += playset
-            elif self._state.is_sideboard:
-                self._sideboard += playset
+            a_tags = td_tag.find_all("a")
+            for a_tag in a_tags:
+                self._parse_tag_for_playset(a_tag)
 
     @override
     def _parse_input_for_decklist(self) -> None:
