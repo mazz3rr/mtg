@@ -729,7 +729,7 @@ class HybridContainerScraper(
                     _log.info(
                         f"Scraping container URL {i}/{len(self._container_urls)} "
                         f"({scraper.short_name()})...")
-                    container_decks = scraper.scrape_decks()
+                    container_decks = scraper.scrape_decks(short_circuit=short_circuit)
                     if container_decks:
                         decks += [d for d in container_decks if d not in decks]
                         if short_circuit:

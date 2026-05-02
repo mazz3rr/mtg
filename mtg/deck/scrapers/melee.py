@@ -45,7 +45,7 @@ class MeleeGgDeckScraper(DeckScraper):
     """
     HEADERS = HEADERS
     EXAMPLE_URLS = (
-        "https://melee.gg/Decklist/View/7776"
+        "https://melee.gg/Decklist/View/7776",
     )
 
     @classmethod

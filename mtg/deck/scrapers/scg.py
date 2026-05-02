@@ -169,7 +169,7 @@ class ScgEventScraper(DeckUrlsContainerScraper):
         if _is_player_url(url):
             return False
         try:
-            _, segments = get_path_segments(url)
+            _, *segments = get_path_segments(url)
             if 3 >= len(segments) >= 2:
                 # this will filter out too long deck query results, e.g.:
                 # https://old.starcitygames.com/decks/results/format/1-28-70/event_ID/49/[...]/start_num/0/

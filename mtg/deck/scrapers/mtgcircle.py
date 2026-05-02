@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 
 from mtg.constants import Json
 from mtg.deck.abc import DeckJsonParser
-from mtg.deck.scrapers.abc import DeckScraper, HybridContainerScraper
+from mtg.deck.scrapers.abc import DeckScraper, HybridContainerScraper, video_throttled_deck_scraper
 from mtg.lib.common import from_iterable
 from mtg.lib.json import Node
 from mtg.lib.scrape.core import ScrapingError, dissect_js, is_more_than_root_path
@@ -103,8 +103,8 @@ def get_data(
 
 
 # FIXME: #443
-# @throttled_deck_scraper
-# @DeckScraper.registered
+@video_throttled_deck_scraper
+@DeckScraper.registered
 class MtgCircleVideoDeckScraper(DeckScraper):
     """Scraper of MTGCircle video decklist page.
     """
@@ -171,8 +171,8 @@ class MtgCircleVideoDeckScraper(DeckScraper):
 
 
 # FIXME: #443
-# @throttled_deck_scraper
-# @DeckScraper.registered
+@video_throttled_deck_scraper
+@DeckScraper.registered
 class MtgCircleRegularDeckScraper(MtgCircleVideoDeckScraper):
     """Scraper of MTGCircle regular decklist page.
     """
@@ -202,7 +202,7 @@ class MtgCircleRegularDeckScraper(MtgCircleVideoDeckScraper):
 
 
 # FIXME: #443
-# @HybridContainerScraper.registered
+@HybridContainerScraper.registered
 class MtgCircleArticleScraper(HybridContainerScraper):
     """Scraper of MTGCircle article page.
     """

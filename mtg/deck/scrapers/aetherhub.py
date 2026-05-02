@@ -272,7 +272,7 @@ class AetherhubUserScraper(DeckUrlsContainerScraper):
     """Scraper of Aetherhub user page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": '//table[@id="metaHubTable"]',
+        "xpath": '//table[contains(@id, "metaHubTable")]',
         "consent_xpath": CONSENT_XPATH,
         "wait_for_consent_disappearance": False
     }

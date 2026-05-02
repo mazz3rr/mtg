@@ -203,7 +203,7 @@ class FlexslotArticleScraper(HybridContainerScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return is_more_than_root_path(url, "flexslot.gg/article/")
+        return is_more_than_root_path(url, "flexslot.gg/articles/")
 
     @classmethod
     @override

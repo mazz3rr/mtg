@@ -59,7 +59,8 @@ class ArchidektDeckScraper(DeckScraper):
     """
     JSON_FROM_SOUP = True  # override
     EXAMPLE_URLS = (
-        "https://archidekt.com/decks/16069812/zombie_horde",
+        "https://archidekt.com/decks/13183782/isperia_modified",
+        "https://archidekt.com/decks/22232192/azurious_auras",
     )
 
     @classmethod
