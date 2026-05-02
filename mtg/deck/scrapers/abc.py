@@ -332,12 +332,15 @@ class ContainerScraper(DeckScraper):
             _log.warning(f"Scraping failed with: {e!r}")
 
     @abstractmethod
-    def scrape_decks(self) -> list[Deck]:
+    def scrape_decks(self, short_circuit=False) -> list[Deck]:
         """Scrape the input URL for a list of Deck objects.
 
         This method only delegates the gathered data (deck links / deck HTML tags / deck
         JSON data) to relevant sub-scrapers (or sub-parsers), aggregates the resultant decks into a
         singular list and returns it.
+
+        Args:
+            short_circuit (bool, optional): if True, return after first successfully scraped deck (or decks in case of the hybrid scraper scraping other containers)
         """
         raise NotImplementedError
 
@@ -354,7 +357,7 @@ class ContainerScraper(DeckScraper):
                 _log.info(f"Testing URL {url!r}...")
                 last_url = url
                 scraper = cls(url)
-                decks = scraper.scrape_decks()
+                decks = scraper.scrape_decks(short_circuit=True)
                 if not decks:
                     return last_url, False, None
         except Exception as e:
@@ -426,7 +429,7 @@ class DeckUrlsContainerScraper(ContainerScraper):
 
     # having this method distinctly named in deck URLs/tags/JSON scrapers is intentional
     # it makes the hybrid scraper's cooperative multi-inheritance possible
-    def _delegate_deck_urls_scraping(self) -> list[Deck]:
+    def _delegate_deck_urls_scraping(self, short_circuit=False) -> list[Deck]:
         decks = []
         for i, deck_url in enumerate(self._deck_urls, start=1):
             if deck_url in (self.url, self.url + "/"):
@@ -452,6 +455,8 @@ class DeckUrlsContainerScraper(ContainerScraper):
                     continue
                 if deck:
                     decks.append(deck)
+                    if short_circuit:
+                        return decks
                 # skipping/adding to scraped/failed is already handled in deck scrapers
 
         if not decks:
@@ -463,13 +468,13 @@ class DeckUrlsContainerScraper(ContainerScraper):
     @backoff.on_exception(
         backoff.expo, (ConnectionError, HTTPError, ReadTimeout), max_time=60)
     @override
-    def scrape_decks(self) -> list[Deck]:
+    def scrape_decks(self, short_circuit=False) -> list[Deck]:
         self._scrape_before_delegation()
         self._deck_urls = [url.removesuffix("/") for url in self._deck_urls]
         _log.info(
             f"Gathered {len(self._deck_urls)} deck URL(s) from a {self.CONTAINER_NAME} at:"
             f" {self.url!r}")
-        return self._delegate_deck_urls_scraping()
+        return self._delegate_deck_urls_scraping(short_circuit=short_circuit)
 
 
 class DeckTagsContainerScraper(ContainerScraper):
@@ -499,7 +504,7 @@ class DeckTagsContainerScraper(ContainerScraper):
 
     # having this method distinctly named in deck URLs/tags/JSON scrapers is intentional
     # it makes the hybrid scraper's cooperative multi-inheritance possible
-    def _delegate_deck_tags_parsing(self) -> list[Deck]:
+    def _delegate_deck_tags_parsing(self, short_circuit=False) -> list[Deck]:
         if not self.DECK_TAG_PARSER_TYPE:
             raise TypeError("Deck tag parser's type not specified")
 
@@ -521,6 +526,8 @@ class DeckTagsContainerScraper(ContainerScraper):
                 if deck.name:
                     msg += f": {deck.name!r}"
                 _log.info(msg)
+                if short_circuit:
+                    return decks
             else:
                 _log.warning(f"Failed to parse deck {i}/{len(self._deck_tags)}. Skipping...")
                 continue
@@ -534,12 +541,12 @@ class DeckTagsContainerScraper(ContainerScraper):
     @backoff.on_exception(
         backoff.expo, (ConnectionError, HTTPError, ReadTimeout), max_time=60)
     @override
-    def scrape_decks(self) -> list[Deck]:
+    def scrape_decks(self, short_circuit=False) -> list[Deck]:
         self._scrape_before_delegation()
         _log.info(
             f"Gathered {len(self._deck_tags)} deck tag(s) from a {self.CONTAINER_NAME} at:"
             f" {self.url!r}")
-        return self._delegate_deck_tags_parsing()
+        return self._delegate_deck_tags_parsing(short_circuit=short_circuit)
 
 
 class DecksJsonContainerScraper(ContainerScraper):
@@ -569,7 +576,7 @@ class DecksJsonContainerScraper(ContainerScraper):
 
     # having this method distinctly named in deck URLs/tags/JSON scrapers is intentional
     # it makes the hybrid scraper's cooperative multi-inheritance possible
-    def _delegate_decks_json_parsing(self) -> list[Deck]:
+    def _delegate_decks_json_parsing(self, short_circuit=False) -> list[Deck]:
         if not self.DECK_JSON_PARSER_TYPE:
             raise TypeError("Deck JSON parser's type not specified")
 
@@ -591,6 +598,8 @@ class DecksJsonContainerScraper(ContainerScraper):
                 if deck.name:
                     msg += f": {deck.name!r}"
                 _log.info(msg)
+                if short_circuit:
+                    return decks
             else:
                 _log.warning(f"Failed to parse deck {i}/{len(self._decks_json)}. Skipping...")
                 continue
@@ -604,12 +613,12 @@ class DecksJsonContainerScraper(ContainerScraper):
     @backoff.on_exception(
         backoff.expo, (ConnectionError, HTTPError, ReadTimeout), max_time=60)
     @override
-    def scrape_decks(self) -> list[Deck]:
+    def scrape_decks(self, short_circuit=False) -> list[Deck]:
         self._scrape_before_delegation()
         _log.info(
             f"Gathered data for {len(self._decks_json)} deck(s) from a {self.CONTAINER_NAME} "
             f"at: {self.url!r}")
-        return self._delegate_decks_json_parsing()
+        return self._delegate_decks_json_parsing(short_circuit=short_circuit)
 
 
 class HybridContainerScraper(
@@ -701,7 +710,7 @@ class HybridContainerScraper(
             *tags, css_selector=css_selector, url_prefix=url_prefix, query_stripped=False)
         return self._sift_links(*links)
 
-    def _delegate_container_urls_scraping(self) -> list[Deck]:
+    def _delegate_container_urls_scraping(self, short_circuit=False) -> list[Deck]:
         decks = []
         for i, url in enumerate(self._container_urls, start=1):
             if self.url in url:
@@ -721,10 +730,12 @@ class HybridContainerScraper(
                         f"Scraping container URL {i}/{len(self._container_urls)} "
                         f"({scraper.short_name()})...")
                     container_decks = scraper.scrape_decks()
-                    if not container_decks:
-                        self._session.add_failed_url(normalized_url)
-                    else:
+                    if container_decks:
                         decks += [d for d in container_decks if d not in decks]
+                        if short_circuit:
+                            return decks
+                    else:
+                        self._session.add_failed_url(normalized_url)
 
         for deck in decks:
             deck.update_metadata(outer_container_url=self.url)
@@ -735,29 +746,29 @@ class HybridContainerScraper(
     @backoff.on_exception(
         backoff.expo, (ConnectionError, HTTPError, ReadTimeout), max_time=60)
     @override
-    def scrape_decks(self) -> list[Deck]:
+    def scrape_decks(self, short_circuit=False) -> list[Deck]:
         self._scrape_before_delegation()
         decks = []
         if self._deck_urls:
             _log.info(
                 f"Gathered {len(self._deck_urls)} deck URL(s) from a {self.CONTAINER_NAME} at:"
                 f" {self.url!r}")
-            decks += self._delegate_deck_urls_scraping()
+            decks += self._delegate_deck_urls_scraping(short_circuit=short_circuit)
         if self._deck_tags:
             _log.info(
                 f"Gathered {len(self._deck_tags)} deck tag(s) from a {self.CONTAINER_NAME} at:"
                 f" {self.url!r}")
-            decks += self._delegate_deck_tags_parsing()
+            decks += self._delegate_deck_tags_parsing(short_circuit=short_circuit)
         if self._decks_json:
             _log.info(
             f"Gathered data for {len(self._decks_json)} deck(s) from a {self.CONTAINER_NAME} "
             f"at: {self.url!r}")
-            decks += self._delegate_decks_json_parsing()
+            decks += self._delegate_decks_json_parsing(short_circuit=short_circuit)
         if self._container_urls:
             _log.info(
                 f"Gathered {len(self._container_urls)} container URL(s) from a "
                 f"{self.CONTAINER_NAME} at: {self.url!r}")
-            decks += self._delegate_container_urls_scraping()
+            decks += self._delegate_container_urls_scraping(short_circuit=short_circuit)
         if not decks:
             # outer container URLs are not ever skipped
             # to allow for potential scraping of their content changes
