@@ -600,5 +600,5 @@ def parse_keywords(tag_or_text: Tag | str) -> list[str]:
     return keywords
 
 
-def normalize_url(url: str) -> str:
-    return url.strip().rstrip("/").lower()
+def normalize_url(url: str, case_sensitive=False) -> str:
+    return url.strip().rstrip("/") if case_sensitive else url.strip().rstrip("/").lower()

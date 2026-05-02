@@ -23,7 +23,7 @@ from mtg.deck.scrapers.abc import (
 )
 from mtg.lib.common import ParsingError
 from mtg.lib.numbers import extract_int
-from mtg.lib.scrape.core import ScrapingError, fetch_json, strip_url_query
+from mtg.lib.scrape.core import ScrapingError, fetch_json, normalize_url, strip_url_query
 from mtg.lib.text import decode_escapes
 
 _log = logging.getLogger(__name__)
@@ -41,6 +41,10 @@ class TopDeckDeckScraper(DeckScraper):
     @override
     def is_valid_url(cls, url: str) -> bool:
         return "topdeck.gg/deck/" in url.lower()
+
+    @classmethod
+    def normalize_url(cls, url: str) -> str:
+        return normalize_url(url, case_sensitive=True)
 
     @override
     def _is_page_inaccessible(self) -> bool:
@@ -130,7 +134,7 @@ class TopDeckBracketScraper(HybridContainerScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         return strip_url_query(url)
 
     @override
@@ -255,7 +259,7 @@ class TopDeckProfileScraper(DecksJsonContainerScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         return strip_url_query(url).removesuffix("/stats")
 
     @override

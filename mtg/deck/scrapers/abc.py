@@ -777,3 +777,14 @@ class HybridContainerScraper(
             _log.info(f"Nothing gathered from a {self.CONTAINER_NAME} at: {self.url!r}")
 
         return decks
+
+
+def get_registered_scraper_types() -> list[type[DeckScraper]]:
+    scraper_types: list[type[DeckScraper]] = []
+    scraper_types += DeckScraper.get_registered_scrapers()
+    scraper_types += DeckUrlsContainerScraper.get_registered_scrapers()
+    scraper_types += DecksJsonContainerScraper.get_registered_scrapers()
+    scraper_types += DeckTagsContainerScraper.get_registered_scrapers()
+    scraper_types += HybridContainerScraper.get_registered_scrapers()
+    return scraper_types
+

@@ -14,6 +14,7 @@ import dateutil.parser
 from bs4 import Tag
 
 from mtg.deck.scrapers.abc import DeckScraper
+from mtg.lib.scrape.core import normalize_url
 from mtg.scryfall import Card
 
 _log = logging.getLogger(__name__)
@@ -31,6 +32,11 @@ class ManaBoxDeckScraper(DeckScraper):
     @override
     def is_valid_url(cls, url: str) -> bool:
         return "manabox.app/decks/" in url.lower()
+
+    @classmethod
+    @override
+    def normalize_url(cls, url: str) -> str:
+        return normalize_url(url, case_sensitive=True)
 
     @override
     def _parse_input_for_metadata(self) -> None:

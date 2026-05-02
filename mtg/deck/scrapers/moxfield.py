@@ -18,7 +18,10 @@ from mtg.deck.scrapers.abc import (
     DeckScraper, DeckUrlsContainerScraper, folder_container_scraper,
     video_throttled_deck_scraper,
 )
-from mtg.lib.scrape.core import ScrapingError, Soft404Error, get_path_segments, strip_url_query
+from mtg.lib.scrape.core import (
+    ScrapingError, Soft404Error, get_path_segments, normalize_url,
+    strip_url_query,
+)
 from mtg.lib.scrape.dynamic import fetch_dynamic_soup, fetch_selenium_json
 from mtg.scryfall import Card
 
@@ -45,7 +48,7 @@ class MoxfieldDeckScraper(DeckScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         url = strip_url_query(
             url).removesuffix("/primer").removesuffix("/history").removesuffix(
             "/settings").removesuffix("/goldfish")
@@ -141,7 +144,7 @@ class MoxfieldListScraper(DeckUrlsContainerScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         return url.replace("moxfield.com/bookmarks/", "moxfield.com/lists/")
 
     def _get_bookmark_id(self) -> str:
@@ -227,6 +230,11 @@ class MoxfieldDeckSearchScraper(DeckUrlsContainerScraper):
     @override
     def is_valid_url(cls, url: str) -> bool:
         return "moxfield.com/decks/public?q=" in url.lower()
+
+    @classmethod
+    @override
+    def normalize_url(cls, url: str) -> str:
+        return normalize_url(url, case_sensitive=True)
 
     @override
     def _pre_parse(self) -> None:

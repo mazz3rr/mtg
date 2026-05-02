@@ -21,7 +21,7 @@ from mtg.deck.abc import DeckTagParser
 from mtg.deck.scrapers.abc import DeckScraper, HybridContainerScraper
 from mtg.lib.common import ParsingError
 from mtg.lib.scrape.core import (
-    ScrapingError, fetch_soup, find_links, prepend_url,
+    ScrapingError, fetch_soup, find_links, normalize_url, prepend_url,
     strip_url_query,
 )
 from mtg.scryfall import Card
@@ -72,6 +72,7 @@ def _get_data(
     return deck_data, soup
 
 
+# TODO: fix parsing
 @DeckScraper.registered
 class EdhrecPreviewDeckScraper(DeckScraper):
     """Scraper of EDHREC preview decklist page.
@@ -84,7 +85,7 @@ class EdhrecPreviewDeckScraper(DeckScraper):
         "G": "Forest",
     }
     EXAMPLE_URLS = (
-        "https://edhrec.com/deckpreview/mgRcVo95TJj9ztl2dHMBPw",
+        "https://edhrec.com/deckpreview/KOhEueaPVFI7Zj0pqTn6SA",
     )
 
     @property
@@ -105,7 +106,7 @@ class EdhrecPreviewDeckScraper(DeckScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         return strip_url_query(url)
 
     @override

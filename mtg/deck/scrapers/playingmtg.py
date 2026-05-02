@@ -17,7 +17,7 @@ from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper, HybridC
 from mtg.lib.numbers import extract_float, extract_int
 from mtg.lib.scrape.core import (
     ScrapingError, find_links, find_next_sibling_tag,
-    is_more_than_root_path, prepend_url, strip_url_query,
+    is_more_than_root_path, normalize_url, prepend_url, strip_url_query,
 )
 from mtg.scryfall import Card
 
@@ -45,7 +45,7 @@ class PlayingMtgDeckScraper(DeckScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         return strip_url_query(url)
 
     @override

@@ -15,7 +15,7 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
 from mtg.lib.numbers import extract_float, extract_int
-from mtg.lib.scrape.core import ScrapingError, find_next_sibling_tag, strip_url_query
+from mtg.lib.scrape.core import ScrapingError, find_next_sibling_tag, normalize_url, strip_url_query
 from mtg.lib.scrape.dynamic import fetch_dynamic_soup
 
 _log = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class UntappedProfileDeckScraper(DeckScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         return strip_url_query(url)
 
     def _fetch_soup(self) -> None:
@@ -92,7 +92,7 @@ class UntappedRegularDeckScraper(DeckScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         return strip_url_query(url)
 
     @override
@@ -133,7 +133,7 @@ class UntappedMetaDeckScraper(DeckScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         return strip_url_query(url)
 
     @override
@@ -200,7 +200,7 @@ class UntappedProfileScraper(DeckUrlsContainerScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         return strip_url_query(url)
 
     @override

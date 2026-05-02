@@ -94,8 +94,8 @@ class PauperwaveArticleScraper(HybridContainerScraper):
     ]
     EXAMPLE_URLS = (
         "https://blog.pauperwave.org/articles/2026-04-26-pauperancino",  # decklist
-        "https://blog.pauperwave.org/articles/2026-03-31-dennis-garbati-paupergeddon-spring-2026" # report
-        "https://blog.pauperwave.org/articles/2025-12-06-tutorial-pingers"  # tutorial
+        "https://blog.pauperwave.org/articles/2026-03-31-dennis-garbati-paupergeddon-spring-2026", # report
+        "https://blog.pauperwave.org/articles/2025-12-06-tutorial-pingers",  # tutorial
     )
 
     @classmethod
