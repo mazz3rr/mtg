@@ -17,7 +17,7 @@ from requests import ConnectionError, HTTPError, ReadTimeout
 from selenium.common import ElementClickInterceptedException, TimeoutException
 
 from mtg.constants import Json
-from mtg.deck.abc import DeckJsonParser, NestedDeckParser, DeckTagParser
+from mtg.deck.abc import DeckJsonParser, DeckTagParser, NestedDeckParser
 from mtg.deck.core import CardNotFound, Deck, InvalidDeck
 from mtg.lib.common import Noop, ParsingError, register_type
 from mtg.lib.scrape.core import (
@@ -243,19 +243,19 @@ class DeckScraper(NestedDeckParser):
             return None, True, None
 
 
-_THROTTLED_DECK_SCRAPER_TYPES = set()
+_VIDEO_THROTTLED_DECK_SCRAPER_TYPES = set()
 
 
 def video_throttled_deck_scraper(
         scraper_type: Type[DeckScraper]) -> Type[DeckScraper]:
     """Register this deck scraper for video scraping to add an extra throttle.
     """
-    register_type(_THROTTLED_DECK_SCRAPER_TYPES, scraper_type, DeckScraper)
+    register_type(_VIDEO_THROTTLED_DECK_SCRAPER_TYPES, scraper_type, DeckScraper)
     return scraper_type
 
 
 def get_video_throttled_deck_scraper_types() -> set[Type[DeckScraper]]:
-    return set(_THROTTLED_DECK_SCRAPER_TYPES)
+    return set(_VIDEO_THROTTLED_DECK_SCRAPER_TYPES)
 
 
 class ContainerScraper(DeckScraper):
@@ -779,6 +779,21 @@ class HybridContainerScraper(
         return decks
 
 
+_TESTED_ONLY_SCRAPER_TYPES = set()
+
+
+def tested_only_scraper(
+        scraper_type: Type[DeckScraper]) -> Type[DeckScraper]:
+    """Register this scraper to be included in testing - even if it disabled otherwise.
+    """
+    register_type(_TESTED_ONLY_SCRAPER_TYPES, scraper_type, DeckScraper)
+    return scraper_type
+
+
+def get_tested_only_scraper_types() -> set[Type[DeckScraper]]:
+    return set(_TESTED_ONLY_SCRAPER_TYPES)
+
+
 def get_registered_scraper_types() -> list[type[DeckScraper]]:
     scraper_types: list[type[DeckScraper]] = []
     scraper_types += DeckScraper.get_registered_scrapers()
@@ -786,5 +801,6 @@ def get_registered_scraper_types() -> list[type[DeckScraper]]:
     scraper_types += DecksJsonContainerScraper.get_registered_scrapers()
     scraper_types += DeckTagsContainerScraper.get_registered_scrapers()
     scraper_types += HybridContainerScraper.get_registered_scrapers()
+    scraper_types += get_tested_only_scraper_types()
     return scraper_types
 

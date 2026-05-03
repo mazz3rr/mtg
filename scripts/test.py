@@ -74,7 +74,9 @@ def test_scrapers(*scraper_types: type[DeckScraper]) -> None:
             _log.info(msg)
             passed.append(scraper_type)
         else:
-            msg = f"✗ {name!r} scraper: FAILED on {url!r} - {repr(exc) or 'no decks scraped'}"
+            if exc:
+                exc = repr(exc)
+            msg = f"✗ {name!r} scraper: FAILED on {url!r} - {exc or 'no decks scraped'}"
             _log.warning(msg)
             failed.append(scraper_type)
         messages.append(msg)

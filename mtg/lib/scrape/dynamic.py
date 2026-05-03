@@ -15,8 +15,10 @@ import backoff
 import pyperclip
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common import ElementClickInterceptedException, NoSuchElementException, \
-    StaleElementReferenceException, TimeoutException
+from selenium.common import (
+    ElementClickInterceptedException, NoSuchElementException,
+    StaleElementReferenceException, TimeoutException, WebDriverException,
+)
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
@@ -32,9 +34,38 @@ SELENIUM_TIMEOUT = 20.0  # seconds
 SCROLL_DOWN_TIMES = 50
 
 
+class CloudflareInvalidSslError(WebDriverException):
+    """Raised as a sentinel for backoff on target's infrastructure spawning a Cloudflare 526 error.
+
+    More on reasons for this spawning: https://share.google/aimode/1B551gxjT4039uigg
+    """
+
+
+class CloudflareBlockError(WebDriverException):
+    """Raised on a Cloudflare block being detected to short-circuit scraping that is anyway
+    doomed to fall.
+    """
+
+
+def _is_invalid_ssl_error(driver: WebDriver) -> bool:
+    tokens = "526", "invalid", "ssl"
+    if any(t in driver.title.lower() for t in tokens):
+        return True
+    return False
+
+# pretty conservative for now
+def _is_cloudflare_block(soup: BeautifulSoup) -> bool:
+    if _ := soup.find("p", string=lambda s: "malicious bots" in s.strip().lower()):
+        return True
+    return False
+
+
 @timed("fetching dynamic soup")
 @backoff.on_exception(
-    backoff.expo, (ElementClickInterceptedException, StaleElementReferenceException), max_time=300)
+    backoff.expo,
+    (ElementClickInterceptedException, StaleElementReferenceException, CloudflareInvalidSslError),
+    max_time=300
+)
 def fetch_dynamic_soup(
         url: str,
         xpath: str,
@@ -96,6 +127,12 @@ def fetch_dynamic_soup(
             driver.execute_cdp_cmd("Network.enable", {})
 
         driver.get(url)
+
+        if _is_invalid_ssl_error(driver):
+            raise CloudflareInvalidSslError("Cloudflare Error 526 encountered")
+
+        if _is_cloudflare_block(BeautifulSoup(driver.page_source, "lxml")):
+            raise CloudflareBlockError("Blocking by Cloudflare detected")
 
         if consent_xpath:
             if wait_for_consent_disappearance:

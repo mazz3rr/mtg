@@ -21,7 +21,7 @@ from mtg.deck.scrapers.abc import (
 )
 from mtg.lib.common import from_iterable
 from mtg.lib.numbers import extract_float, extract_int
-from mtg.lib.scrape.core import ScrapingError, strip_url_query
+from mtg.lib.scrape.core import ScrapingError, normalize_url, strip_url_query
 from mtg.yt.discover import UrlHook
 
 _log = logging.getLogger(__name__)
@@ -292,11 +292,11 @@ class AetherhubUserScraper(DeckUrlsContainerScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         url = strip_url_query(url)
         # links like: https://aetherhub.com/User/LegenVD/Decks/Standard-BO1 are already OK
         # links like: https://aetherhub.com/User/LegenVD/ need sanitization
-        if "/decks/" not in url and not url.endswith("/decks"):
+        if "/decks/" not in url.lower() and not url.lower().endswith("/decks"):
             return f"{url}/decks"
         return url
 
