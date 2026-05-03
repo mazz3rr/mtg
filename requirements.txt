@@ -6,6 +6,7 @@ gspread~=5.11.3
 httpcore~=1.0.5
 lingua-language-detector~=2.0.2
 lxml~=5.2.1
+njsparser~=2.16
 pyperclip~=1.9.0
 python-dateutil~=2.9.0.post0
 pytubefix~=10.3.8

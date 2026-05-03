@@ -113,6 +113,34 @@ class FlexslotDeckJsonParser(DeckJsonParser):
         self._derive_commander_from_sideboard()
 
 
+
+# This is how you obtain deck data now:
+
+# from mtg.lib.scrape.dynamic import fetch_dynamic_soup
+# xpath = "//script[contains(text(), 'api.scryfall.com/cards/')]"
+# url = "https://flexslot.gg/decks/243fc88f-1fca-41ae-a81a-9503347ce85c"
+# r = fetch_dynamic_soup(url, xpath=xpath)
+# soup, *_ = r
+# 2026-05-03 23:51:57,761 [mtg.lib.scrape.dynamic] INFO: Webdriving using Chrome to: 'https://flexslot.gg/decks/243fc88f-1fca-41ae-a81a-9503347ce85c'...
+# 2026-05-03 23:52:00,454 [mtg.lib.scrape.dynamic] INFO: Page has been loaded and XPath-specified element(s) is present
+# 2026-05-03 23:52:00,688 [mtg.lib.time] INFO: Completed fetching dynamic soup in 3.734 second(s)
+# markup = str(soup)
+# import njsparser
+# fd = njsparser.BeautifulFD(markup)
+# 2026-05-03 23:52:29,092 [njsparser] WARNING: Couldn't find an appropriate type for given class `None`. Giving `Element`.
+# 2026-05-03 23:52:29,092 [njsparser] WARNING: Couldn't find an appropriate type for given class `None`. Giving `Element`.
+# import json
+# parsed_json = json.dumps(fd, indent=4, default=njsparser.default)
+# parsed_data = json.loads(parsed_json)
+# from mtg.lib.json import Node
+# node = Node(parsed_data)
+# found = node.find(lambda n: n.is_text and 'Walking Ballista' in n.data)
+# found.path
+# "/['52']['value'][3]['children'][3]['children'][3]['children'][3]['initialData']['data']['text_list']"
+# fa = found.ancestors[0]
+# deck_data = fa.data
+
+
 @DeckScraper.registered
 class FlexslotDeckScraper(DeckScraper):
     """Scraper of Flexslot.gg decklist page.

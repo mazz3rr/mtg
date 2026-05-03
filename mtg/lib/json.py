@@ -72,7 +72,7 @@ def from_json(json_text: str) -> Json:
 
 
 class Node:
-    """A tree-building wrapper on dict/list deserialized from JSON.
+    """A recursive tree-building wrapper on dict/list deserialized from JSON.
     """
     @property
     def ancestors(self) -> tuple[Self, ...]:
@@ -117,6 +117,10 @@ class Node:
     @property
     def is_root(self) -> bool:
         return not self.ancestors
+
+    @property
+    def is_text(self) -> bool:
+        return isinstance(self.data, str)
 
     @property
     def next_sibling(self) -> Self | None:
@@ -271,4 +275,4 @@ class Node:
 
     @property
     def text_nodes(self) -> Iterator[Self]:
-        return self.find_all(lambda n: isinstance(n.data, str))
+        return self.find_all(lambda n: n.is_text)
