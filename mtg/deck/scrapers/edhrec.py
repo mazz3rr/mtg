@@ -24,7 +24,6 @@ from mtg.lib.scrape.core import (
     ScrapingError, fetch_soup, find_links, normalize_url, prepend_url,
     strip_url_query,
 )
-from mtg.scryfall import Card
 from mtg.yt.discover import UrlHook
 
 _log = logging.getLogger(__name__)
@@ -72,36 +71,21 @@ def _get_data(
     return deck_data, soup
 
 
-# TODO: fix parsing
 @DeckScraper.registered
 class EdhrecPreviewDeckScraper(DeckScraper):
     """Scraper of EDHREC preview decklist page.
     """
-    COLORS_TO_BASIC_LANDS = {
-        "W": "Plains",
-        "U": "Island",
-        "B": "Swamp",
-        "R": "Mountain",
-        "G": "Forest",
-    }
     EXAMPLE_URLS = (
         "https://edhrec.com/deckpreview/KOhEueaPVFI7Zj0pqTn6SA",
+        "https://edhrec.com/deckpreview/eGjbKhdKXZIK473Lqbybvg",
+        "https://edhrec.com/deckpreview/9mZz3h1gZINrHfwoDGCgKQ",
     )
-
-    @property
-    def cards(self) -> list[Card]:
-        cards = []
-        if self._commander:
-            cards.append(self._commander)
-        if self._partner_commander:
-            cards.append(self._partner_commander)
-        cards += self._maindeck
-        return cards
 
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return "edhrec.com/" in url.lower() and "/deckpreview/" in url.lower()
+        url = url.lower().strip()
+        return "edhrec.com/" in url and "/deckpreview/" in url
 
     @classmethod
     @override
@@ -131,32 +115,55 @@ class EdhrecPreviewDeckScraper(DeckScraper):
         if tribe := self._json.get("tribe"):
             self._metadata["tribe"] = tribe
 
-    def _add_basic_lands(self) -> None:
-        lands = [self.COLORS_TO_BASIC_LANDS[c] for c in self._json["coloridentity"]]
-        pool = [self.find_card(l) for l in lands]
-        cursor = 0
-        while len(self.cards) < 100:
-            self._maindeck.append(pool[cursor])
-            cursor += 1
-            if cursor == len(pool):
-                cursor = 0
-
     @override
     def _parse_input_for_decklist(self) -> None:
-        for card_name in self._json["cards"]:
-            self._maindeck += self.get_playset(self.find_card(card_name), 1)
-
-        for card_name in [c for c in self._json["commanders"] if c]:
-            card = self.find_card(card_name)
-            self._set_commander(card)
-
-        self._add_basic_lands()
+        decklist = ["Commander"]
+        decklist += [f"1 {playset}" for playset in self._json["commanders"] if playset]
+        decklist += ["", "Deck"]
+        decklist += [playset for playset in self._json["deck"] if playset not in decklist]
+        self._decklist = "\n".join(decklist)
 
 
 @DeckScraper.registered
 class EdhrecAverageDeckScraper(DeckScraper):
     """Scraper of EDHREC average decklist page and commander page.
     """
+    # those are collected by the article scraper
+    # but doesn't work even when trying manually in a browser
+    _BAD_URLS = {
+        'https://edhrec.com/average-decks/abzan',
+        'https://edhrec.com/average-decks/azorius',
+        'https://edhrec.com/average-decks/bant',
+        'https://edhrec.com/average-decks/boros',
+        'https://edhrec.com/average-decks/colorless',
+        'https://edhrec.com/average-decks/dimir',
+        'https://edhrec.com/average-decks/dune-brood',
+        'https://edhrec.com/average-decks/esper',
+        'https://edhrec.com/average-decks/five-color',
+        'https://edhrec.com/average-decks/glint-eye',
+        'https://edhrec.com/average-decks/golgari',
+        'https://edhrec.com/average-decks/grixis',
+        'https://edhrec.com/average-decks/gruul',
+        'https://edhrec.com/average-decks/ink-treader',
+        'https://edhrec.com/average-decks/izzet',
+        'https://edhrec.com/average-decks/jeskai',
+        'https://edhrec.com/average-decks/jund',
+        'https://edhrec.com/average-decks/mardu',
+        'https://edhrec.com/average-decks/mono-black',
+        'https://edhrec.com/average-decks/mono-blue',
+        'https://edhrec.com/average-decks/mono-green',
+        'https://edhrec.com/average-decks/mono-red',
+        'https://edhrec.com/average-decks/mono-white',
+        'https://edhrec.com/average-decks/naya',
+        'https://edhrec.com/average-decks/orzhov',
+        'https://edhrec.com/average-decks/rakdos',
+        'https://edhrec.com/average-decks/selesnya',
+        'https://edhrec.com/average-decks/simic',
+        'https://edhrec.com/average-decks/sultai',
+        'https://edhrec.com/average-decks/temur',
+        'https://edhrec.com/average-decks/witch-maw',
+        'https://edhrec.com/average-decks/yore-tiller',
+    }
     EXAMPLE_URLS = (
         "https://edhrec.com/average-decks/honest-rutstein",
     )
@@ -164,10 +171,13 @@ class EdhrecAverageDeckScraper(DeckScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
+        url = url.lower()
+        if url in cls._BAD_URLS:
+            return False
         return (
-            "edhrec.com/" in url.lower()
-            and ("/average-decks/" in url.lower() or "/commanders/" in url.lower())
-            and "/month" not in url.lower()
+            "edhrec.com/" in url
+            and ("/average-decks/" in url or "/commanders/" in url)
+            and "/month" not in url
         )
 
     @classmethod
@@ -177,7 +187,6 @@ class EdhrecAverageDeckScraper(DeckScraper):
         url = strip_url_query(url)
         return url.replace("/commanders/", "/average-decks/")
 
-    # TODO: check why this doesn't work (url: https://edhrec.com/average-decks/yore-tiller)
     @override
     def _is_soft_404_error(self) -> bool:
         return self._soup.find(
