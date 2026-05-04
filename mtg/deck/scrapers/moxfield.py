@@ -33,7 +33,7 @@ _log = logging.getLogger(__name__)
 class MoxfieldDeckScraper(DeckScraper):
     """Scraper of Moxfield decklist page.
     """
-    API_URL_TEMPLATE = "https://api2.moxfield.com/v3/decks/all/{}"
+    JSON_FROM_API = True  # override
     EXAMPLE_URLS = (
         "https://moxfield.com/decks/y98F6TIUmkmfJ0_6AOIcYw",
     )
@@ -55,11 +55,12 @@ class MoxfieldDeckScraper(DeckScraper):
         return url.rstrip(".,")
 
     @override
-    def _get_json_from_api(self) -> Json:
-        *_, self._decklist_id = self.url.split("/")
-        if self._decklist_id == "undefined":
+    def _fetch_json(self) -> None:
+        *_, decklist_id = self.url.split("/")
+        if decklist_id == "undefined":
             raise Soft404Error(scraper=type(self), url=self.url)
-        return fetch_selenium_json(self.API_URL_TEMPLATE.format(self._decklist_id))
+        api_url = f"https://api2.moxfield.com/v3/decks/all/{decklist_id}"
+        self._json = fetch_selenium_json(api_url)
 
     @override
     def _validate_json(self) -> None:
@@ -123,7 +124,7 @@ class MoxfieldListScraper(DeckUrlsContainerScraper):
     """Scraper of Moxfield list (formerly bookmark) page.
     """
     CONTAINER_NAME = "Moxfield list"  # override
-    API_URL_TEMPLATE = "https://api2.moxfield.com/v1/bookmarks/{}"  # override
+    JSON_FROM_API = True  # override
     DECK_SCRAPER_TYPES = MoxfieldDeckScraper,  # override
     EXAMPLE_URLS = (
         "https://moxfield.com/lists/enD41-decks-i-currently-play?redirectFrom=bookmarks",
@@ -155,8 +156,9 @@ class MoxfieldListScraper(DeckUrlsContainerScraper):
         return bookmark_id_text
 
     @override
-    def _get_json_from_api(self) -> Json:
-        return fetch_selenium_json(self.API_URL_TEMPLATE.format(self._get_bookmark_id()))
+    def _fetch_json(self) -> None:
+        api_url = f"https://api2.moxfield.com/v1/bookmarks/{self._get_bookmark_id()}"
+        self._json = fetch_selenium_json(api_url)
 
     def _validate_json(self) -> None:
         if not self._json or not self._json.get("decks") or not self._json["decks"].get("data"):
@@ -172,12 +174,7 @@ class MoxfieldUserScraper(DeckUrlsContainerScraper):
     """Scraper of Moxfield user page.
     """
     CONTAINER_NAME = "Moxfield user"  # override
-    # 100 page size is pretty arbitrary but tested to work
-    API_URL_TEMPLATE = (
-        "https://api2.moxfield.com/v2/decks/search?includePinned=true&showIllegal"
-        "=true&authorUserNames={}&pageNumber=1&pageSize=100&sortType="
-        "updated&sortDirection=descending&board=mainboard"
-    )  # override
+    JSON_FROM_API = True  # override
     DECK_SCRAPER_TYPES = MoxfieldDeckScraper,  # override
     EXAMPLE_URLS = (
         "https://moxfield.com/users/OCHiveMind",
@@ -186,7 +183,15 @@ class MoxfieldUserScraper(DeckUrlsContainerScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return "moxfield.com/users/" in url.lower()
+        url = url.lower()
+        if "moxfield.com/users/" not in url:
+            return False
+        segments = get_path_segments(url)
+        try:
+            _, user_name = segments
+        except ValueError:
+            return False
+        return True
 
     @classmethod
     @override
@@ -195,9 +200,15 @@ class MoxfieldUserScraper(DeckUrlsContainerScraper):
         return strip_url_query(url)
 
     @override
-    def _get_json_from_api(self) -> Json:
-        *_, last = self.url.split("/")
-        return fetch_selenium_json(self.API_URL_TEMPLATE.format(last))
+    def _fetch_json(self) -> None:
+        # 100 page size is pretty arbitrary but tested to work
+        api_url_template = (
+            "https://api2.moxfield.com/v2/decks/search?includePinned=true&showIllegal"
+            "=true&authorUserNames={}&pageNumber=1&pageSize=100&sortType="
+            "updated&sortDirection=descending&board=mainboard"
+        )
+        _, user_name = get_path_segments(self.url)
+        self._json = fetch_selenium_json(api_url_template.format(user_name))
 
     def _validate_json(self) -> None:
         if not self._json or not self._json.get("data"):
@@ -216,11 +227,6 @@ class MoxfieldDeckSearchScraper(DeckUrlsContainerScraper):
         "xpath": "//input[@id='filter']"
     }
     CONTAINER_NAME = "Moxfield deck search"  # override
-    # 100 page size is pretty arbitrary but tested to work
-    API_URL_TEMPLATE = (
-        "https://api2.moxfield.com/v2/decks/search?pageNumber=1&pageSize=100&sort"
-        "Type=updated&sortDirection=descending&filter={}"
-    )  # override
     DECK_SCRAPER_TYPES = MoxfieldDeckScraper,  # override
     EXAMPLE_URLS = (
         "https://moxfield.com/decks/public?q=eyJmaWx0ZXIiOiJwb2cyNTAxIn0%3D",
@@ -260,7 +266,12 @@ class MoxfieldDeckSearchScraper(DeckUrlsContainerScraper):
         if not filter_:
             raise ScrapingError(
                 "'filter' parameter missing from API URL", scraper=type(self), url=self.url)
-        api_url = self.API_URL_TEMPLATE.format(filter_)
+        # 100 page size is pretty arbitrary but tested to work
+        api_url_template = (
+            "https://api2.moxfield.com/v2/decks/search?pageNumber=1&pageSize=100&sort"
+            "Type=updated&sortDirection=descending&filter={}"
+        )
+        api_url = api_url_template.format(filter_)
         json_data = fetch_selenium_json(api_url)
         if not json_data or not json_data.get("data"):
             raise ScrapingError("No deck data", scraper=type(self), url=self.url)

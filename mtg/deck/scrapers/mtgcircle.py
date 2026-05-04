@@ -19,7 +19,6 @@ from mtg.constants import Json
 from mtg.deck.abc import DeckJsonParser
 from mtg.deck.scrapers.abc import (
     DeckScraper, HybridContainerScraper, tested_only_scraper,
-    video_throttled_deck_scraper,
 )
 from mtg.lib.common import from_iterable
 from mtg.lib.json import Node
@@ -151,8 +150,8 @@ class MtgCircleVideoDeckScraper(DeckScraper):
         return decks[-1].data
 
     @override
-    def _get_json_from_soup(self) -> Json:
-        return get_data(self._soup, type(self), self.url, self._retrieve_deck_data)
+    def _extract_json(self) -> None:
+        self._json = get_data(self._soup, type(self), self.url, self._retrieve_deck_data)
 
     @override
     def _get_sub_parser(self) -> MtgCircleDeckJsonParser:
@@ -162,10 +161,10 @@ class MtgCircleVideoDeckScraper(DeckScraper):
     def _parse_input_for_metadata(self) -> None:
         fmt_tags = self._soup.select("nav > ol > li > a")
         if fmt_tag := from_iterable(
-                fmt_tags,
-                lambda t: "#" not in t.attrs["href"]
-                          and t.text != "Videos"
-                          and t.text.lower() in all_formats()
+            fmt_tags,
+            lambda t: "#" not in t.attrs["href"]
+                      and t.text != "Videos"
+                      and t.text.lower() in all_formats()
         ):
             self._update_fmt(fmt_tag.text)
 

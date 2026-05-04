@@ -8,7 +8,6 @@
 
 """
 import logging
-import urllib.parse
 from typing import override
 
 import dateutil.parser
@@ -213,7 +212,7 @@ class JapaneseHareruyaDeckJsonParser(DeckJsonParser):
 class JapaneseHareruyaDeckScraper(DeckScraper):
     """Scraper of Japanese Hareruya decklist page.
     """
-    API_URL_TEMPLATE = "https://api.deck.hareruyamtg.com/api/deck/{}?display_token={}"  # override
+    JSON_FROM_API = True  # override
     EXAMPLE_URLS = (
         "https://www.hareruyamtg.com/decks/831676?display_token=cb0bc.3104896075514f",
         "https://www.hareruyamtg.com/decks/list/662964",
@@ -245,7 +244,7 @@ class JapaneseHareruyaDeckScraper(DeckScraper):
         return "ページが存在しません" in self._soup.text and "このページは存在しないか、" in self._soup.text
 
     @override
-    def _get_json_from_api(self) -> Json:
+    def _fetch_json(self) -> None:
         display_token_values = get_query_values(self.url, "display_token")
         display_token = display_token_values[0] if display_token_values else ""
         segments = get_path_segments(self.url)
@@ -255,8 +254,10 @@ class JapaneseHareruyaDeckScraper(DeckScraper):
         if not decklist_id or not all(ch.isdigit() for ch in decklist_id):
             raise ScrapingError(
                 f"Decklist ID needs to be a number, got: {decklist_id!r}", type(self), self.url)
-        return fetch_json(
-            self.API_URL_TEMPLATE.format(decklist_id, display_token))
+        api_url = (
+            f"https://api.deck.hareruyamtg.com/api/deck/{decklist_id}?display_token={display_token}"
+        )
+        self._json = fetch_json(api_url)
 
     @override
     def _get_sub_parser(self) -> JapaneseHareruyaDeckJsonParser:

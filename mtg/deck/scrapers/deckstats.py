@@ -116,8 +116,8 @@ class DeckstatsDeckScraper(DeckScraper):
         return tag and "This deck does not exist." in tag.text
 
     @override
-    def _get_json_from_soup(self) -> Json:
-        return dissect_js(
+    def _extract_json(self) -> None:
+        self._json = dissect_js(
             self._soup, "init_deck_data(", "deck_display();", lambda s: s.removesuffix(", false);"))
 
     @override
@@ -129,7 +129,7 @@ class DeckstatsDeckScraper(DeckScraper):
                 url=self.url)
         self._soup = BeautifulSoup(response.text, "lxml")
         self._validate_soup()
-        self._json = self._get_json_from_soup()
+        self._json = self._extract_json()
 
     @override
     def _parse_input_for_metadata(self) -> None:
@@ -180,10 +180,6 @@ class DeckstatsUserScraper(DeckUrlsContainerScraper):
     """
     THROTTLING = DeckUrlsContainerScraper.THROTTLING * 1.33  # override
     CONTAINER_NAME = "Deckstats user"  # override
-    API_URL_TEMPLATE = (
-        "https://deckstats.net/api.php?action=user_folder_get&result_type="
-        "folder%3Bdecks%3Bparent_tree%3Bsubfolders&owner_id={}&folder_id=0&decks_page={}"
-    )  # override
     DECK_SCRAPER_TYPES = DeckstatsDeckScraper,  # override
     EXAMPLE_URLS = (
         "https://deckstats.net/decks/30513",
@@ -215,22 +211,18 @@ class DeckstatsUserScraper(DeckUrlsContainerScraper):
         return user_id
 
     @override
-    def _get_json_from_api(self) -> Json:
-        return {}  # dummy
-
-    @override
-    def _validate_json(self) -> None:
-        pass
-
-    @override
     def _parse_input_for_decks_data(self) -> None:
+        api_url_template = (
+            "https://deckstats.net/api.php?action=user_folder_get&result_type="
+            "folder%3Bdecks%3Bparent_tree%3Bsubfolders&owner_id={}&folder_id=0&decks_page={}"
+        )
         user_id = self._get_user_id()
         total, page = 1, 1
         last_seen = None
         while len(self._deck_urls) < total:
             if page != 1:
                 throttle(*self.THROTTLING)
-            json_data = fetch_json(self.API_URL_TEMPLATE.format(user_id, page))
+            json_data = fetch_json(api_url_template.format(user_id, page))
             if self._deck_urls and last_seen == json_data:
                 break
             if not json_data or not json_data.get("folder") or not json_data["folder"].get("decks"):

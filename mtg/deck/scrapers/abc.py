@@ -41,12 +41,12 @@ class DeckScraper(NestedDeckParser):
     deck scrapers and mere deck parsers.
     """
     _REGISTRY: set[Type[Self]] = set()
-    SELENIUM_PARAMS = {}
     THROTTLING = Throttling(0.6, 0.15)
-    API_URL_TEMPLATE = ""
+    SELENIUM_PARAMS = {}
     HEADERS = None
     USE_WAYBACK = False
     JSON_FROM_SOUP = False
+    JSON_FROM_API = False
     EXAMPLE_URLS: tuple[str, ...] | None = None
 
     @property
@@ -103,10 +103,14 @@ class DeckScraper(NestedDeckParser):
             else:
                 self._soup = fetch_soup(self.url, self.HEADERS)
 
-    def _get_json_from_api(self) -> Json:
+    def _fetch_json(self) -> None:
+        """Fetch JSON deck data using the site's internal API(s).
+        """
         raise NotImplementedError
 
-    def _get_json_from_soup(self) -> Json:
+    def _extract_json(self) -> None:
+        """Extract JSON deck data from the site's HTML soup.
+        """
         raise NotImplementedError
 
     def _is_page_inaccessible(self) -> bool:
@@ -134,14 +138,14 @@ class DeckScraper(NestedDeckParser):
 
     @override
     def _pre_parse(self) -> None:
-        if self.API_URL_TEMPLATE:  # JSON-based, soup not needed
-            self._json = self._get_json_from_api()
+        if self.JSON_FROM_API:  # API-based, soup not needed
+            self._fetch_json()
             self._validate_json()
         else:
             self._fetch_soup()
             self._validate_soup()
             if self.JSON_FROM_SOUP:
-                self._json = self._get_json_from_soup()
+                self._extract_json()
                 self._validate_json()
 
     @abstractmethod

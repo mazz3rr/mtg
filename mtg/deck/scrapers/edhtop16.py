@@ -68,7 +68,7 @@ class EdhTop16TournamentScraper(DeckUrlsContainerScraper):
                 raise ScrapingError("No tournament data", scraper=type(self), url=self.url)
 
     @override
-    def _get_json_from_soup(self) -> Json:
+    def _extract_json(self) -> None:
         end_processor = lambda s: s.replace('":undefined', '":null').replace(
                 '": undefined', '": null').rstrip(";")
         start_hook = "window.__router_ops = "
@@ -78,7 +78,7 @@ class EdhTop16TournamentScraper(DeckUrlsContainerScraper):
                 "Data <script> tag not found", scraper=type(self), url=self.url)
         if not json_data:
             raise ScrapingError("No decks data", scraper=type(self), url=self.url)
-        return self._process_json(json_data)
+        self._json = self._process_json(json_data)
 
     @override
     def _validate_json(self) -> None:

@@ -81,9 +81,9 @@ class ArchidektDeckScraper(DeckScraper):
         return tag and tag.text.strip() == "Page not found"
 
     @override
-    def _get_json_from_soup(self) -> Json:
+    def _extract_json(self) -> None:
         json_data = json.loads(self._soup.find("script", id="__NEXT_DATA__").text)
-        return json_data["props"]["pageProps"]["redux"]["deck"]
+        self._json = json_data["props"]["pageProps"]["redux"]["deck"]
 
     @override
     def _parse_input_for_metadata(self) -> None:

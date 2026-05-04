@@ -101,11 +101,11 @@ class CardsrealmDeckScraper(DeckScraper):
         return to_eng_url(url, "decks")
 
     @override
-    def _get_json_from_soup(self) -> Json:
+    def _extract_json(self) -> None:
         def process(text: str) -> str:
             obj, _ = text.rsplit("]", maxsplit=1)
             return obj + "]"
-        return dissect_js(
+        self._json = dissect_js(
             self._soup, "var deck_cards = ", 'var torneio_type =', end_processor=process)
 
     @override

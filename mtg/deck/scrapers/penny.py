@@ -12,15 +12,14 @@ from typing import override
 
 from bs4 import Tag
 
-from mtg.constants import Json
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
-from mtg.scryfall import Card
 from mtg.lib.common import from_iterable
-from mtg.lib.time import get_date_from_ago_text, get_date_from_month_text
 from mtg.lib.scrape.core import (
     ScrapingError, fetch_json, fetch_soup, get_path_segments,
     strip_url_query,
 )
+from mtg.lib.time import get_date_from_ago_text, get_date_from_month_text
+from mtg.scryfall import Card
 
 _log = logging.getLogger(__name__)
 URL_PREFIX = "https://pennydreadfulmagic.com"
@@ -97,11 +96,7 @@ class PennyDreadfulMagicCompetitionScraper(DeckUrlsContainerScraper):
     """Scraper of PennyDreadfulMagic competition page.
     """
     CONTAINER_NAME = "PennyDreadfulMagic competition"  # override
-    API_URL_TEMPLATE = (
-        "https://pennydreadfulmagic.com/api/decks/?achievementKey=&archetypeId=&"
-        "cardName=&competitionId={}&competitionFlagId=&deckType=&page=0&page"
-        "Size=200&personId=&q=&seasonId="
-    )  # override
+    JSON_FROM_API = True  # override
     DECK_SCRAPER_TYPES = PennyDreadfulMagicDeckScraper,  # override
     DECK_URL_PREFIX = URL_PREFIX  # override
     EXAMPLE_URLS = (
@@ -128,9 +123,14 @@ class PennyDreadfulMagicCompetitionScraper(DeckUrlsContainerScraper):
         return strip_url_query(url)
 
     @override
-    def _get_json_from_api(self) -> Json:
+    def _fetch_json(self) -> None:
+        api_url_template = (
+            "https://pennydreadfulmagic.com/api/decks/?achievementKey=&archetypeId=&"
+            "cardName=&competitionId={}&competitionFlagId=&deckType=&page=0&page"
+            "Size=200&personId=&q=&seasonId="
+        )
         *_, competition_id = get_path_segments(self.url)
-        return fetch_json(self.API_URL_TEMPLATE.format(competition_id))
+        self._json = fetch_json(api_url_template.format(competition_id))
 
     @override
     def _validate_json(self) -> None:
@@ -148,11 +148,6 @@ class PennyDreadfulMagicUserScraper(DeckUrlsContainerScraper):
     """Scraper of PennyDreadfulMagic user page.
     """
     CONTAINER_NAME = "PennyDreadfulMagic user"  # override
-    API_URL_TEMPLATE = (
-        "https://pennydreadfulmagic.com/api/decks/?achievementKey=&archetypeId="
-        "&cardName=&competitionId=&competitionFlagId=&deckType=all&page=0&page"
-        "Size=200&personId={}&q=&seasonId={}"
-    )  # override
     DECK_SCRAPER_TYPES = PennyDreadfulMagicDeckScraper,  # override
     DECK_URL_PREFIX = URL_PREFIX  # override
     EXAMPLE_URLS = (
@@ -202,21 +197,18 @@ class PennyDreadfulMagicUserScraper(DeckUrlsContainerScraper):
         return self._find_ids()
 
     @override
-    def _get_json_from_api(self) -> Json:
-        return {}  # dummy
-
-    @override
-    def _validate_json(self) -> None:
-        pass
-
-    @override
     def _parse_input_for_decks_data(self) -> None:
         if ids := self._get_ids():
             season_id, user_id = ids
         else:
             raise ScrapingError(
                 "Parameters needed for API missing from the URL", scraper=type(self), url=self.url)
-        json_data = fetch_json(self.API_URL_TEMPLATE.format(user_id, season_id))
+        api_url_template = (
+            "https://pennydreadfulmagic.com/api/decks/?achievementKey=&archetypeId="
+            "&cardName=&competitionId=&competitionFlagId=&deckType=all&page=0&page"
+            "Size=200&personId={}&q=&seasonId={}"
+        )
+        json_data = fetch_json(api_url_template.format(user_id, season_id))
         if not json_data or not json_data.get("objects"):
             raise ScrapingError("No decks data", scraper=type(self), url=self.url)
         self._deck_urls = [d["url"] for d in json_data["objects"]]

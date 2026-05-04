@@ -160,7 +160,7 @@ class MtgoDeckScraper(DeckScraper):
         return fragment.removeprefix("deck_")
 
     @override
-    def _get_json_from_soup(self) -> Json:
+    def _extract_json(self) -> None:
         json_data = _get_json(self._soup, type(self), self.url)
         decks_data = json_data["decklists"]
         deck_data = from_iterable(decks_data, lambda d: d["player"] == self._player_name)
@@ -171,7 +171,7 @@ class MtgoDeckScraper(DeckScraper):
         if rank_data := json_data.get("final_rank"):
             _process_ranks(rank_data, deck_data)
         self._metadata.update(_get_event_metadata(json_data))
-        return decks_data
+        self._json = decks_data
 
     @override
     def _get_sub_parser(self) -> MtgoDeckJsonParser:

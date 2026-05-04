@@ -138,14 +138,14 @@ class TopDeckBracketScraper(HybridContainerScraper):
         return strip_url_query(url)
 
     @override
-    def _get_json_from_api(self) -> Json:
-        return fetch_json(self.url.replace("/bracket/", "/PublicPData/"))
+    def _fetch_json(self) -> None:
+        self._json = fetch_json(self.url.replace("/bracket/", "/PublicPData/"))
 
     @override
     def _pre_parse(self) -> None:
         self._fetch_soup()
         self._validate_soup()
-        self._json = self._get_json_from_api()
+        self._fetch_json()
         self._validate_json()
 
     @staticmethod
@@ -263,21 +263,21 @@ class TopDeckProfileScraper(DecksJsonContainerScraper):
         return strip_url_query(url).removesuffix("/stats")
 
     @override
-    def _pre_parse(self) -> None:
-        self._fetch_soup()
-        self._validate_soup()
-        self._json = self._get_json_from_api()
-        self._validate_json()
-
-    @override
-    def _get_json_from_api(self) -> Json:
-        return fetch_json(self.url + "/stats")
+    def _fetch_json(self) -> Json:
+        self._json = fetch_json(self.url + "/stats")
 
     @override
     def _validate_json(self) -> None:
         super()._validate_json()
         if not self._json.get("gameFormats"):
             raise ScrapingError("No 'gameFormats' data", scraper=type(self), url=self.url)
+
+    @override
+    def _pre_parse(self) -> None:
+        self._fetch_soup()
+        self._validate_soup()
+        self._fetch_json()
+        self._validate_json()
 
     @override
     def _parse_input_for_metadata(self) -> None:

@@ -14,7 +14,10 @@ from requests import ReadTimeout
 
 from mtg.constants import Json
 from mtg.deck.scrapers.abc import DeckScraper
-from mtg.lib.scrape.core import ScrapingError, fetch_json, strip_url_query
+from mtg.lib.scrape.core import (
+    ScrapingError, fetch_json, get_netloc_domain, get_path_segments,
+    strip_url_query,
+)
 from mtg.scryfall import Card
 
 _log = logging.getLogger(__name__)
@@ -24,9 +27,7 @@ _log = logging.getLogger(__name__)
 class SeventeenLandsDeckScraper(DeckScraper):
     """Scraper of 17Lands decklist page.
     """
-    API_URL_TEMPLATE = (
-        "https://www.17lands.com/data/user_deck?sharing_token={}&deck={}&timestamp={}"
-    )  # override
+    JSON_FROM_API = True  # override
     EXAMPLE_URLS = (
         "https://www.17lands.com/user/deck/eba7a011b7e84f8cb286492312cf4241/85624423/1734473634",
     )
@@ -34,7 +35,18 @@ class SeventeenLandsDeckScraper(DeckScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return "17lands.com/user/deck/" in url.lower()
+        url = url.lower()
+        segments = get_path_segments(url)
+        try:
+            first, second, sharing_token, deck_id, timestamp = segments
+        except ValueError:
+            return False
+        domain = get_netloc_domain(url, naked=True)
+        return (
+            domain == "17lands.com"
+            and first == "user"
+            and second == "deck"
+        )
 
     @classmethod
     @override
@@ -44,11 +56,14 @@ class SeventeenLandsDeckScraper(DeckScraper):
         return url.rstrip(".,")
 
     @override
-    def _get_json_from_api(self) -> Json:
-        _, rest = self.url.split("/user/deck/", maxsplit=1)
-        sharing_token, deck_id, timestamp = rest.split("/")
+    def _fetch_json(self) -> None:
+        _, _, sharing_token, deck_id, timestamp = get_path_segments(self.url)
+        api_url = (
+            f"https://www.17lands.com/data/user_deck?sharing_token={sharing_token}&deck="
+            f"{deck_id}&timestamp={timestamp}"
+        )
         try:
-            return fetch_json(self.API_URL_TEMPLATE.format(sharing_token, deck_id, timestamp))
+            self._json = fetch_json(api_url)
         except ReadTimeout:
             raise ScrapingError("API request timed out", scraper=type(self), url=self.url)
 

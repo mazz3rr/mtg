@@ -48,8 +48,8 @@ class MtgMetaIoDeckScraper(DeckScraper):
         url = super().normalize_url(url)
         return strip_url_query(url)
 
-    def _get_json_from_soup(self) -> Json:
-        return dissect_js(self._soup, "const decklist = ", " ;\n  ")
+    def _extract_json(self) -> None:
+        self._json = dissect_js(self._soup, "const decklist = ", " ;\n  ")
 
     @override
     def _parse_input_for_metadata(self) -> None:

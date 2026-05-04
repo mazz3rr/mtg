@@ -61,7 +61,7 @@ class MtgStocksDeckScraper(DeckScraper):
         _, deck_id = get_path_segments(self.url)
         return int(deck_id)
 
-    def _get_json_from_soup(self) -> Json:
+    def _extract_json(self) -> None:
         script_tag = self._soup.find("script", id="ng-state")
         if not script_tag:
             raise ScrapingError("<script> not found", scraper=type(self), url=self.url)
@@ -72,7 +72,7 @@ class MtgStocksDeckScraper(DeckScraper):
         if not deck_data:
             raise ScrapingError(
                 "Deck data missing in <script> tag's JSON", scraper=type(self), url=self.url)
-        return deck_data["b"]
+        self._json = deck_data["b"]
 
     @override
     def _parse_input_for_metadata(self) -> None:

@@ -16,7 +16,10 @@ from requests import ReadTimeout
 from mtg.constants import Json
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
 from mtg.lib.time import get_date_from_ago_text
-from mtg.lib.scrape.core import ScrapingError, fetch_json, normalize_url, strip_url_query
+from mtg.lib.scrape.core import (
+    ScrapingError, fetch_json, get_path_segments, normalize_url,
+    strip_url_query,
+)
 
 _log = logging.getLogger(__name__)
 
@@ -25,7 +28,7 @@ _log = logging.getLogger(__name__)
 class StreamdeckerDeckScraper(DeckScraper):
     """Scraper of Streamdecker deck page.
     """
-    API_URL_TEMPLATE = "https://www.streamdecker.com/api/deck/{}"  # override
+    JSON_FROM_API = True  # override
     EXAMPLE_URLS = (
         "https://www.streamdecker.com/deck/ESysr7yWC",
     )
@@ -33,7 +36,15 @@ class StreamdeckerDeckScraper(DeckScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return "www.streamdecker.com/deck/" in url.lower()
+        url = url.lower()
+        if "streamdecker.com/deck/" not in url:
+            return False
+        segments = get_path_segments(url)
+        try:
+            _, decklist_id = segments
+        except ValueError:
+            return False
+        return True
 
     @classmethod
     @override
@@ -42,15 +53,15 @@ class StreamdeckerDeckScraper(DeckScraper):
         return strip_url_query(url)
 
     @override
-    def _get_json_from_api(self) -> Json:
-        *_, decklist_id = self.url.split("/")
+    def _fetch_json(self) -> None:
+        _, decklist_id = get_path_segments(self.url)
         try:
-            json_data = fetch_json(self.API_URL_TEMPLATE.format(decklist_id))
+            json_data = fetch_json(f"https://www.streamdecker.com/api/deck/{decklist_id}")
         except ReadTimeout as rt:
             raise ScrapingError("API request timed out", scraper=type(self), url=self.url) from rt
         if not json_data or not json_data.get("data") or json_data["data"] == {"deck": {}}:
             raise ScrapingError("No deck data", scraper=type(self), url=self.url)
-        return json_data["data"]
+        self._json = json_data["data"]
 
     def _parse_date(self) -> date | None:
         date_text = self._json["updatedAt"]
@@ -93,7 +104,7 @@ class StreamdeckerUserScraper(DeckUrlsContainerScraper):
     """Scraper of Streamdecker user page.
     """
     CONTAINER_NAME = "Streamdecker user"  # override
-    API_URL_TEMPLATE = "https://www.streamdecker.com/api/userdecks/{}"  # override
+    JSON_FROM_API = True  # override
     DECK_SCRAPER_TYPES = StreamdeckerDeckScraper,  # override
     DECK_URL_PREFIX = "https://www.streamdecker.com/deck/"  # override
     EXAMPLE_URLS = (
@@ -103,7 +114,15 @@ class StreamdeckerUserScraper(DeckUrlsContainerScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return "streamdecker.com/decks/" in url.lower()
+        url = url.lower()
+        if "streamdecker.com/decks/" not in url:
+            return False
+        segments = get_path_segments(url)
+        try:
+            _, user_name = segments
+        except ValueError:
+            return False
+        return True
 
     @classmethod
     @override
@@ -112,9 +131,9 @@ class StreamdeckerUserScraper(DeckUrlsContainerScraper):
         return strip_url_query(url)
 
     @override
-    def _get_json_from_api(self) -> Json:
-        *_, user_name = self.url.split("/")
-        return fetch_json(self.API_URL_TEMPLATE.format(user_name))
+    def _fetch_json(self) -> Json:
+        _, user_name = get_path_segments(self.url)
+        return fetch_json(f"https://www.streamdecker.com/api/userdecks/{user_name}")
 
     @override
     def _validate_json(self) -> None:

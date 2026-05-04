@@ -13,7 +13,6 @@ from typing import override
 
 import dateutil.parser
 
-from mtg.constants import Json
 from mtg.deck.scrapers.abc import DeckScraper
 from mtg.lib.scrape.core import ScrapingError, dissect_js, strip_url_query
 from mtg.yt.discover import UrlHook
@@ -55,7 +54,7 @@ class CardhoarderDeckScraper(DeckScraper):
         return strip_url_query(url)
 
     @override
-    def _get_json_from_soup(self) -> Json:
+    def _extract_json(self) -> None:
         start = 'const props = JSON.parse('
         end = ');\n\t\t\twindow.Cardhoarder.helpers.addDeckViewer('
         # in this case, it returns raw JSON string instead of dict...
@@ -64,7 +63,7 @@ class CardhoarderDeckScraper(DeckScraper):
             raise ScrapingError(
                 "Nothing extracted from JavaScript", scraper=type(self), url=self.url)
         # ...that needs to be reparsed
-        return json.loads(deck_data)
+        self._json = json.loads(deck_data)
 
     @override
     def _parse_input_for_metadata(self) -> None:

@@ -45,18 +45,18 @@ class ManatradersDeckScraper(DeckScraper):
         return strip_url_query(url)
 
     @override
-    def _get_json_from_soup(self) -> Json:
+    def _extract_json(self) -> None:
         data_tag = self._soup.find("div", {"data-react-class": "WebshopApp"})
         if not data_tag:
             data_tag = self._soup.find("div", {"data-react-class": "DeckBuilder"})
             if not data_tag:
                 raise ScrapingError("Deck tag not found", scraper=type(self), url=self.url)
         json_data = json.loads(data_tag.attrs["data-react-props"])
-        if deck_json := json_data.get("deck"):
-            return deck_json
-        if deck_json := json_data.get("initialDeck"):
-            return deck_json
-        raise ScrapingError("Deck data missing in extracted JSON", scraper=type(self), url=self.url)
+        if deck_json := json_data.get("deck") or json_data.get("initialDeck"):
+            self._json = deck_json
+        else:
+            raise ScrapingError(
+                "Deck data missing in extracted JSON", scraper=type(self), url=self.url)
 
     @override
     def _parse_input_for_metadata(self) -> None:

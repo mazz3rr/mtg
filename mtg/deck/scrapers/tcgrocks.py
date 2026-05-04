@@ -17,7 +17,6 @@ from typing import override
 
 import dateutil.parser
 
-from mtg.constants import Json
 from mtg.deck.scrapers.abc import DeckScraper
 from mtg.lib.json import Node
 from mtg.lib.scrape.core import ScrapingError, strip_url_query
@@ -52,9 +51,9 @@ class TcgRocksDeckScraper(DeckScraper):
             raise ScrapingError(
                 "Deck data <script> tag not found", scraper=type(self), url=self.url)
 
-    def _get_json_from_soup(self) -> Json:
+    def _extract_json(self) -> None:
         script_tag = self._soup.select_one("script#__NUXT_DATA__")
-        return json.loads(script_tag.text.strip())
+        self._json = json.loads(script_tag.text.strip())
 
     def _validate_json(self) -> None:
         super()._validate_json()

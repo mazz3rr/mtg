@@ -16,7 +16,7 @@ from bs4 import Tag
 from mtg.deck.scrapers.abc import DeckScraper
 from mtg.lib.text import sanitize_whitespace
 from mtg.lib.numbers import extract_int
-from mtg.lib.scrape.core import strip_url_query
+from mtg.lib.scrape.core import get_netloc_domain, get_path_segments, strip_url_query
 from mtg.scryfall import Card
 
 _log = logging.getLogger(__name__)
@@ -33,7 +33,14 @@ class ScryfallDeckScraper(DeckScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return "scryfall.com/@" in url.lower() and "/decks/" in url.lower()
+        url = url.lower()
+        user_segment, segment, *_ = get_path_segments(url)
+        domain = get_netloc_domain(url, naked=True)
+        return (
+            domain == "scryfall.com"
+            and user_segment.startswith("@")
+            and segment == "decks"
+        )
 
     @classmethod
     @override
@@ -44,9 +51,8 @@ class ScryfallDeckScraper(DeckScraper):
 
     @override
     def _parse_input_for_metadata(self) -> None:
-        *_, author_part = self.url.split("@")
-        author, *_ = author_part.split("/")
-        self._metadata["author"] = author
+        author_part, *_ = get_path_segments(self.url)
+        self._metadata["author"] = author_part.removeprefix("@")
         if name_tag := self._soup.find("h1", class_="deck-details-title"):
             self._metadata["name"] = sanitize_whitespace(name_tag.text.strip())
         info_tag = self._soup.find("p", class_="deck-details-subtitle")
