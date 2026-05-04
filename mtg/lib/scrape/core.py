@@ -424,9 +424,7 @@ def get_query_data(url: str) -> dict[str, str]:
     return an empty dict.
 
     E.g. supplying 'https://www.tcdecks.net/deck.php?id=38058&iddeck=347793' results in:
-        {
-        "deck_Walker735": {
-        }
+        {'id': ['38058'], 'iddeck': ['347793']}
     """
     try:
         query = urllib.parse.urlsplit(url).query
@@ -458,26 +456,29 @@ def url_decode(encoded: str) -> str:
     return urllib.parse.unquote(encoded.replace('+', ' '))
 
 
-def is_more_than_root_path(url: str, root_path: str, case_insensitive=True) -> bool:
-    """Check whether the passed URL is more than the provided root path (whether the root path is
-    within the URL, but NOT EXACTLY it).
+def is_more_than_root_path(url: str, *path_segments: str, case_sensitive=False) -> bool:
+    """Check whether the passed URL is more than its root path (whether the root path is
+    within the URL, but NOT EXACTLY it (disregarding any network scheme prefix like "https://")).
+
+    A "root path" is defined here as the URL's netloc domain + any path segments specified. E.g.:
+    for URL: "https://flexslot.gg/decks/243fc88f-1fca-41ae-a81a-9503347ce85c" a netloc domain is
+    "flexslot.gg" and if "decks" are passed as a path segment than root path checked becomes
+    "flexslot.gg/decks".
+
+    This check disregards presence or absence of any trailing slash in the checked URL. E.g. if
+    the passed path segment is "decks" both "https://flexslot.gg/decks/" and
+    "https://flexslot.gg/decks" return True if passed as `url`.
 
     Args:
         url: a URL to check
-        root_path: URL root path (netloc + (optionally) initial path segments, with or without
-                   the trailing slash), e.g. "pauperwave.com" or "playingmtg.com/tournaments/")
-        case_insensitive: if True, make the check case-insensitive
+        path_segments: a list of path segments to include in root path to check against
+        case_sensitive: if True, make the check case-sensitive
     """
-    url = url.lower() if case_insensitive else url
-    root_path = root_path.lower() if case_insensitive else root_path
-    url = url.removesuffix("/") + "/"
-    root_path = root_path.removesuffix("/") + "/"
-    if root_path not in url:
-        return False  # root path not within URL
-    *_, rest = url.split(f"{root_path}")
-    if not rest:
-        return False  # URL is the root path exactly
-    return True
+    url = normalize_url(url, case_sensitive=case_sensitive)
+    parsed_url = urllib.parse.urlparse(url)
+    path = "/".join(path_segments)
+    root_path = urllib.parse.urlunsplit((parsed_url.scheme, parsed_url.netloc, path, "", ""))
+    return url != root_path
 
 
 MONTHS = [

@@ -18,7 +18,10 @@ from mtg.deck.core import DeckParser
 from mtg.deck.scrapers.abc import HybridContainerScraper
 from mtg.lib.common import ParsingError
 from mtg.lib.numbers import extract_int
-from mtg.lib.scrape.core import ScrapingError, is_more_than_root_path, strip_url_query
+from mtg.lib.scrape.core import (
+    ScrapingError, is_more_than_root_path,
+    strip_url_query,
+)
 from mtg.yt.discover import UrlHook
 
 _log = logging.getLogger(__name__)
@@ -187,7 +190,7 @@ class CoolStuffIncArticleScraper(HybridContainerScraper):
     @override
     def is_valid_url(cls, url: str) -> bool:
         return (
-            is_more_than_root_path(url, "coolstuffinc.com/a/")
+            is_more_than_root_path(url, "a")
             and "action=search" not in url.lower()
         )
 

@@ -152,7 +152,7 @@ class FlexslotDeckScraper(DeckScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return is_more_than_root_path(url, "flexslot.gg/decks/")
+        return is_more_than_root_path(url, "decks")
 
     @classmethod
     @override
@@ -193,7 +193,7 @@ class FlexslotSideboardScraper(DecksJsonContainerScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return is_more_than_root_path(url, "flexslot.gg/sideboards/")
+        return is_more_than_root_path(url, "sideboards")
 
     @classmethod
     @override
@@ -231,7 +231,7 @@ class FlexslotArticleScraper(HybridContainerScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return is_more_than_root_path(url, "flexslot.gg/articles/")
+        return is_more_than_root_path(url, "articles")
 
     @classmethod
     @override

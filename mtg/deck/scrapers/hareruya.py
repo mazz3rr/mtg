@@ -498,7 +498,7 @@ class HareruyaArticleScraper(HybridContainerScraper):
         try:
             url = strip_url_query(url).lower()
             return (
-                is_more_than_root_path(url, "article.hareruyamtg.com/article/")
+                is_more_than_root_path(url, "article")
                 and not any(t in url for t in ("/page/", "/author/", "/category/", "/coverage/"))
                 and not get_fragment(url)
             )
@@ -560,7 +560,7 @@ class HareruyaArticleDeckScraper(DeckScraper):
         try:
             url = strip_url_query(url, keep_fragment=True).lower()
             return (
-                is_more_than_root_path(url, "article.hareruyamtg.com/article/")
+                is_more_than_root_path(url, "article")
                 and not any(t in url for t in ("/page/", "/author/", "/category/", "/coverage/"))
                 and bool(get_fragment(url))
             )

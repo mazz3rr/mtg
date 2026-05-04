@@ -44,7 +44,6 @@ from mtg.deck.scrapers.manastack import DeckScraper
 from mtg.deck.scrapers.manatraders import DeckScraper
 from mtg.deck.scrapers.melee import DeckScraper
 from mtg.deck.scrapers.moxfield import DeckScraper
-from mtg.deck.scrapers.archived.mtgarenapro import DeckScraper
 from mtg.deck.scrapers.mtgazone import DeckScraper
 from mtg.deck.scrapers.mtgcircle import DeckScraper
 from mtg.deck.scrapers.mtgdecksnet import DeckScraper
@@ -52,7 +51,6 @@ from mtg.deck.scrapers.mtgjson import DeckScraper
 from mtg.deck.scrapers.mtgmeta import DeckScraper
 from mtg.deck.scrapers.mtgo import DeckScraper
 from mtg.deck.scrapers.mtgstocks import DeckScraper
-from mtg.deck.scrapers.archived.mtgotraders import DeckScraper
 from mtg.deck.scrapers.mtgtop8 import DeckScraper
 from mtg.deck.scrapers.mtgvault import DeckScraper
 from mtg.deck.scrapers.paupermtg import DeckScraper

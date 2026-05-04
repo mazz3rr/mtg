@@ -126,7 +126,7 @@ class CyclesGamingArticleScraper(HybridContainerScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return is_more_than_root_path(url, "cyclesgaming.com")
+        return is_more_than_root_path(url)
 
     @classmethod
     @override

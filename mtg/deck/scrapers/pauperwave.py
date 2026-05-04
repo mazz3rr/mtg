@@ -101,7 +101,7 @@ class PauperwaveArticleScraper(HybridContainerScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return is_more_than_root_path(url, "blog.pauperwave.org/articles/")
+        return is_more_than_root_path(url, "articles")
 
     @classmethod
     @override
