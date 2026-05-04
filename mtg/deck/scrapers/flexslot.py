@@ -7,10 +7,12 @@
     @author: mazz3rr
 
 """
+import json
 import logging
 from typing import override
 
 import dateutil.parser
+import njsparser
 from bs4 import BeautifulSoup
 
 from mtg.constants import Json, SECRETS
@@ -19,6 +21,7 @@ from mtg.deck.scrapers.abc import (
     DeckScraper, DeckUrlsContainerScraper, DecksJsonContainerScraper,
     HybridContainerScraper,
 )
+from mtg.lib.json import Node
 from mtg.lib.scrape.core import (
     InaccessiblePage, ScrapingError, fetch_json,
     is_more_than_root_path, strip_url_query,
@@ -113,38 +116,14 @@ class FlexslotDeckJsonParser(DeckJsonParser):
         self._derive_commander_from_sideboard()
 
 
-
-# This is how you obtain deck data now:
-
-# from mtg.lib.scrape.dynamic import fetch_dynamic_soup
-# xpath = "//script[contains(text(), 'api.scryfall.com/cards/')]"
-# url = "https://flexslot.gg/decks/243fc88f-1fca-41ae-a81a-9503347ce85c"
-# r = fetch_dynamic_soup(url, xpath=xpath)
-# soup, *_ = r
-# 2026-05-03 23:51:57,761 [mtg.lib.scrape.dynamic] INFO: Webdriving using Chrome to: 'https://flexslot.gg/decks/243fc88f-1fca-41ae-a81a-9503347ce85c'...
-# 2026-05-03 23:52:00,454 [mtg.lib.scrape.dynamic] INFO: Page has been loaded and XPath-specified element(s) is present
-# 2026-05-03 23:52:00,688 [mtg.lib.time] INFO: Completed fetching dynamic soup in 3.734 second(s)
-# markup = str(soup)
-# import njsparser
-# fd = njsparser.BeautifulFD(markup)
-# 2026-05-03 23:52:29,092 [njsparser] WARNING: Couldn't find an appropriate type for given class `None`. Giving `Element`.
-# 2026-05-03 23:52:29,092 [njsparser] WARNING: Couldn't find an appropriate type for given class `None`. Giving `Element`.
-# import json
-# parsed_json = json.dumps(fd, indent=4, default=njsparser.default)
-# parsed_data = json.loads(parsed_json)
-# from mtg.lib.json import Node
-# node = Node(parsed_data)
-# found = node.find(lambda n: n.is_text and 'Walking Ballista' in n.data)
-# found.path
-# "/['52']['value'][3]['children'][3]['children'][3]['children'][3]['initialData']['data']['text_list']"
-# fa = found.ancestors[0]
-# deck_data = fa.data
-
-
 @DeckScraper.registered
 class FlexslotDeckScraper(DeckScraper):
     """Scraper of Flexslot.gg decklist page.
     """
+    JSON_FROM_SOUP = True
+    SELENIUM_PARAMS = {
+        "xpath": "//script[contains(text(), 'api.scryfall.com/cards/')]",
+    }
     EXAMPLE_URLS = (
         "https://flexslot.gg/decks/243fc88f-1fca-41ae-a81a-9503347ce85c",
     )
@@ -161,23 +140,40 @@ class FlexslotDeckScraper(DeckScraper):
         return strip_url_query(url).removesuffix("/view")
 
     @override
-    def _pre_parse(self) -> None:
-        json_data = _get_json_data(self.url)
-        if not json_data or not json_data.get("data"):
-            raise ScrapingError("No deck data", scraper=type(self), url=self.url)
-        self._json = json_data["data"]
-
-    @override
-    def _get_sub_parser(self) -> FlexslotDeckJsonParser:
-        return FlexslotDeckJsonParser(self._json, self._metadata)
+    def _extract_json(self) -> None:
+        markup = str(self._soup)
+        fd = njsparser.BeautifulFD(markup)
+        parsed_json = json.dumps(fd, default=njsparser.default)
+        parsed_data = json.loads(parsed_json)
+        node = Node(parsed_data)
+        found = node.find_by_path("['initialData']['data']['text_list']", mode="end")
+        self._json = found.ancestors[0].data
 
     @override
     def _parse_input_for_metadata(self) -> None:
-        pass
+        self._metadata["name"] = self._json["name"]
+        if firebase_user := self._json.get("firebase_user"):
+            self._metadata["author"] = firebase_user["username"]
+            self._metadata["author_real_name"] = firebase_user["name"]
+        self._update_fmt(self._json["format"].lower())
+        self._metadata["date"] = dateutil.parser.parse(self._json["updated_at"]).date()
+        self._metadata["likes"] = self._json["likes"]
+        self._metadata["views"] = self._json["pageviews"]
+        # used to be present in the legacy data
+        if event_name := self._json.get("event_name"):
+            self._metadata["event"] = {"name": event_name}
+            if event_date := self._json.get("event_date"):
+                self._metadata["event"]["date"] = dateutil.parser.parse(event_date).date()
+            if player := self._json.get("player"):
+                self._metadata["event"]["player"] = player
+            if rank := self._json.get("rank"):
+                self._metadata["event"]["rank"] = rank
 
     @override
     def _parse_input_for_decklist(self) -> None:
-        pass
+        self._decklist = self._json["text_list"].replace(
+            "Commander:", "Commander").replace("Companion:", "Companion").replace(
+            "Maindeck:", "Deck").replace("Sideboard:", "Sideboard")
 
 
 @DecksJsonContainerScraper.registered
