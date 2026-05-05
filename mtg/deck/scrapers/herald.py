@@ -94,7 +94,7 @@ class CommandersHeraldArticleScraper(HybridContainerScraper):
             '/terms-of-service'
         )
         return (
-            is_more_than_root_path(url)
+            is_more_than_root_path(url, "commandersherald.com")
             and not any(t in url.lower() for t in tokens)
         )
 

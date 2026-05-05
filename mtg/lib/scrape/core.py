@@ -456,7 +456,8 @@ def url_decode(encoded: str) -> str:
     return urllib.parse.unquote(encoded.replace('+', ' '))
 
 
-def is_more_than_root_path(url: str, *path_segments: str, case_sensitive=False) -> bool:
+def is_more_than_root_path(
+    url: str, domain: str, *path_segments: str, case_sensitive=False, naked_domain=True) -> bool:
     """Check whether the passed URL is more than its root path (whether the root path is
     within the URL, but NOT EXACTLY it (disregarding any network scheme prefix like "https://")).
 
@@ -471,13 +472,30 @@ def is_more_than_root_path(url: str, *path_segments: str, case_sensitive=False) 
 
     Args:
         url: a URL to check
+        domain: a netloc domain to check against, e.g. "flexslot.gg" or "blog.pauperwave.org"
         path_segments: a list of path segments to include in root path to check against
         case_sensitive: if True, make the check case-sensitive
+        naked_domain: if True, strip a "www." prefix from netloc domain before comparison
     """
     url = normalize_url(url, case_sensitive=case_sensitive)
-    parsed_url = urllib.parse.urlparse(url)
-    path = "/".join(path_segments)
-    root_path = urllib.parse.urlunsplit((parsed_url.scheme, parsed_url.netloc, path, "", ""))
+    parsed_url = urllib.parse.urlsplit(url)
+
+    if naked_domain:
+        domain = domain.removeprefix("www.")
+        # reconstruct URL with naked netloc domain
+        url = urllib.parse.urlunsplit((
+            parsed_url.scheme,
+            parsed_url.netloc.removeprefix("www."),
+            parsed_url.path,
+            parsed_url.query,
+            parsed_url.fragment,
+        ))
+
+    root_path = urllib.parse.urlunsplit(
+        (parsed_url.scheme, domain, "/".join(path_segments), "", ""))
+    root_path = normalize_url(root_path, case_sensitive=case_sensitive)
+    if root_path not in url:
+        return False
     return url != root_path
 
 

@@ -34,7 +34,10 @@ class ScryfallDeckScraper(DeckScraper):
     @override
     def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
-        user_segment, segment, *_ = get_path_segments(url)
+        try:
+            user_segment, segment, *_ = get_path_segments(url)
+        except ValueError:
+            return False
         domain = get_netloc_domain(url, naked=True)
         return (
             domain == "scryfall.com"

@@ -147,7 +147,7 @@ class MtgaZoneArticleScraper(HybridContainerScraper):
     @override
     def is_valid_url(cls, url: str) -> bool:
         return (
-            is_more_than_root_path(url)
+            is_more_than_root_path(url, "mtgazone.com")
             and not any(t in url.lower() for t in (
                 "/user-decks", "/deck/", "/plans/premium", "/mtg-arena-codes", "/author/", "jump-in"
             ))

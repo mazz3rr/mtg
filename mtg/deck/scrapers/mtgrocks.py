@@ -39,7 +39,7 @@ class MtgRocksArticleScraper(HybridContainerScraper):
             "/editorial-policy/", "/privacy-policy/"
         )
         return (
-            is_more_than_root_path(url)
+            is_more_than_root_path(url, "mtgrocks.com")
             and not any(t in url.lower() for t in tokens)
         )
 

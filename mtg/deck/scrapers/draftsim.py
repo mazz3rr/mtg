@@ -41,7 +41,7 @@ class DraftsimDeckScraper(DeckScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return is_more_than_root_path(url, "decks")
+        return is_more_than_root_path(url, "draftsim.com", "decks")
 
     @classmethod
     @override
@@ -133,7 +133,7 @@ class DraftsimArticleScraper(HybridContainerScraper):
     def is_valid_url(cls, url: str) -> bool:
         tokens = "/decks/", "/author/", "/blog", "/ratings/", "/all-sets", "/arenatutor"
         return (
-            is_more_than_root_path(url)
+            is_more_than_root_path(url, "draftsim.com")
             and not any(t in url.lower() for t in tokens)
         )
 

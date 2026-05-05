@@ -190,7 +190,7 @@ class CoolStuffIncArticleScraper(HybridContainerScraper):
     @override
     def is_valid_url(cls, url: str) -> bool:
         return (
-            is_more_than_root_path(url, "a")
+            is_more_than_root_path(url, "coolstuffinc.com", "a")
             and "action=search" not in url.lower()
         )
 

@@ -129,7 +129,7 @@ class MtgCircleVideoDeckScraper(DeckScraper):
         url = url.lower()
         if "mtgcircle.com/videos/" not in url or "/draft/" in url:
             return False
-        return is_more_than_root_path(url, "videos")
+        return is_more_than_root_path(url, "mtgcircle.com", "videos")
 
     # FIXME: this doesn't work as it's in a part loaded dynamically
     @override
@@ -190,7 +190,7 @@ class MtgCircleRegularDeckScraper(MtgCircleVideoDeckScraper):
         url = url.lower()
         if "mtgcircle.com/decks/" not in url or "/draft/" in url:
             return False
-        return is_more_than_root_path(url, "decks")
+        return is_more_than_root_path(url, "mtgcircle.com", "decks")
 
     @override
     def _retrieve_deck_data(self, data: Json) -> Json:

@@ -61,7 +61,7 @@ class CardKingdomArticleScraper(HybridContainerScraper):
     def is_valid_url(cls, url: str) -> bool:
         tokens = "/category/", '/tag/', '/submissions/', '/updates/', '/author/'
         return (
-            is_more_than_root_path(url)
+            is_more_than_root_path(url, "blog.cardkingdom.com")
             and not any(t in url.lower() for t in tokens)
         )
 

@@ -40,7 +40,7 @@ class PlayingMtgDeckScraper(DeckScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return is_more_than_root_path(url, "decks")
+        return is_more_than_root_path(url, "playingmtg.com", "decks")
 
     @classmethod
     @override
@@ -131,7 +131,7 @@ class PlayingMtgTournamentScraper(DeckUrlsContainerScraper):
     @classmethod
     @override
     def is_valid_url(cls, url: str) -> bool:
-        return is_more_than_root_path(url, "tournaments")
+        return is_more_than_root_path(url, "playingmtg.com", "tournaments")
 
     def _parse_input_for_metadata(self) -> None:
         if event_date_hook := self._soup.find("div", string=lambda s: s and s == "Event Date"):
@@ -214,7 +214,7 @@ class PlayingMtgArticleScraper(HybridContainerScraper):
         )
         if any(f"playingmtg.com/{t}" in url.lower() for t in tokens):
             return False
-        return is_more_than_root_path(url)
+        return is_more_than_root_path(url, "playingmtg.com")
 
     @override
     def _parse_input_for_decks_data(self) -> None:
