@@ -1355,9 +1355,8 @@ def query_api_for_card(card_name: str) -> Card | None:
     query - even though they are English. Still, they pass in the 'fuzzy' mode - the same as
     localized cards.
 
-    If the returned card has a different name then the queried one, this function ensures it's
-    either a localized or reflavored card case. Otherwise, it returns None and complains with
-    warning in the logs.
+    If the returned card has a different name from the queried one, and it's not either a
+    localized or reflavored version, this function will complain with warning in the logs about it.
     """
     _log.info(f"Querying Scryfall for {card_name!r}...")
     try:
@@ -1386,7 +1385,6 @@ def query_api_for_card(card_name: str) -> Card | None:
             _log.warning(
                 f"Mismatched card found by Scryfall API query: {found.name!r} "
                 f"instead of {card_name!r}")
-            return None
         return found
 
     _log.warning(f"Scryfall API failed to found {card_name!r}")

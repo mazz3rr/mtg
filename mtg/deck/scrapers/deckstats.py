@@ -129,7 +129,7 @@ class DeckstatsDeckScraper(DeckScraper):
                 url=self.url)
         self._soup = BeautifulSoup(response.text, "lxml")
         self._validate_soup()
-        self._json = self._extract_json()
+        self._extract_json()
 
     @override
     def _parse_input_for_metadata(self) -> None:

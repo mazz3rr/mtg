@@ -10,6 +10,7 @@
 import json
 import logging
 import time
+from collections.abc import Iterable
 
 import backoff
 import pyperclip
@@ -69,7 +70,7 @@ def _is_cloudflare_block(soup: BeautifulSoup) -> bool:
 def fetch_dynamic_soup(
         url: str,
         xpath: str,
-        *halt_xpaths: str,
+        halt_xpaths: Iterable[str] = (),
         click=False,
         wait_for_all=False,
         consent_xpath="",

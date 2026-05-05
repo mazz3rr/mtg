@@ -27,10 +27,13 @@ CLIPBOARD_XPATH = "//span[text()='Copy to MTGA']"
 class UntappedProfileDeckScraper(DeckScraper):
     """Scraper of decklist page of Untapped.gg user's profile.
     """
-    NO_GAMES_XPATH = (
-        "//div[text()='No games have been played with this deck in the selected time frame']"
-    )
-    PRIVATE_XPATH = "//div[text()='This profile is private']"
+    SELENIUM_PARAMS = {  # override
+        "xpath": CLIPBOARD_XPATH,
+        "halt_xpaths":(
+            "//div[text()='No games have been played with this deck in the selected time frame']",
+            "//div[text()='This profile is private']",
+        )
+    }
     EXAMPLE_URLS = (
         "https://mtga.untapped.gg/profile/1ebb0626-01d1-46e1-9de9-8fe0e44cf0bf/TYDMHO3B7ZBKVHKYYX34JLSSXA/deck/8fd8ce80-01a3-4df8-aafc-a0aa0f90969f?gameType=constructed&constructedType=ranked&constructedFormat=standard",
     )
@@ -45,18 +48,6 @@ class UntappedProfileDeckScraper(DeckScraper):
     def normalize_url(cls, url: str) -> str:
         url = normalize_url(url, case_sensitive=True)
         return strip_url_query(url)
-
-    def _fetch_soup(self) -> None:
-        try:
-            self._soup, _, self._clipboard = fetch_dynamic_soup(
-                self.url, CLIPBOARD_XPATH, self.NO_GAMES_XPATH, self.PRIVATE_XPATH,
-                consent_xpath=CONSENT_XPATH, clipboard_xpath=CLIPBOARD_XPATH)
-        except NoSuchElementException:
-            raise ScrapingError(
-                "Scraping failed due to absence of the looked for element", scraper=type(self),
-                url=self.url)
-        except TimeoutException:
-            raise ScrapingError(self._selenium_timeout_msg, scraper=type(self), url=self.url)
 
     @override
     def _parse_input_for_metadata(self) -> None:
