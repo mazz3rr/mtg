@@ -13,6 +13,7 @@ from typing import override
 
 from mtg.deck.scrapers.abc import DeckScraper
 from mtg.lib.scrape.core import ScrapingError, strip_url_query
+from mtg.lib.scrape.dynamic import Xpath
 
 _log = logging.getLogger(__name__)
 
@@ -22,7 +23,9 @@ class MtgSearchItDeckScraper(DeckScraper):
     """Scraper of a MTGSearch.it decklist page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//div[contains(@class, 'tags') and contains(@class, 'mt10')]"
+        "xpaths": [
+            Xpath("//div[contains(@class, 'tags') and contains(@class, 'mt10')]"),
+        ],
     }
     EXAMPLE_URLS = (
         "https://mtgsearch.it/decks/jeskai-convoke",

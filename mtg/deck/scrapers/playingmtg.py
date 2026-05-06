@@ -19,6 +19,7 @@ from mtg.lib.scrape.core import (
     ScrapingError, find_links, find_next_sibling_tag,
     is_more_than_root_path, normalize_url, prepend_url, strip_url_query,
 )
+from mtg.lib.scrape.dynamic import Xpath
 from mtg.scryfall import Card
 
 _log = logging.getLogger(__name__)
@@ -30,7 +31,9 @@ class PlayingMtgDeckScraper(DeckScraper):
     """Scraper of PlayingMTG decklist page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": '//article//div/a[contains(@href, "/playingmtg.com/cards/")]'
+        "xpaths": [
+            Xpath('//article//div/a[contains(@href, "/playingmtg.com/cards/")]'),
+        ],
     }
     EXAMPLE_URLS = (
         "https://playingmtg.com/decks/dimir-midrange-t0wk2",
@@ -117,8 +120,9 @@ class PlayingMtgTournamentScraper(DeckUrlsContainerScraper):
     """Scraper of PlayingMTG tournament page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": '//div[text()="Event Date"]',
-        "wait_for_all": True
+        "xpaths": [
+            Xpath('//div[text()="Event Date"]', wait_for_all=True),
+        ],
     }
     THROTTLING = DeckUrlsContainerScraper.THROTTLING * 2  # override
     CONTAINER_NAME = "PlayingMTG tournament"  # override
@@ -193,8 +197,12 @@ class PlayingMtgArticleScraper(HybridContainerScraper):
     """Scraper of PlayingMTG article page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": '//div[@class="RootOfEmbeddedDeck"]//a[contains(@href, "/decks/")]',
-        "wait_for_all": True
+        "xpaths": [
+            Xpath(
+                text='//div[@class="RootOfEmbeddedDeck"]//a[contains(@href, "/decks/")]',
+                wait_for_all=True,
+            ),
+        ],
     }
     THROTTLING = DeckUrlsContainerScraper.THROTTLING * 2  # override
     CONTAINER_NAME = "PlayingMTG article"  # override

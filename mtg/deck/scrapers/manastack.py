@@ -11,6 +11,7 @@ import logging
 from typing import override
 
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
+from mtg.lib.scrape.dynamic import Xpath
 from mtg.lib.time import get_date_from_ago_text
 from mtg.lib.scrape.core import ScrapingError, strip_url_query
 
@@ -22,7 +23,9 @@ class ManaStackDeckScraper(DeckScraper):
     """Scraper of ManaStack decklist page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//div[@class='deck-list-container']"
+        "xpaths": [
+            Xpath("//div[@class='deck-list-container']"),
+        ],
     }
     EXAMPLE_URLS = (
         "https://manastack.com/deck/dustin-and-max-learned-tap-dancing",
@@ -85,7 +88,9 @@ class ManaStackUserScraper(DeckUrlsContainerScraper):
     """Scraper of ManaStack user page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": '//div[@class="deck-listing-container"]'
+        "xpaths": [
+            Xpath('//div[@class="deck-listing-container"]'),
+        ],
     }
     CONTAINER_NAME = "ManaStack user"  # override
     DECK_SCRAPER_TYPES = ManaStackDeckScraper,  # override

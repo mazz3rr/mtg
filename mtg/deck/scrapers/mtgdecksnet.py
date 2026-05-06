@@ -21,6 +21,7 @@ from mtg.lib.scrape.core import (
     ScrapingError, find_previous_sibling_tag, get_netloc_domain,
     get_path_segments, strip_url_query,
 )
+from mtg.lib.scrape.dynamic import Xpath
 from mtg.scryfall import all_formats
 
 _log = logging.getLogger(__name__)
@@ -77,7 +78,9 @@ class MtgDecksNetDeckScraper(DeckScraper):
     """Scraper of MTGDecks.net decklist page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//textarea[@id='arena_deck']"
+        "xpaths": [
+            Xpath("//textarea[@id='arena_deck']"),
+        ],
     }
     _FORMATS = {
         "brawl": "standardbrawl",
@@ -131,7 +134,9 @@ class MtgDecksNetTournamentScraper(DeckUrlsContainerScraper):
     """Scraper of MTGDecks.net tournament page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": '//a[contains(@href, "-decklist-")]'
+        "xpaths": [
+            Xpath('//a[contains(@href, "-decklist-")]', wait_for_all=True),
+        ],
     }
     CONTAINER_NAME = "MTGDecks.net tournament"  # override
     DECK_SCRAPER_TYPES = MtgDecksNetDeckScraper,  # override
@@ -160,7 +165,8 @@ class MtgDecksNetTournamentScraper(DeckUrlsContainerScraper):
     @override
     def _parse_input_for_decks_data(self) -> None:
         deck_tags = [
-            tag for tag in self._soup.find_all("a", href=lambda h: h and "-decklist-" in h)]
+            tag for tag in self._soup.find_all("a", href=lambda h: h and "-decklist-" in h)
+        ]
         if not deck_tags:
             raise ScrapingError("Deck tags not found", scraper=type(self), url=self.url)
         self._deck_urls = [deck_tag.attrs["href"] for deck_tag in deck_tags]
@@ -171,8 +177,9 @@ class MtgDecksNetArticleScraper(HybridContainerScraper):
     """Scraper of MTGDecks.net article page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//div[@class='framed']",
-        "wait_for_all": True
+        "xpaths": [
+            Xpath("//div[@class='framed']", wait_for_all=True),
+        ],
     }
     CONTAINER_NAME = "MTGDecks.net article"  # override
     DECK_TAG_PARSER_TYPE = MtgDecksNetDeckTagParser  # override

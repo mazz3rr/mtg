@@ -16,7 +16,7 @@ from selenium.common import TimeoutException
 
 from mtg.lib.common import Noop
 from mtg.lib.scrape.core import dissect_js, fetch
-from mtg.lib.scrape.dynamic import fetch_dynamic_soup
+from mtg.lib.scrape.dynamic import Xpath, fetch_dynamic_soup
 from mtg.session import ScrapingSession
 
 _log = logging.getLogger(__name__)
@@ -169,7 +169,7 @@ class LinksExpander:
 
     def _get_patreon_text_tag(self, link: str) -> Tag | None:
         try:
-            soup, _, _ = fetch_dynamic_soup(link, self._PATREON_XPATH, timeout=10)
+            soup, _, _ = fetch_dynamic_soup(link, [Xpath(self._PATREON_XPATH)], timeout=10)
             if not soup:
                 _log.warning("Patreon post data not available")
                 self._session.add_failed_url(link)
@@ -177,7 +177,7 @@ class LinksExpander:
             return soup.find("div", class_=lambda c: c and "sc-dtMgUX" in c and 'IEufa' in c)
         except TimeoutException:
             try:
-                soup, _, _ = fetch_dynamic_soup(link, self._PATREON_XPATH2)
+                soup, _, _ = fetch_dynamic_soup(link,[Xpath(self._PATREON_XPATH2)])
                 if not soup:
                     _log.warning("Patreon post data not available")
                     self._session.add_failed_url(link)
@@ -205,7 +205,7 @@ class LinksExpander:
     def _expand_google_doc(self, link: str) -> None:
         # url = "https://docs.google.com/document/d/1Bnsd4M7n_8LHfN6uEJVxoRr72antIEIO9w4YOGKltiU/edit"
         try:
-            soup, _, _ = fetch_dynamic_soup(link, self._GOOGLE_DOC_XPATH)
+            soup, _, _ = fetch_dynamic_soup(link, [Xpath(self._GOOGLE_DOC_XPATH)])
             if not soup:
                 _log.warning("Google Docs document data not available")
                 self._session.add_failed_url(link)

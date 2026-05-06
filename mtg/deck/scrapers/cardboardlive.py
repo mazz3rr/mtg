@@ -12,6 +12,7 @@ from typing import override
 
 from mtg.deck.scrapers.abc import DeckScraper
 from mtg.lib.scrape.core import strip_url_query
+from mtg.lib.scrape.dynamic import Xpath
 from mtg.yt.discover import UrlHook
 
 _log = logging.getLogger(__name__)
@@ -31,7 +32,9 @@ class CardBoardLiveDeckScraper(DeckScraper):
     """Scraper of a CardBoard Live decklist page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": CLIPBOARD_XPATH,
+        "xpaths": [
+            Xpath(CLIPBOARD_XPATH),
+        ],
         "clipboard_xpath": CLIPBOARD_XPATH
     }
     EXAMPLE_URLS = (

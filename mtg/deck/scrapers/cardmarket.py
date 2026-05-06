@@ -17,6 +17,7 @@ from mtg.deck.abc import DeckTagParser
 from mtg.deck.scrapers.abc import HybridContainerScraper
 from mtg.lib.common import from_iterable
 from mtg.lib.scrape.core import ScrapingError, strip_url_query
+from mtg.lib.scrape.dynamic import Xpath
 from mtg.scryfall import COMMANDER_FORMATS, Card, all_formats
 from mtg.yt.discover import UrlHook
 
@@ -143,8 +144,9 @@ class CardmarketArticleScraper(HybridContainerScraper):
     """Scraper of Cardmarket article page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//div[@class='table-responsive mb-4']",
-        "wait_for_all": True
+        "xpaths": [
+            Xpath("//div[@class='table-responsive mb-4']", wait_for_all=True),
+        ],
     }
     CONTAINER_NAME = "Cardmarket article"  # override
     DECK_TAG_PARSER_TYPE = CardmarketDeckTagParser  # override
@@ -205,8 +207,9 @@ class CardmarketWriterScraper(HybridContainerScraper):
     """Scraper of Cardmarket writer page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//article//a[contains(@href, '/Insight/Articles/')]",
-        "wait_for_all": True
+        "xpaths": [
+            Xpath("//article//a[contains(@href, '/Insight/Articles/')]", wait_for_all=True),
+        ],
     }
     CONTAINER_NAME = "Cardmarket writer"  # override
     CONTAINER_SCRAPER_TYPES = CardmarketArticleScraper,  # override

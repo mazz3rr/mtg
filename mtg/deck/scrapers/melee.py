@@ -16,6 +16,7 @@ from mtg.constants import SECRETS
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
 from mtg.lib.common import from_iterable
 from mtg.lib.scrape.core import ScrapingError, find_links
+from mtg.lib.scrape.dynamic import Xpath
 
 _log = logging.getLogger(__name__)
 
@@ -115,7 +116,9 @@ class MeleeGgTournamentScraper(DeckUrlsContainerScraper):
     """Scraper of Melee.gg tournament page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": '//a[@data-type="decklist"]'
+        "xpaths": [
+            Xpath('//a[@data-type="decklist"]'),
+        ]
     }
     CONTAINER_NAME = "Melee.gg tournament"  # override
     DECK_SCRAPER_TYPES = MeleeGgDeckScraper,  # override
@@ -150,7 +153,9 @@ class MeleeGgProfileScraper(DeckUrlsContainerScraper):
     """Scraper of Melee.gg profile page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": '//tr[@role="row"]'
+        "xpaths": [
+            Xpath('//tr[@role="row"]'),
+        ],
     }
     CONTAINER_NAME = "Melee.gg profile"  # override
     DECK_SCRAPER_TYPES = MeleeGgDeckScraper,  # override

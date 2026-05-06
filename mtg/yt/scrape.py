@@ -44,7 +44,7 @@ from mtg.lib.scrape.core import (
     ScrapingError, extract_url, http_requests_counted,
     parse_keywords, throttle, throttled, unshorten,
 )
-from mtg.lib.scrape.dynamic import fetch_dynamic_soup
+from mtg.lib.scrape.dynamic import ConsentXpath, Xpath, fetch_dynamic_soup
 from mtg.lib.scrape.linktree import LinktreeScraper
 from mtg.lib.time import naive_utc_now, timed
 from mtg.scryfall import all_formats
@@ -416,8 +416,8 @@ class MissingChannelData(ScrapingError):
 class ChannelScraper:
     """Scrape YouTube channel's videos for MtG deck data.
     """
-    CONSENT_XPATH = "//button[@aria-label='Accept all']"
-    XPATH = "//span[contains(., 'subscriber')]"
+    XPATH = Xpath("//span[contains(., 'subscriber')]")
+    CONSENT_XPATH = ConsentXpath("//button[@aria-label='Accept all']")
 
     @property
     def url(self) -> str:
@@ -516,7 +516,8 @@ class ChannelScraper:
     # not currently used
     def _fetch_info_with_selenium(  # not used
             self) -> tuple[str | None, str | None, list[str] | None, int | None]:
-        soup, _, _ = fetch_dynamic_soup(self.url, self.XPATH, consent_xpath=self.CONSENT_XPATH)
+        soup, _, _ = fetch_dynamic_soup(
+            self.url, [self.XPATH], consent_xpath=self.CONSENT_XPATH, headless=True)
         title, description, tags, subscribers = None, None, None, None
 
         # title (from <meta> or <title>)

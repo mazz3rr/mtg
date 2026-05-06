@@ -15,8 +15,9 @@ from collections.abc import Callable, Iterator
 from datetime import date, datetime
 from typing import Any, Literal, Self
 
-from mtg.constants import Json
-from mtg.constants import READABLE_TIMESTAMP_FORMAT
+import njsparser
+
+from mtg.constants import Json, READABLE_TIMESTAMP_FORMAT
 
 
 def serialize_dates(obj: Any) -> str:
@@ -119,8 +120,16 @@ class Node:
         return not self.ancestors
 
     @property
-    def is_text(self) -> bool:
+    def is_str(self) -> bool:
         return isinstance(self.data, str)
+
+    @property
+    def is_list(self) -> bool:
+        return isinstance(self.data, list)
+
+    @property
+    def is_dict(self) -> bool:
+        return isinstance(self.data, dict)
 
     @property
     def next_sibling(self) -> Self | None:
@@ -273,6 +282,18 @@ class Node:
         """
         return next(self.find_all_by_path(path, mode), None)
 
-    @property
     def text_nodes(self) -> Iterator[Self]:
-        return self.find_all(lambda n: n.is_text)
+        return self.find_all(lambda n: n.is_str)
+
+
+def node_from_njs_fd_markup(markup: str) -> Node:
+    """Return a Node wrapper on JSON data extracted from passed HTML markup by njsparser.
+
+    This function assumes the passed markup contains a valid Next.js flight data. Otherwise,
+    all hell can break loose: https://chatgpt.com/s/t_69fba6b23b6c81918681c2eb3a2e7f47
+    """
+    fd = njsparser.BeautifulFD(markup)
+    parsed_json = json.dumps(fd, default=njsparser.default)
+    parsed_data = json.loads(parsed_json)
+    return Node(parsed_data)
+

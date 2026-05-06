@@ -25,6 +25,7 @@ from mtg.lib.scrape.core import (
     ScrapingError, fetch_throttled_soup, http_requests_counted,
     strip_url_query,
 )
+from mtg.lib.scrape.dynamic import ConsentXpath, Xpath
 from mtg.lib.time import timed
 from mtg.scryfall import all_formats
 from mtg.yt.discover import UrlHook
@@ -151,8 +152,10 @@ class GoldfishDeckScraper(DeckScraper):
     """Scraper of MTGGoldfish decklist page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//table[@class='deck-view-deck-table']",
-        "consent_xpath": CONSENT_XPATH
+        "xpaths": [
+            Xpath("//table[@class='deck-view-deck-table']"),
+        ],
+        "consent_xpath": ConsentXpath(CONSENT_XPATH)
     }
     EXAMPLE_URLS = (
         "https://www.mtggoldfish.com/deck/6833104#paper",
@@ -263,9 +266,10 @@ class GoldfishArticleScraper(HybridContainerScraper):
     """Scraper of MTG Goldfish article page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//div[@class='deck-container']",
-        "consent_xpath": CONSENT_XPATH,
-        "wait_for_all": True
+        "xpaths": [
+            Xpath("//div[@class='deck-container']", wait_for_all=True),
+        ],
+        "consent_xpath": ConsentXpath(CONSENT_XPATH),
     }
     CONTAINER_NAME = "Goldfish article"  # override
     DECK_TAG_PARSER_TYPE = GoldfishDeckTagParser  # override

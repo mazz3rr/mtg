@@ -21,7 +21,7 @@ from mtg.deck.abc import DeckTagParser
 from mtg.deck.scrapers.abc import DeckScraper, DeckTagsContainerScraper
 from mtg.lib.common import ParsingError
 from mtg.lib.scrape.core import ScrapingError, get_query_values, strip_url_query
-from mtg.lib.scrape.dynamic import fetch_dynamic_soup
+from mtg.lib.scrape.dynamic import fetch_dynamic_soup, Xpath, ConsentXpath
 from mtg.lib.text import sanitize_whitespace
 
 _log = logging.getLogger(__name__)
@@ -156,8 +156,10 @@ class MagicGgDeckScraper(DeckScraper):
     """Scraper of Magic.gg event page that points to an individual deck.
     """
     SELENIUM_PARAMS = {
-        "xpath": '//div[@class="css-3X0PN"]',
-        "consent_xpath": '//button[@aria-label="Reject All"]'
+        "xpaths": [
+            Xpath('//div[@class="css-3X0PN"]'),
+        ],
+        "consent_xpath": ConsentXpath('//button[@aria-label="Reject All"]')
     }
     EXAMPLE_URLS = (
         "https://magic.gg/decklists/february-kaldheim-league-weekend-mpl-decklists?decklist=_Reid%2520Duke_February%2520Kaldheim%2520League%2520Weekend_02_27_21_7e2afc8b-3c0e-4873-8f71-e7b9b2fa70f2",
@@ -233,7 +235,7 @@ class MagicGgEventScraper(DeckTagsContainerScraper):
             self.__class__.TAG_BASED_DECK_PARSER = MagicGgOldDeckTagParser
             try:
                 self._soup, _, _ = fetch_dynamic_soup(
-                    self.url, MagicGgDeckScraper.SELENIUM_PARAMS["xpath"],
+                    self.url, MagicGgDeckScraper.SELENIUM_PARAMS["xpaths"],
                     consent_xpath=MagicGgDeckScraper.SELENIUM_PARAMS["consent_xpath"])
                 deck_tags = [*self._soup.find_all("div", class_="css-3X0PN")]
                 if not deck_tags:

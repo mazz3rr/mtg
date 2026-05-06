@@ -11,12 +11,10 @@ import logging
 from datetime import datetime
 from typing import override
 
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
 from mtg.lib.numbers import extract_float, extract_int
 from mtg.lib.scrape.core import ScrapingError, find_next_sibling_tag, normalize_url, strip_url_query
-from mtg.lib.scrape.dynamic import fetch_dynamic_soup
+from mtg.lib.scrape.dynamic import ConsentXpath, Xpath
 
 _log = logging.getLogger(__name__)
 CONSENT_XPATH = '//button[contains(@class, "fc-button fc-cta-consent") and @aria-label="Consent"]'
@@ -28,11 +26,15 @@ class UntappedProfileDeckScraper(DeckScraper):
     """Scraper of decklist page of Untapped.gg user's profile.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": CLIPBOARD_XPATH,
-        "halt_xpaths":(
-            "//div[text()='No games have been played with this deck in the selected time frame']",
-            "//div[text()='This profile is private']",
-        )
+        "xpaths": [
+            Xpath(
+                text=CLIPBOARD_XPATH,
+                halt_xpaths=(
+                    "//div[text()='No games have been played with this deck in the selected time frame']",
+                    "//div[text()='This profile is private']",
+                )
+            ),
+        ],
     }
     EXAMPLE_URLS = (
         "https://mtga.untapped.gg/profile/1ebb0626-01d1-46e1-9de9-8fe0e44cf0bf/TYDMHO3B7ZBKVHKYYX34JLSSXA/deck/8fd8ce80-01a3-4df8-aafc-a0aa0f90969f?gameType=constructed&constructedType=ranked&constructedFormat=standard",
@@ -67,8 +69,10 @@ class UntappedRegularDeckScraper(DeckScraper):
     """Scraper of a regular Untapped.gg decklist page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": CLIPBOARD_XPATH,
-        "consent_xpath": CONSENT_XPATH,
+        "xpaths": [
+            Xpath(CLIPBOARD_XPATH),
+        ],
+        "consent_xpath": ConsentXpath(CONSENT_XPATH),
         "clipboard_xpath": CLIPBOARD_XPATH
     }
     EXAMPLE_URLS = (
@@ -104,8 +108,10 @@ class UntappedMetaDeckScraper(DeckScraper):
     """Scraper of Untapped meta-decks page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": CLIPBOARD_XPATH,
-        "consent_xpath": CONSENT_XPATH,
+        "xpaths": [
+            Xpath(CLIPBOARD_XPATH),
+        ],
+        "consent_xpath": ConsentXpath(CONSENT_XPATH),
         "clipboard_xpath": CLIPBOARD_XPATH
     }
     EXAMPLE_URLS = (
@@ -170,9 +176,13 @@ class UntappedProfileScraper(DeckUrlsContainerScraper):
     """Scraper of Untapped.gg user profile page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//a[contains(@href, '/profile/') and contains(@class, 'deckbox')]",
-        "consent_xpath": CONSENT_XPATH,
-        "wait_for_all": True
+        "xpaths": [
+            Xpath(
+                text="//a[contains(@href, '/profile/') and contains(@class, 'deckbox')]",
+                wait_for_all=True,
+            ),
+        ],
+        "consent_xpath": ConsentXpath(CONSENT_XPATH),
     }
     THROTTLING = DeckUrlsContainerScraper.THROTTLING * 1.4  # override
     CONTAINER_NAME = "Untapped profile"  # override

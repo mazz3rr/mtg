@@ -550,23 +550,28 @@ def prepend_url(url: str, prefix="") -> str:
 
 def find_links(
         *tags: Tag, css_selector="", url_prefix="", query_stripped=False,
-        **bs_options) -> list[str]:
+        **bs_find_all_options) -> list[str]:
     """Find all links in the provided tags.
 
-        Args:
-            *tags: variable number of BeautifulSoup tags containing links
-            css_selector: CSS selector to pass to BeautifulSoup's select() method
-            url_prefix: prefix to prepend relative URLs with
-            query_stripped: whether to strip the query part of the URL
-            **bs_options: options to pass to BeautifulSoup's find_all() method for better filtering
-        """
+    CSS selector provided should point to `<a>` tags. If it's provided `bs_find_all_options` are
+    ignored as `select()` and not `find_all()` is utilized.
+
+    Args:
+        *tags: variable number of BeautifulSoup tags containing links
+        css_selector: CSS selector to pass to BeautifulSoup's select() method
+        url_prefix: prefix to prepend relative URLs with
+        query_stripped: whether to strip the query part of the URL
+        **bs_find_all_options: options to pass to BeautifulSoup's find_all() method for better filtering
+    """
     links = set()
     for tag in tags:
+        if tag.name == "a":
+            links.add(tag["href"].removesuffix("/"))
         if css_selector:
-            links |= {t.attrs["href"].removesuffix("/") for t in tag.select(css_selector)}
+            links |= {t["href"].removesuffix("/") for t in tag.select(css_selector)}
         else:
-            bs_options = bs_options or {"href": lambda h: h}
-            links |= {t.attrs["href"].removesuffix("/") for t in tag.find_all("a", **bs_options)}
+            bs_options = bs_find_all_options or {"href": lambda h: h}
+            links |= {t["href"].removesuffix("/") for t in tag.find_all("a", **bs_options)}
     links = {prepend_url(l, url_prefix) for l in links} if url_prefix else links
     links = {strip_url_query(l) for l in links} if query_stripped else links
     return sorted(links)

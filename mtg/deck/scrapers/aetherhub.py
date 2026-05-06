@@ -22,6 +22,7 @@ from mtg.deck.scrapers.abc import (
 from mtg.lib.common import from_iterable
 from mtg.lib.numbers import extract_float, extract_int
 from mtg.lib.scrape.core import ScrapingError, normalize_url, strip_url_query
+from mtg.lib.scrape.dynamic import ConsentXpath, Xpath
 from mtg.yt.discover import UrlHook
 
 _log = logging.getLogger(__name__)
@@ -128,10 +129,10 @@ class AetherhubDeckScraper(DeckScraper):
         "Oathbreaker": ("oathbreaker", Mode.BO3),
     }
     SELENIUM_PARAMS = {  # override
-        "xpath": '//div[@class="row"]',
-        "wait_for_all": True,
-        "consent_xpath": CONSENT_XPATH,
-        "wait_for_consent_disappearance": False
+        "xpaths": [
+            Xpath('//div[@class="row"]', wait_for_all=True),
+        ],
+        "consent_xpath": ConsentXpath(CONSENT_XPATH),
     }
     EXAMPLE_URLS = (
         "https://aetherhub.com/Deck/tmnt-boros-ascension",
@@ -272,9 +273,10 @@ class AetherhubUserScraper(DeckUrlsContainerScraper):
     """Scraper of Aetherhub user page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": '//table[contains(@id, "metaHubTable")]',
-        "consent_xpath": CONSENT_XPATH,
-        "wait_for_consent_disappearance": False
+        "xpaths": [
+            Xpath('//table[contains(@id, "metaHubTable")]'),
+        ],
+        "consent_xpath": ConsentXpath(CONSENT_XPATH),
     }
     CONTAINER_NAME = "Aetherhub user"  # override
     DECK_SCRAPER_TYPES = AetherhubDeckScraper,  # override
@@ -313,9 +315,10 @@ class AetherhubEventScraper(DeckUrlsContainerScraper):
     """Scraper of Aetherhub event page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": '//tr[@class="deckdata"]',
-        "consent_xpath": CONSENT_XPATH,
-        "wait_for_consent_disappearance": False
+        "xpaths": [
+            Xpath('//tr[@class="deckdata"]'),
+        ],
+        "consent_xpath": ConsentXpath(CONSENT_XPATH),
     }
     CONTAINER_NAME = "Aetherhub event"  # override
     DECK_SCRAPER_TYPES = AetherhubDeckScraper,  # override
@@ -355,9 +358,10 @@ class AetherhubArticleScraper(HybridContainerScraper):
     CONTAINER_NAME = "Aetherhub article"  # override
     CONTAINER_SCRAPER_TYPES = AetherhubUserScraper, AetherhubEventScraper  # override
     SELENIUM_PARAMS = {  # override
-        "xpath": '//div[@id="article-text"]',
-        "consent_xpath": CONSENT_XPATH,
-        "wait_for_consent_disappearance": False
+        "xpaths": [
+            Xpath('//div[@id="article-text"]'),
+        ],
+        "consent_xpath": ConsentXpath(CONSENT_XPATH),
     }
     EXAMPLE_URLS = (
         "https://aetherhub.com/Article/Theros-Beyond-Death-Fresh-new-decks",

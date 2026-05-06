@@ -30,7 +30,7 @@ from mtg.lib.scrape.core import (
     ScrapingError, fetch_json, get_path_segments, get_query_data, get_query_values,
     strip_url_query, throttle,
 )
-from mtg.lib.scrape.dynamic import SCROLL_DOWN_TIMES, fetch_dynamic_soup
+from mtg.lib.scrape.dynamic import fetch_dynamic_soup, Xpath, ScrollDown, SCROLL_DOWN_TIMES
 from mtg.scryfall import Card
 
 _log = logging.getLogger(__name__)
@@ -382,13 +382,13 @@ class TcgPlayerArticleScraper(DecksJsonContainerScraper):
     """
     _HOOK = "/magic-the-gathering/deck/"
     SELENIUM_PARAMS = {  # override
-        "xpath": f"//a[contains(@href, '{_HOOK}')]",
-        # "consent_xpath": ("//button[contains(@class, 'martech-button') and contains(@class, "
-        #                   "'martech-medium') and contains(@class, 'martech-primary')]"),
-        "wait_for_all": True,
-        "scroll_down": True,
-        "scroll_down_delay": 2.0,
-        "timeout": 5.0
+        "xpaths": (
+            Xpath(
+                text=f"//a[contains(@href, '{_HOOK}')]",
+                wait_for_all=True,
+                timeout=5.0,
+            ),
+        ),
     }
     CONTAINER_NAME = "TCGPlayer article"  # override
     DECK_JSON_PARSER_TYPE = TcgPlyerDeckJsonParser  # override
@@ -425,7 +425,10 @@ class TcgPlayerArticleScraper(DecksJsonContainerScraper):
     def _fetch_soup(self) -> None:
         try:
             self._soup, _, _ = fetch_dynamic_soup(
-                self.url, **self.SELENIUM_PARAMS, scroll_down_times=self._scroll_down_times)
+                self.url,
+                scroll_down=ScrollDown(self._scroll_down_times, delay=2.0),
+                **self.SELENIUM_PARAMS
+            )
         except TimeoutException:
             raise ScrapingError(self._selenium_timeout_msg, scraper=type(self), url=self.url)
 
@@ -458,8 +461,11 @@ class TcgPlayerAuthorScraper(HybridContainerScraper):
     """Scraper of TCG Player author page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//div[@class='grid']",
-        # "consent_xpath": TcgPlayerInfiniteArticleScraper.SELENIUM_PARAMS["consent_xpath"],
+        "xpaths": (
+            Xpath(
+                text="//div[@class='grid']"
+            ),
+        ),
     }
     CONTAINER_NAME = "TCGPlayer author"  # override
     CONTAINER_SCRAPER_TYPES = TcgPlayerArticleScraper,  # override
@@ -530,7 +536,7 @@ class TcgPlayerAuthorDecksPaneScraper(DeckUrlsContainerScraper):
     """Scraper of TCG Player author decks page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": TcgPlayerAuthorScraper.SELENIUM_PARAMS["xpath"],
+        "xpaths": TcgPlayerAuthorScraper.SELENIUM_PARAMS["xpaths"],
         # "consent_xpath": TcgPlayerInfiniteArticleScraper.SELENIUM_PARAMS["consent_xpath"],
     }
     CONTAINER_NAME = "TCGPlayer author decks pane"  # override

@@ -15,6 +15,7 @@ import dateutil.parser
 
 from mtg.deck.scrapers.abc import DeckScraper
 from mtg.lib.scrape.core import ScrapingError, dissect_js, strip_url_query
+from mtg.lib.scrape.dynamic import Xpath
 from mtg.yt.discover import UrlHook
 
 _log = logging.getLogger(__name__)
@@ -35,7 +36,9 @@ class CardhoarderDeckScraper(DeckScraper):
     """Scraper of Cardhoarder decklist page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//div[contains(@id, 'deck-viewer')]"
+        "xpaths": [
+            Xpath("//div[contains(@id, 'deck-viewer')]"),
+        ],
     }
     JSON_FROM_SOUP = True  # override
     EXAMPLE_URLS = (

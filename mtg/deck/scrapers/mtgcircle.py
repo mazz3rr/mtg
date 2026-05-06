@@ -23,6 +23,7 @@ from mtg.deck.scrapers.abc import (
 from mtg.lib.common import from_iterable
 from mtg.lib.json import Node
 from mtg.lib.scrape.core import ScrapingError, dissect_js, is_more_than_root_path
+from mtg.lib.scrape.dynamic import Xpath
 from mtg.scryfall import Card, all_formats
 
 _log = logging.getLogger(__name__)
@@ -114,9 +115,13 @@ class MtgCircleVideoDeckScraper(DeckScraper):
     JSON_FROM_SOUP = True  # override
     THROTTLING = _THROTTLING * 2  # override
     SELENIUM_PARAMS = {  # override
-        "xpath": "//script[contains(text(), 'cards') and contains(text(), 'deckPos') and "
-                 "contains(text(), 'mainDeck') and contains(text(), 'name') and contains(text(), "
-                 "'quantity')]",
+        "xpaths": [
+            Xpath(
+                text="//script[contains(text(), 'cards') and contains(text(), 'deckPos') and "
+                     "contains(text(), 'mainDeck') and contains(text(), 'name') and "
+                     "contains(text(), 'quantity')]"
+            )
+        ],
         "headers": {"Referer": "https://www.youtube.com/"}  # FIXME: try passing a cookie (#443)
     }
     EXAMPLE_URLS = (

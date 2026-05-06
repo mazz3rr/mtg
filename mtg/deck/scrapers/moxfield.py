@@ -22,7 +22,7 @@ from mtg.lib.scrape.core import (
     ScrapingError, Soft404Error, get_path_segments, normalize_url,
     strip_url_query,
 )
-from mtg.lib.scrape.dynamic import fetch_dynamic_soup, fetch_selenium_json
+from mtg.lib.scrape.dynamic import fetch_dynamic_soup, fetch_selenium_json, Xpath
 from mtg.scryfall import Card
 
 _log = logging.getLogger(__name__)
@@ -224,7 +224,9 @@ class MoxfieldDeckSearchScraper(DeckUrlsContainerScraper):
     """Scraper of Moxfield deck search results page.
     """
     SELENIUM_PARAMS = {  # override
-        "xpath": "//input[@id='filter']"
+        "xpaths": [
+            Xpath("//input[@id='filter']"),
+        ],
     }
     CONTAINER_NAME = "Moxfield deck search"  # override
     DECK_SCRAPER_TYPES = MoxfieldDeckScraper,  # override
@@ -248,7 +250,7 @@ class MoxfieldDeckSearchScraper(DeckUrlsContainerScraper):
 
     def _get_filter(self) -> str | None:
         try:
-            soup, _, _ = fetch_dynamic_soup(self.url, self.SELENIUM_PARAMS["xpath"])
+            soup, _, _ = fetch_dynamic_soup(self.url, self.SELENIUM_PARAMS["xpaths"])
             if not soup:
                 return None
         except TimeoutException:
