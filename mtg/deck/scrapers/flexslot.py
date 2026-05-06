@@ -21,9 +21,9 @@ from mtg.deck.scrapers.abc import (
     DeckScraper, DeckUrlsContainerScraper, DecksJsonContainerScraper,
     HybridContainerScraper,
 )
-from mtg.lib.json import Node
+from mtg.lib.json import Node, node_from_njs_fd_markup
 from mtg.lib.scrape.core import (
-    InaccessiblePage, ScrapingError, fetch_json,
+    InaccessiblePage, ScrapingError, extract_url, fetch_json,
     is_more_than_root_path, strip_url_query,
 )
 from mtg.yt.discover import UrlHook
@@ -78,11 +78,7 @@ class FlexslotDeckScraper(DeckScraper):
 
     @override
     def _extract_json(self) -> None:
-        markup = str(self._soup)
-        fd = njsparser.BeautifulFD(markup)
-        parsed_json = json.dumps(fd, default=njsparser.default)
-        parsed_data = json.loads(parsed_json)
-        node = Node(parsed_data)
+        node = node_from_njs_fd_markup(self._markup)
         found = node.find_by_path(self._nodepath, mode="end")
         if not found:
             raise ScrapingError("No deck data", scraper=type(self), url=self.url)
@@ -151,66 +147,64 @@ class FlexslotSideboardDeckScraper(FlexslotDeckScraper):
         return is_more_than_root_path(url, "flexslot.gg", "sideboards")
 
 
-# metadata API
-# https://api.flexslot.gg/api/v3/blogposts/a3222f36-64f1-43b1-9b5a-94dffa76459a/metadata/
-# @HybridContainerScraper.registered
-# class FlexslotArticleScraper(HybridContainerScraper):
-#     """Scraper of Flexslot article page.
-#     """
-#     SELENIUM_PARAMS = {
-#         "xpath": "//div[contains(concat(' ', normalize-space(@class), ' '), ' ProseMirror ')]",
-#     }
-#     CONTAINER_NAME = "Flexslot article"  # override
-#     EXAMPLE_URLS = (
-#         "https://flexslot.gg/articles/a3222f36-64f1-43b1-9b5a-94dffa76459a",
-#     )
-#
-#     @classmethod
-#     @override
-#     def is_valid_url(cls, url: str) -> bool:
-#         return is_more_than_root_path(url, "flexslot.gg", "articles")
-#
-#     @classmethod
-#     @override
-#     def normalize_url(cls, url: str) -> str:
-#         return FlexslotDeckScraper.normalize_url(url)
-#
-#     @override
-#     def _pre_parse(self) -> None:
-#         json_data = _get_json_data(
-#             self.url, domain_suffix="/article/", api_domain_suffix="/blogposts/")
-#         if not json_data or not json_data.get("data"):
-#             raise ScrapingError("No article data", scraper=type(self), url=self.url)
-#         self._json = json_data["data"]
-#         if not self._json.get("content"):
-#             raise ScrapingError("No article HTML content data", type(self), self.url)
-#         self._soup = BeautifulSoup(self._json["content"], "lxml")
-#
-#     @override
-#     def _parse_input_for_metadata(self) -> None:
-#         if author := self._json.get("author_name") or self._json.get("author_username"):
-#             self._metadata["author"] = author
-#         if date := self._json.get("date_updated") or self._json.get(
-#                 "date_created") or self._json.get("date_published"):
-#             self._metadata["date"] = dateutil.parser.parse(date).date()
-#         if title := self._json.get("title"):
-#             self._metadata.setdefault("article", {})["title"] = title
-#         if page_views := self._json.get("pageviews"):
-#             self._metadata.setdefault("article", {})["page_views"] = page_views
-#         if likes := self._json.get("likes"):
-#             self._metadata.setdefault("article", {})["likes"] = likes
-#         if tags := self._json.get("tags"):
-#             self._metadata.setdefault("article", {})["tags"] = self.normalize_metadata_deck_tags(tags)
-#
-#     @override
-#     def _parse_input_for_decks_data(self) -> None:
-#         deck_urls, container_urls = self._find_links_in_tags()
-#         deck_urls2, container_urls2 = self._sift_links(
-#             *[t.text for t in self._soup.select("h4 > strong > u")])
-#         self._deck_urls = deck_urls + deck_urls2
-#         self._container_urls = container_urls + container_urls2
-#
-#
+@HybridContainerScraper.registered
+class FlexslotArticleScraper(HybridContainerScraper):
+    """Scraper of Flexslot article page.
+    """
+    SELENIUM_PARAMS = {
+        "xpath": "//div[contains(concat(' ', normalize-space(@class), ' '), ' ProseMirror ')]",
+    }
+    PARSE_NJS_FD = True
+    CONTAINER_NAME = "Flexslot article"  # override
+    EXAMPLE_URLS = (
+        "https://flexslot.gg/articles/a3222f36-64f1-43b1-9b5a-94dffa76459a",
+    )
+
+    @classmethod
+    @override
+    def is_valid_url(cls, url: str) -> bool:
+        return is_more_than_root_path(url, "flexslot.gg", "articles")
+
+    @classmethod
+    @override
+    def normalize_url(cls, url: str) -> str:
+        return FlexslotDeckScraper.normalize_url(url)
+
+    @override
+    def _parse_input_for_metadata(self) -> None:
+        tokens = "title", "author_name", "author_username", "updated_at", "pageviews", "likes"
+        data_node = self._node.find(lambda n: n.is_dict and all(t in n.data for t in tokens))
+        if not data_node:
+            raise ScrapingError("No article metadata found", scraper=type(self), url=self.url)
+        data = data_node.data
+        if author := data.get("author_name") or data.get("author_username"):
+            self._metadata["author"] = author
+        if date := data.get("date_updated") or data.get(
+                "date_created") or data.get("date_published"):
+            self._metadata["date"] = dateutil.parser.parse(date).date()
+        # article-specific metadata
+        self._metadata["article"] = {}
+        self._metadata["article"]["title"] = data["title"]
+        self._metadata["article"]["author"] = data["author_username"]
+        self._metadata["article"]["author_real_name"] = data["author_name"]
+        self._metadata["article"]["date"] = dateutil.parser.parse(data["updated_at"]).date()
+        if tags := data.get("tags"):
+            self._metadata["article"]["tags"] = tags
+        self._metadata["article"]["views"] = data["pageviews"]
+        self._metadata["article"]["likes"] = data["likes"]
+
+    @override
+    def _parse_input_for_decks_data(self) -> None:
+        tokens = "type", "doc", "content", "heading", "paragraph", "text"
+        found = self._node.find(lambda n: n.is_str and all(t in n.data for t in tokens))
+        if not found:
+            raise ScrapingError("No article data found", scraper=type(self), url=self.url)
+        data_node = Node(json.loads(found.data))
+        article_text  = "\n".join(n.data for n in data_node.find_all(lambda n: n.key == "text"))
+        links = [extract_url(l) for l in article_text.splitlines()]
+        self._deck_urls, self._container_urls = self._sift_links(*[l for l in links if l])
+
+
 # # TODO: add articles (once Flexslot.gg actually adds them to a user page)
 # @HybridContainerScraper.registered
 # class FlexslotUserScraper(HybridContainerScraper):

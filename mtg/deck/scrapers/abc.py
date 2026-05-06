@@ -9,6 +9,7 @@
 """
 import logging
 from abc import abstractmethod
+from functools import cached_property
 from typing import Self, Type, override
 
 import backoff
@@ -20,6 +21,7 @@ from mtg.constants import Json
 from mtg.deck.abc import DeckJsonParser, DeckTagParser, NestedDeckParser
 from mtg.deck.core import CardNotFound, Deck, InvalidDeck
 from mtg.lib.common import Noop, ParsingError, register_type
+from mtg.lib.json import Node, node_from_njs_fd_markup
 from mtg.lib.scrape.core import (
     InaccessiblePage, ScrapingError, Soft404Error, Throttling,
     fetch_soup, find_links, normalize_url, prepend_url, throttle,
@@ -47,6 +49,7 @@ class DeckScraper(NestedDeckParser):
     USE_WAYBACK = False
     JSON_FROM_SOUP = False
     JSON_FROM_API = False
+    PARSE_NJS_FD = False
     EXAMPLE_URLS: tuple[str, ...] | None = None
 
     @property
@@ -59,6 +62,10 @@ class DeckScraper(NestedDeckParser):
         word = f"'{word}'" if word else "XPath-defined"
         return f"Selenium timed out looking for {word} element(s)"
 
+    @cached_property
+    def _markup(self) -> str | None:
+        return str(self._soup) if self._soup else None
+
     def __init__(
             self, url: str, metadata: Json | None = None,
             session: ScrapingSession | Noop | None = None) -> None:
@@ -70,6 +77,7 @@ class DeckScraper(NestedDeckParser):
         self._soup: BeautifulSoup | None = None  # for HTML-based scraping
         self._clipboard: str | None  = None  # for Selenium-based scraping
         self._json: Json | None = None  # for JSON-based scraping
+        self._node: Node | None = None  # for NJS-FD parsing
         self._post_init()
 
     def _post_init(self) -> None:
@@ -147,6 +155,8 @@ class DeckScraper(NestedDeckParser):
             if self.JSON_FROM_SOUP:
                 self._extract_json()
                 self._validate_json()
+            elif self.PARSE_NJS_FD:
+                self._node = node_from_njs_fd_markup(self._markup)
 
     @abstractmethod
     @override
@@ -687,6 +697,8 @@ class HybridContainerScraper(
 
     @classmethod
     def _sift_links(cls, *links: str) -> tuple[list[str], list[str]]:
+        """Sift links into deck URLs and container URLs.
+        """
         deck_urls = [l for l in links if any(ds.is_valid_url(l) for ds in cls._get_deck_scraper_types())]
         container_urls = [
             l for l in links if any(
