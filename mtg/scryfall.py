@@ -40,6 +40,7 @@ from pprint import pprint
 from types import EllipsisType
 from typing import Self
 
+import backoff
 import scrython
 from aiohttp.client_exceptions import ServerTimeoutError
 from scrython.base import ScrythonRequestHandler
@@ -49,7 +50,7 @@ from mtg import __version__
 from mtg.constants import APP_NAME, Json
 from mtg.lib.common import from_iterable
 from mtg.lib.numbers import get_float, get_int
-from mtg.lib.text import get_repr
+from mtg.lib.text import get_repr, is_foreign
 from mtg.lib.time import timed
 from mtg.mtgwiki import CLASSES, RACES
 
@@ -82,6 +83,7 @@ MULTIFACE_LAYOUTS = (
 # all cards that got Alchemy rebalance treatment have their rebalanced counterparts with names
 # prefixed by 'A-'
 ALCHEMY_REBALANCE_INDICATOR = "A-"
+API_QUERY_DELAY = 0.2
 
 
 class Color(Enum):
@@ -1314,10 +1316,10 @@ _oracle_ids_cache, _tcgplayer_ids_cache, _cardmarket_ids_cache, _mtgo_ids_cache 
 def _cache_cards() -> None:
     _log.info("Caching cards for fast lookups...")
     for card in bulk_data():
-        _names_cache[unidecode(card.name).casefold()] = card
+        _names_cache[unidecode(card.name.casefold())] = card
         if card.is_multifaced:
-            _names_cache[unidecode(card.first_face_name).casefold()] = card
-            _names_cache[unidecode(card.second_face_name).casefold()] = card
+            _names_cache[unidecode(card.first_face_name.casefold())] = card
+            _names_cache[unidecode(card.second_face_name.casefold())] = card
         _scryfall_ids_cache[card.id] = card
         _oracle_ids_cache[card.id] = card
         if card.tcgplayer_id is not None:
@@ -1346,7 +1348,12 @@ def _validate_query_result(queried_name: str, found_card: Card) -> bool:
 
 
 @lru_cache(maxsize=None)
-def query_api_for_card(card_name: str) -> Card | None:
+@backoff.on_predicate(
+    backoff.expo,
+    predicate=lambda result: result is None,
+    max_time=60
+)
+def query_api_for_card(card_name: str, delay=API_QUERY_DELAY) -> Card | None:
     """Query Scryfall API for a card designated by provided name.
 
     The provided name doesn't need to be English. Foreign names only fail the 'exact' query,
@@ -1357,22 +1364,27 @@ def query_api_for_card(card_name: str) -> Card | None:
 
     If the returned card has a different name from the queried one, and it's not either a
     localized or reflavored version, this function will complain with warning in the logs about it.
+
+    Args:
+        card_name (str): name of the card to query
+        delay (float, optional): delay between calls to the API in seconds (defaults to the recommended 0.2)
     """
+    rate_limit = 1 / delay
     _log.info(f"Querying Scryfall for {card_name!r}...")
     try:
         try:
-            result = scrython.cards.Named(exact=card_name, rate_limit_per_second=5)
+            result = scrython.cards.Named(exact=card_name, rate_limit_per_second=rate_limit)
         except scrython.base.ScryfallError:
             result = None
         if not result:
             try:
-                result = scrython.cards.Named(fuzzy=card_name, rate_limit_per_second=5)
+                result = scrython.cards.Named(fuzzy=card_name, rate_limit_per_second=rate_limit)
             except scrython.base.ScryfallError:
                 result = None
             if not result :
                 try:
                     result = scrython.cards.Named(
-                        fuzzy=unidecode(card_name), rate_limit_per_second=5)
+                        fuzzy=unidecode(card_name), rate_limit_per_second=rate_limit)
                 except scrython.base.ScryfallError:
                     result = None
     except (ServerTimeoutError, AsyncIoTimeoutError):
@@ -1382,12 +1394,13 @@ def query_api_for_card(card_name: str) -> Card | None:
     if result:
         found = Card(result.to_dict())
         if not _validate_query_result(card_name, found):
+            found_name = found.printed_name if found.printed_name else found.name
             _log.warning(
-                f"Mismatched card found by Scryfall API query: {found.name!r} "
-                f"instead of {card_name!r}")
+                f"Mismatched card found by Scryfall API query: {found_name!r} "
+                f"instead of {card_name!r}. Possible result of fuzzy matching.")
         return found
 
-    _log.warning(f"Scryfall API failed to found {card_name!r}")
+    _log.warning(f"Scryfall API failed to find {card_name!r}")
     return None
 
 
@@ -1398,9 +1411,10 @@ def find_by_name(card_name: str, fall_back_on_api=True) -> Card | None:
     """
     if not _names_cache:
         _cache_cards()
-    if card := _names_cache.get(unidecode(card_name).casefold()):
+    if card := _names_cache.get(unidecode(card_name.casefold())):
         return card
-    return query_api_for_card(card_name) if fall_back_on_api else None
+    delay = API_QUERY_DELAY * 2 if is_foreign(card_name) else API_QUERY_DELAY
+    return query_api_for_card(card_name, delay=delay) if fall_back_on_api else None
 
 
 def find_by_words(*words: str) -> set[Card]:
