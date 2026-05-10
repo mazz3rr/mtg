@@ -8,6 +8,7 @@
 
 """
 import logging
+import time
 from datetime import datetime
 from operator import attrgetter
 from timeit import default_timer as timer
@@ -20,7 +21,7 @@ from sqlalchemy.orm import Session
 from mtg.data.db import NoAutoFlushSession, retrieve_or_create
 from mtg.data.models import Channel, Deck, Decklist, FailedUrl, Snapshot, Tag, Video
 from mtg.lib.common import from_iterable
-from mtg.lib.scrape.core import normalize_url, throttle_with_countdown
+from mtg.lib.scrape.core import normalize_url
 from mtg.lib.text import get_hash
 from mtg.lib.time import get_formatted_time
 
@@ -36,9 +37,16 @@ class CoolOffManager:
         self.total_decks, self.total_videos, self.total_channels = 0, 0, 0
         self.current_videos = 0
 
+    @staticmethod
+    def _sleep_with_countdown(delay_seconds: int) -> None:
+        for i in range(delay_seconds, 0, -1):
+            print(f"Waiting {i} seconds before next batch...", end="\r")
+            time.sleep(1)
+        print("Ready for next batch!")
+
     def _cool_off(self) -> None:
-        _log.info(f"Throttling for 5 minutes before the next batch...")
-        throttle_with_countdown(5 * 60)
+        _log.info(f"Sleeping for 5 minutes before the next batch...")
+        self._sleep_with_countdown(5 * 60)
         self.current_videos = 0
 
     def bump_channel(self) -> None:

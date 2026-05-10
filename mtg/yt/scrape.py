@@ -298,7 +298,7 @@ class VideoScraper:
                 _log.info(f"Skipping already failed deck URL: {normalized_link!r}...")
                 return None
             try:
-                deck = scraper.scrape(throttled=type(scraper) in get_video_throttled_deck_scraper_types())
+                deck = scraper.scrape()
             except ReadTimeout:
                 _log.warning(f"Back-offed scraping of {link!r} failed with read timeout")
         return deck

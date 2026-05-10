@@ -16,14 +16,13 @@ from bs4 import Tag
 from mtg.deck.abc import DeckTagParser
 from mtg.deck.core import Deck, Mode
 from mtg.deck.scrapers.abc import (
-    DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper,
-    video_throttled_deck_scraper,
+    DEFAULT_THROTTLING, DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper,
 )
 from mtg.lib.common import ParsingError
 from mtg.lib.numbers import extract_int
 from mtg.lib.scrape.core import (
-    ScrapingError, fetch_throttled_soup, http_requests_counted,
-    strip_url_query,
+    ScrapingError, fetch_soup, http_requests_counted,
+    strip_url_query, throttle,
 )
 from mtg.lib.scrape.dynamic import ConsentXpath, Xpath
 from mtg.lib.time import timed
@@ -146,7 +145,6 @@ class GoldfishDeckTagParser(DeckTagParser):
         self._parse_decklist_tag(decklist_tag)
 
 
-@video_throttled_deck_scraper
 @DeckScraper.registered
 class GoldfishDeckScraper(DeckScraper):
     """Scraper of MTGGoldfish decklist page.
@@ -157,6 +155,7 @@ class GoldfishDeckScraper(DeckScraper):
         ],
         "consent_xpath": ConsentXpath(CONSENT_XPATH)
     }
+    THROTTLING = DEFAULT_THROTTLING  # override
     EXAMPLE_URLS = (
         "https://www.mtggoldfish.com/deck/6833104#paper",
         "https://www.mtggoldfish.com/archetype/standard-mono-green-landfall-woe#paper"
@@ -337,25 +336,32 @@ def scrape_meta(fmt="standard") -> list[Deck]:
     fmt = fmt.lower()
     if fmt not in all_formats():
         raise ValueError(f"Invalid format: {fmt!r}. Can be only one of: {all_formats()}")
+
     url = f"https://www.mtggoldfish.com/metagame/{fmt}/full"
-    soup = fetch_throttled_soup(url, headers=HEADERS)
+
+    throttle(*(DEFAULT_THROTTLING * 2))
+    soup = fetch_soup(url, headers=HEADERS)
     if not soup:
         raise ScrapingError(scraper=GoldfishDeckScraper, url=url)
+
     tiles = soup.find_all("div", class_="archetype-tile")
     if not tiles:
         raise ScrapingError("No deck tiles tags found", scraper=GoldfishDeckScraper, url=url)
+
     decks, metas = [], []
     for i, tile in enumerate(tiles, start=1):
         link = tile.find("a").attrs["href"]
         deck = GoldfishDeckScraper(
-            f"https://www.mtggoldfish.com{link}", {"format": fmt}).scrape(throttled=True)
+            f"https://www.mtggoldfish.com{link}", {"format": fmt}).scrape()
         count = tile.find("span", class_="archetype-tile-statistic-value-extra-data").text.strip()
         count = extract_int(count)
         metas.append({"place": i, "count": count})
         decks.append(deck)
+
     total = sum(m["count"] for m in metas)
     for deck, meta in zip(decks, metas):
         meta["share"] = meta["count"] * 100 / total
         deck.update_metadata(meta=meta)
         deck.update_metadata(mode=Mode.BO3.value)
+
     return decks

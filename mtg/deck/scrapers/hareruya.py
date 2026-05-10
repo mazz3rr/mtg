@@ -17,7 +17,7 @@ from mtg.constants import Json, SECRETS
 from mtg.deck.abc import DeckJsonParser, DeckTagParser
 from mtg.deck.scrapers.abc import (
     DeckScraper, DeckUrlsContainerScraper,
-    HybridContainerScraper, video_throttled_deck_scraper,
+    HybridContainerScraper, DEFAULT_THROTTLING,
 )
 from mtg.deck.scrapers.goldfish import HEADERS as GOLDFISH_HEADERS
 from mtg.lib.common import ParsingError
@@ -63,12 +63,12 @@ URL_HOOKS = (
 )
 
 
-@video_throttled_deck_scraper
 @DeckScraper.registered
 class InternationalHareruyaDeckScraper(DeckScraper):
     """Scraper of international Hareruya decklist page.
     """
     HEADERS = GOLDFISH_HEADERS  # override
+    THROTTLING = DEFAULT_THROTTLING  # override
     EXAMPLE_URLS = (
         "https://www.hareruyamtg.com/en/deck/515432/show/",
     )
@@ -207,13 +207,13 @@ class JapaneseHareruyaDeckJsonParser(DeckJsonParser):
             self._parse_json_card(card)
 
 
-@video_throttled_deck_scraper
 @DeckScraper.registered
 class JapaneseHareruyaDeckScraper(DeckScraper):
     """Scraper of Japanese Hareruya decklist page.
     """
     JSON_FROM_API = True  # override
     API_URL_TEMPLATE = "https://api.deck.hareruyamtg.com/api/deck/{}?display_token={}"
+    THROTTLING = DEFAULT_THROTTLING  # override
     EXAMPLE_URLS = (
         "https://www.hareruyamtg.com/decks/831676?display_token=cb0bc.3104896075514f",
         "https://www.hareruyamtg.com/decks/list/662964",

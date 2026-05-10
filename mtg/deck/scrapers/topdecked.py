@@ -27,7 +27,7 @@ from mtg.lib.common import ParsingError
 from mtg.lib.numbers import extract_float
 from mtg.lib.time import get_date_from_ago_text
 from mtg.lib.scrape.core import ScrapingError, strip_url_query
-from mtg.lib.scrape.dynamic import TIMEOUT, click_for_clipboard
+from mtg.lib.scrape.dynamic import DEFAULT_TIMEOUT, click_for_clipboard
 from mtg.scryfall import COMMANDER_FORMATS
 
 _log = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ class TopDeckedRegularDeckScraper(DeckScraper):
             consent = WebDriverWait(driver, self.CONSENT_TIMEOUT).until(
                 EC.element_to_be_clickable((By.XPATH, self.CONSENT_XPATH)))
             consent.click()
-            WebDriverWait(driver, TIMEOUT / 2).until_not(
+            WebDriverWait(driver, DEFAULT_TIMEOUT / 2).until_not(
                 EC.presence_of_element_located((By.XPATH, self.CONSENT_XPATH)))
             _log.info("Consent pop-up closed")
 
@@ -101,7 +101,7 @@ class TopDeckedRegularDeckScraper(DeckScraper):
             self._process_metadata_with_selenium(driver)
 
             # arena decklist
-            share_btn = WebDriverWait(driver, TIMEOUT).until(
+            share_btn = WebDriverWait(driver, DEFAULT_TIMEOUT).until(
                 EC.element_to_be_clickable((By.XPATH, self.SHARE_XPATH)))
             share_btn.click()
             _log.info("Share button clicked")
@@ -151,9 +151,9 @@ class TopDeckedRegularDeckScraper(DeckScraper):
         backoff.expo, MalformedDecklist, max_time=60)
     @override
     def scrape(
-            self, throttled=False, suppressed_errors=(ParsingError, ScrapingError)) -> Deck | None:
+            self, suppressed_errors=(ParsingError, ScrapingError)) -> Deck | None:
         try:
-            return super().scrape(throttled, suppressed_errors=())
+            return super().scrape(suppressed_errors=())
         except MalformedDecklist:
             raise
         except suppressed_errors as err:

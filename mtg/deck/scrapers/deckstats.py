@@ -17,7 +17,9 @@ from bs4 import BeautifulSoup
 from requests import Response
 
 from mtg.constants import Json
-from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper, video_throttled_deck_scraper
+from mtg.deck.scrapers.abc import (
+    DeckScraper, DeckUrlsContainerScraper, DEFAULT_THROTTLING,
+)
 from mtg.lib.scrape.core import (
     ScrapingError, dissect_js, fetch, fetch_json, get_path_segments, strip_url_query,
     throttle,
@@ -62,12 +64,12 @@ def _backoff_handler(details: dict) -> None:
     _log.info("Backing off {wait:0.1f} seconds after {tries} tries...".format(**details))
 
 
-@video_throttled_deck_scraper
 @DeckScraper.registered
 class DeckstatsDeckScraper(DeckScraper):
     """Scraper of Deckstats decklist page.
     """
     JSON_FROM_SOUP = True  # override
+    THROTTLING = DEFAULT_THROTTLING  # override
     EXAMPLE_URLS = (
         "https://deckstats.net/decks/231485/4286921-captain-n-ghathrod",
         "https://deckstats.net/decks/115134/1283677-kaya-s-scourge",
@@ -178,7 +180,6 @@ class DeckstatsDeckScraper(DeckScraper):
 class DeckstatsUserScraper(DeckUrlsContainerScraper):
     """Scraper of Deckstats user page.
     """
-    THROTTLING = DeckUrlsContainerScraper.THROTTLING * 1.33  # override
     CONTAINER_NAME = "Deckstats user"  # override
     DECK_SCRAPER_TYPES = DeckstatsDeckScraper,  # override
     EXAMPLE_URLS = (
@@ -221,7 +222,7 @@ class DeckstatsUserScraper(DeckUrlsContainerScraper):
         last_seen = None
         while len(self._deck_urls) < total:
             if page != 1:
-                throttle(*self.THROTTLING)
+                throttle(DEFAULT_THROTTLING * 1.33)
             json_data = fetch_json(api_url_template.format(user_id, page))
             if self._deck_urls and last_seen == json_data:
                 break

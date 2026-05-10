@@ -22,7 +22,7 @@ from selenium.common import TimeoutException
 from mtg.constants import Json, SECRETS
 from mtg.deck.abc import DeckJsonParser
 from mtg.deck.scrapers.abc import (
-    DeckScraper, DeckUrlsContainerScraper, DecksJsonContainerScraper,
+    DEFAULT_THROTTLING, DeckScraper, DeckUrlsContainerScraper, DecksJsonContainerScraper,
     HybridContainerScraper,
 )
 from mtg.lib.numbers import extract_int
@@ -197,7 +197,7 @@ def _get_deck_data_from_api(
         raise ScrapingError("Request timed out", scraper=scraper, url=url)
 
     if not json_data and tries < 2:
-        throttle(*DeckScraper.THROTTLING)
+        throttle(*DEFAULT_THROTTLING)
         api_url_template += "&external=true"
         json_data = fetch_json(api_url_template.format(decklist_id))
 
@@ -453,7 +453,7 @@ class TcgPlayerArticleScraper(DecksJsonContainerScraper):
             except ScrapingError as err:
                 _log.warning(f"Scraping failed with: {err!r}")
                 continue
-            throttle(*DeckScraper.THROTTLING)
+            throttle(*DEFAULT_THROTTLING)
 
 
 @HybridContainerScraper.registered

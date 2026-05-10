@@ -11,7 +11,7 @@ import logging
 from datetime import datetime
 from typing import override
 
-from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
+from mtg.deck.scrapers.abc import DEFAULT_THROTTLING, DeckScraper, DeckUrlsContainerScraper
 from mtg.lib.numbers import extract_float, extract_int
 from mtg.lib.scrape.core import ScrapingError, find_next_sibling_tag, normalize_url, strip_url_query
 from mtg.lib.scrape.dynamic import ConsentXpath, Xpath
@@ -184,7 +184,7 @@ class UntappedProfileScraper(DeckUrlsContainerScraper):
         ],
         "consent_xpath": ConsentXpath(CONSENT_XPATH),
     }
-    THROTTLING = DeckUrlsContainerScraper.THROTTLING * 1.4  # override
+    THROTTLING = DEFAULT_THROTTLING * 1.4  # override
     CONTAINER_NAME = "Untapped profile"  # override
     DECK_SCRAPER_TYPES = UntappedProfileDeckScraper,  # override
     DECK_URL_PREFIX = "https://mtga.untapped.gg"  # override

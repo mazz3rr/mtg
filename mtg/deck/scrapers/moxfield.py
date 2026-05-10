@@ -15,25 +15,24 @@ from selenium.common import TimeoutException
 
 from mtg.constants import Json
 from mtg.deck.scrapers.abc import (
-    DeckScraper, DeckUrlsContainerScraper, folder_container_scraper,
-    video_throttled_deck_scraper,
+    DeckScraper, DeckUrlsContainerScraper, DEFAULT_THROTTLING, folder_container_scraper,
 )
 from mtg.lib.scrape.core import (
     ScrapingError, Soft404Error, get_path_segments, normalize_url,
     strip_url_query,
 )
-from mtg.lib.scrape.dynamic import fetch_dynamic_soup, fetch_selenium_json, Xpath
+from mtg.lib.scrape.dynamic import Xpath, fetch_dynamic_soup, fetch_selenium_json
 from mtg.scryfall import Card
 
 _log = logging.getLogger(__name__)
 
 
-@video_throttled_deck_scraper
 @DeckScraper.registered
 class MoxfieldDeckScraper(DeckScraper):
     """Scraper of Moxfield decklist page.
     """
     JSON_FROM_API = True  # override
+    THROTTLING = DEFAULT_THROTTLING  # override
     EXAMPLE_URLS = (
         "https://moxfield.com/decks/y98F6TIUmkmfJ0_6AOIcYw",
     )

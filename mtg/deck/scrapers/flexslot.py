@@ -20,7 +20,7 @@ from mtg.lib.json import Node, node_from_njs_fd_markup
 from mtg.lib.scrape.core import (
     ScrapingError, extract_url, is_more_than_root_path, strip_url_query,
 )
-from mtg.lib.scrape.dynamic import Xpath, TIMEOUT
+from mtg.lib.scrape.dynamic import Xpath, DEFAULT_TIMEOUT
 from mtg.yt.discover import UrlHook
 
 _log = logging.getLogger(__name__)
@@ -213,17 +213,17 @@ class FlexslotUserScraper(HybridContainerScraper):
             Xpath(
                 text="//a[contains(@href, '/decks/')]",
                 wait_for_all=True,
-                timeout=TIMEOUT / 4,
+                timeout=DEFAULT_TIMEOUT / 4,
             ),
             Xpath(
                 text = "//a[contains(@href, '/sideboards/')]",
                 wait_for_all=True,
-                timeout=TIMEOUT / 4,
+                timeout=DEFAULT_TIMEOUT / 4,
             ),
             Xpath(
                 text="//a[contains(@href, '/articles/')]",
                 wait_for_all=True,
-                timeout=TIMEOUT / 4,
+                timeout=DEFAULT_TIMEOUT / 4,
             ),
         ],
     }

@@ -18,7 +18,7 @@ from bs4 import BeautifulSoup
 from mtg.constants import Json
 from mtg.deck.abc import DeckJsonParser
 from mtg.deck.scrapers.abc import (
-    DeckScraper, HybridContainerScraper, tested_only_scraper,
+    DEFAULT_THROTTLING, DeckScraper, HybridContainerScraper, tested_only_scraper,
 )
 from mtg.lib.common import from_iterable
 from mtg.lib.json import Node
@@ -27,7 +27,7 @@ from mtg.lib.scrape.dynamic import Xpath
 from mtg.scryfall import Card, all_formats
 
 _log = logging.getLogger(__name__)
-_THROTTLING = DeckScraper.THROTTLING * 2
+_THROTTLING = DEFAULT_THROTTLING * 2
 
 
 class MtgCircleDeckJsonParser(DeckJsonParser):
