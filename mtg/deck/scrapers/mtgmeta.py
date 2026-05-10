@@ -16,7 +16,10 @@ import dateutil.parser
 
 from mtg.constants import Json
 from mtg.deck.abc import DeckTagParser
-from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper
+from mtg.deck.scrapers.abc import (
+    DEFAULT_THROTTLING, DeckScraper, DeckUrlsContainerScraper,
+    HybridContainerScraper,
+)
 from mtg.lib.numbers import extract_float
 from mtg.lib.scrape.core import (
     ScrapingError, dissect_js, find_links,
@@ -25,6 +28,7 @@ from mtg.lib.scrape.core import (
 from mtg.scryfall import Card
 
 _log = logging.getLogger(__name__)
+_THROTTLING = DEFAULT_THROTTLING * 10
 
 
 @DeckScraper.registered
@@ -109,10 +113,10 @@ def _strip_wm_part(*links: str) -> list[str]:
 class MtgMetaIoTournamentScraper(DeckUrlsContainerScraper):
     """Scraper of MTGMeta.io tournament page.
     """
-    THROTTLING = DeckUrlsContainerScraper.THROTTLING * 10  # override
     CONTAINER_NAME = "MTGMeta.io tournament"  # override
     DECK_SCRAPER_TYPES = MtgMetaIoDeckScraper,  # override
     USE_WAYBACK = True  # override
+    THROTTLING = _THROTTLING  # override
     EXAMPLE_URLS = (
         "https://mtgmeta.io/tournaments/4214",
     )
@@ -166,9 +170,9 @@ class MtgMetaIoArticleScraper(HybridContainerScraper):
     """Scraper of MTGMeta.io article page.
     """
     CONTAINER_NAME = "MTGMeta.io article"  # override
-    THROTTLING = MtgMetaIoTournamentScraper.THROTTLING  # override
     DECK_TAG_PARSER_TYPE = MtgMetaIoDeckTagParser  # override
     USE_WAYBACK = True  # override
+    THROTTLING = _THROTTLING  # override
     EXAMPLE_URLS = (
         "https://mtgmeta.io/articles/deck-primer-legacy-oops-all-spells/",
     )

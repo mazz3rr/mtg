@@ -32,6 +32,7 @@ from mtg.lib.time import timed
 from mtg.session import ScrapingSession
 
 _log = logging.getLogger(__name__)
+DEFAULT_THROTTLING = Throttling(0.6, 0.15)
 
 
 class DeckScraper(NestedDeckParser):
@@ -43,7 +44,7 @@ class DeckScraper(NestedDeckParser):
     deck scrapers and mere deck parsers.
     """
     _REGISTRY: set[Type[Self]] = set()
-    THROTTLING = Throttling(0.6, 0.15)
+    THROTTLING: Throttling | None = None
     SELENIUM_PARAMS = {}
     HEADERS = None
     USE_WAYBACK = False
@@ -176,12 +177,11 @@ class DeckScraper(NestedDeckParser):
 
     @backoff.on_exception(
         backoff.expo, (ConnectionError, HTTPError, ReadTimeout), max_time=60)
-    def scrape(
-            self, throttled=False, suppressed_errors=(ParsingError, ScrapingError)) -> Deck | None:
+    def scrape(self, suppressed_errors=(ParsingError, ScrapingError)) -> Deck | None:
         """Scrape the input URL for a Deck object or None (if not possible).
         """
         deck = None
-        if throttled:
+        if self.THROTTLING:
             throttle(*self.THROTTLING)
         try:
             self._pre_parse()
@@ -257,21 +257,6 @@ class DeckScraper(NestedDeckParser):
             return None, True, None
 
 
-_VIDEO_THROTTLED_DECK_SCRAPER_TYPES = set()
-
-
-def video_throttled_deck_scraper(
-        scraper_type: Type[DeckScraper]) -> Type[DeckScraper]:
-    """Register this deck scraper for video scraping to add an extra throttle.
-    """
-    register_type(_VIDEO_THROTTLED_DECK_SCRAPER_TYPES, scraper_type, DeckScraper)
-    return scraper_type
-
-
-def get_video_throttled_deck_scraper_types() -> set[Type[DeckScraper]]:
-    return set(_VIDEO_THROTTLED_DECK_SCRAPER_TYPES)
-
-
 class ContainerScraper(DeckScraper):
     """Abstract base container scraper.
 
@@ -320,7 +305,7 @@ class ContainerScraper(DeckScraper):
 
     @override
     def scrape(
-            self, throttled=False, suppressed_errors=(ParsingError, ScrapingError)) -> Deck | None:
+            self, suppressed_errors=(ParsingError, ScrapingError)) -> Deck | None:
         raise NotImplementedError(f"Not supported for {type(self).__name__!r}")
 
     # ContainerScraper API
@@ -458,7 +443,7 @@ class DeckUrlsContainerScraper(ContainerScraper):
             elif self._session.is_failed_url(normalized_deck_url):
                 _log.info(f"Skipping already failed deck URL: {normalized_deck_url!r}...")
             else:
-                throttle(*self.THROTTLING)
+                throttle(*(self.THROTTLING or DEFAULT_THROTTLING))
                 _log.info(f"Scraping deck {i}/{len(self._deck_urls)}...")
                 deck = None
                 try:

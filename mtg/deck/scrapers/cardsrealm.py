@@ -25,7 +25,7 @@ from mtg.deck.scrapers.abc import (
     folder_container_scraper,
 )
 from mtg.lib.scrape.core import ScrapingError, dissect_js, get_path_segments, strip_url_query
-from mtg.lib.scrape.dynamic import ConsentXpath, TIMEOUT, accept_consent
+from mtg.lib.scrape.dynamic import ConsentXpath, DEFAULT_TIMEOUT, accept_consent
 from mtg.lib.time import timed
 from mtg.yt.discover import UrlHook
 
@@ -275,7 +275,7 @@ class CardsrealmRegularTournamentScraper(DeckUrlsContainerScraper):
                 accept_consent(driver, consent_xpath)
 
                 xpath = "//button[text()='show deck']"
-                buttons = WebDriverWait(driver, TIMEOUT).until(
+                buttons = WebDriverWait(driver, DEFAULT_TIMEOUT).until(
                     EC.presence_of_all_elements_located((By.XPATH, xpath)))
                 _log.info("Page has been loaded and XPath-specified elements are present")
 

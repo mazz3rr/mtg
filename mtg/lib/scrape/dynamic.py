@@ -34,9 +34,9 @@ from mtg.constants import Json
 from mtg.lib.time import timed
 
 _log = logging.getLogger(__name__)
-TIMEOUT = 20.0  # seconds
-CONSENT_TIMEOUT = TIMEOUT / 2
-CLIPBOOARD_TIMEOUT = TIMEOUT / 3
+DEFAULT_TIMEOUT = 20.0  # seconds
+CONSENT_TIMEOUT = DEFAULT_TIMEOUT / 2
+CLIPBOOARD_TIMEOUT = DEFAULT_TIMEOUT / 3
 SCROLL_DOWN_DELAY = 0.0
 SCROLL_DOWN_TIMES = 50
 
@@ -157,7 +157,7 @@ def click_for_clipboard(
 
 
 def _wait_for_elements(
-        driver: WebDriver, xpaths: Iterable[Xpath], timeout=TIMEOUT) -> list[_WaitResult]:
+        driver: WebDriver, xpaths: Iterable[Xpath], timeout=DEFAULT_TIMEOUT) -> list[_WaitResult]:
     """Wait for elements specified by Xpath objects in a way defined by them.
 
     This functions allows for multiple Xpaths queries to expressed to consecutively wait for
@@ -260,7 +260,7 @@ def fetch_dynamic_soup(
     clipboard_xpath="",
     headless=False,
     headers: dict[str, str] | None = None,
-    timeout=TIMEOUT,
+    timeout=DEFAULT_TIMEOUT,
 ) -> tuple[BeautifulSoup, BeautifulSoup | None, str | None]:
     """Return BeautifulSoup object(s) from dynamically rendered page source at the URL using
     Selenium WebDriver that waits for presence of an element(s) specified by XPath(s).

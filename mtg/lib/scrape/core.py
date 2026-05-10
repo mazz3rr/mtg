@@ -33,7 +33,6 @@ from mtg.lib.time import timed
 _log = logging.getLogger(__name__)
 
 REQUESTS_TIMEOUT = 15.0  # seconds
-DEFAULT_THROTTLING = 1.0  # seconds
 
 
 class ScrapingError(OSError):
@@ -191,13 +190,6 @@ def throttle(delay: float, offset=0.0) -> None:
     time.sleep(delay)
 
 
-def throttle_with_countdown(delay_seconds: int) -> None:
-    for i in range(delay_seconds, 0, -1):
-        print(f"Waiting {i} seconds before next batch...", end="\r")
-        time.sleep(1)
-    print("Ready for next batch!")
-
-
 def throttled(delay: float, offset=0.0) -> Callable:
     """Add throttling delay after the decorated operation.
 
@@ -211,16 +203,11 @@ def throttled(delay: float, offset=0.0) -> Callable:
     def decorate(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
             throttle(delay, offset)
+            result = func(*args, **kwargs)
             return result
         return wrapper
     return decorate
-
-
-@throttled(DEFAULT_THROTTLING)
-def fetch_throttled_soup(url: str, headers: dict[str, str] | None = None) -> BeautifulSoup | None:
-    return fetch_soup(url, headers=headers)
 
 
 def http_requests_counted(operation="") -> Callable:

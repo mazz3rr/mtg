@@ -17,7 +17,7 @@ from mtg.deck.abc import DeckTagParser
 from mtg.deck.core import Mode
 from mtg.deck.scrapers.abc import (
     DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper,
-    video_throttled_deck_scraper,
+    DEFAULT_THROTTLING,
 )
 from mtg.lib.common import from_iterable
 from mtg.lib.numbers import extract_float, extract_int
@@ -100,7 +100,6 @@ class AetherhubDeckTagParser(DeckTagParser):
                         self._companion = cards[0]
 
 
-@video_throttled_deck_scraper
 @DeckScraper.registered
 class AetherhubDeckScraper(DeckScraper):
     """Scraper of Aetherhub decklist page.
@@ -134,6 +133,7 @@ class AetherhubDeckScraper(DeckScraper):
         ],
         "consent_xpath": ConsentXpath(CONSENT_XPATH),
     }
+    THROTTLING = DEFAULT_THROTTLING  # override
     EXAMPLE_URLS = (
         "https://aetherhub.com/Deck/tmnt-boros-ascension",
     )

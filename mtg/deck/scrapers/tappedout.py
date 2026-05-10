@@ -15,13 +15,10 @@ import backoff
 from bs4 import BeautifulSoup
 from requests import Response
 
-from mtg.constants import Json, SECRETS
-from mtg.deck.core import Deck
+from mtg.constants import SECRETS
 from mtg.deck.scrapers.abc import (
-    DeckScraper, DeckUrlsContainerScraper, folder_container_scraper,
-    video_throttled_deck_scraper,
+    DeckScraper, DeckUrlsContainerScraper, DEFAULT_THROTTLING, folder_container_scraper,
 )
-from mtg.lib.common import ParsingError
 from mtg.lib.numbers import extract_int
 from mtg.lib.scrape.core import (
     ScrapingError, fetch, fetch_json, fetch_soup, get_path_segments, prepend_url,
@@ -32,6 +29,7 @@ from mtg.lib.time import get_date_from_ago_text
 _log = logging.getLogger(__name__)
 URL_PREFIX = "https://tappedout.net"
 _MAX_TRIES = 6
+_THROTTLING = DEFAULT_THROTTLING * 6
 HEADERS = {
     "Host": "tappedout.net",
     "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0",
@@ -63,16 +61,15 @@ def _backoff_handler(details: dict) -> None:
     _log.info("Backing off {wait:0.1f} seconds after {tries} tries...".format(**details))
 
 
-@video_throttled_deck_scraper
 @DeckScraper.registered
 class TappedoutDeckScraper(DeckScraper):
     """Scraper of TappedOut decklist page.
     """
+    THROTTLING = _THROTTLING  # override
     EXAMPLE_URLS = (
         "https://tappedout.net/mtg-decks/rakdos-orc-sac/?cb=1687559977",
         "https://tappedout.net/mtg-decks/pias-myr-deck/",
     )
-    THROTTLING = DeckScraper.THROTTLING * 6
 
     @classmethod
     @override
@@ -143,11 +140,6 @@ class TappedoutDeckScraper(DeckScraper):
         self._decklist = "\n".join(lines)
         self._metadata["name"] = name_line.removeprefix("Name ")
 
-    @override
-    def scrape(
-        self, throttled=False, suppressed_errors=(ParsingError, ScrapingError)) -> Deck | None:
-        return super().scrape(True, suppressed_errors)
-
 
 @DeckUrlsContainerScraper.registered
 class TappedoutUserScraper(DeckUrlsContainerScraper):
@@ -188,7 +180,7 @@ class TappedoutUserScraper(DeckUrlsContainerScraper):
         collected, total, page = [], 1, 1
         while len(collected) < total:
             if page != 1:
-                throttle(*TappedoutDeckScraper.THROTTLING)
+                throttle(*_THROTTLING)
             json_data = fetch_json(api_url_template.format(username, page))
             if not json_data or not json_data.get("results") or not json_data.get("total_decks"):
                 if not collected:
@@ -280,7 +272,7 @@ class TappedoutUserFolderScraper(TappedoutUserScraper):
         collected, has_next, page = [], True, 1
         while has_next:
             if page != 1:
-                throttle(*TappedoutDeckScraper.THROTTLING)
+                throttle(*_THROTTLING)
             json_data = fetch_json(api_url_template.format(username, page))
             if not json_data or not json_data.get("results"):
                 if not collected:

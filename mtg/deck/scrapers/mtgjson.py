@@ -118,7 +118,7 @@ class Scraper:
             for i, link in enumerate(links, start=1):
                 _log.info(f"Scraping deck {i}/{len(links)}: {link!r}...")
                 try:
-                    deck = MtgJsonDeckScraper(link).scrape(throttled=True)
+                    deck = MtgJsonDeckScraper(link).scrape()
                 except Exception as err:
                     _log.warning(f"Scraping deck {i}/{len(links)}: {link!r} failed with: {err!r}")
                     yield None

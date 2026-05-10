@@ -13,7 +13,10 @@ from typing import override
 import dateutil.parser
 from bs4 import Tag
 
-from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper, HybridContainerScraper
+from mtg.deck.scrapers.abc import (
+    DEFAULT_THROTTLING, DeckScraper, DeckUrlsContainerScraper,
+    HybridContainerScraper,
+)
 from mtg.lib.numbers import extract_float, extract_int
 from mtg.lib.scrape.core import (
     ScrapingError, find_links, find_next_sibling_tag,
@@ -24,6 +27,7 @@ from mtg.scryfall import Card
 
 _log = logging.getLogger(__name__)
 URL_PREFIX = "https://playingmtg.com"
+_THROTTLING = DEFAULT_THROTTLING * 2
 
 
 @DeckScraper.registered
@@ -124,7 +128,7 @@ class PlayingMtgTournamentScraper(DeckUrlsContainerScraper):
             Xpath('//div[text()="Event Date"]', wait_for_all=True),
         ],
     }
-    THROTTLING = DeckUrlsContainerScraper.THROTTLING * 2  # override
+    THROTTLING = _THROTTLING  # override
     CONTAINER_NAME = "PlayingMTG tournament"  # override
     DECK_SCRAPER_TYPES = PlayingMtgDeckScraper,  # override
     DECK_URL_PREFIX = URL_PREFIX  # override
@@ -204,7 +208,7 @@ class PlayingMtgArticleScraper(HybridContainerScraper):
             ),
         ],
     }
-    THROTTLING = DeckUrlsContainerScraper.THROTTLING * 2  # override
+    THROTTLING = _THROTTLING  # override
     CONTAINER_NAME = "PlayingMTG article"  # override
     CONTAINER_SCRAPER_TYPES = PlayingMtgTournamentScraper,  # override
     CONTAINER_URL_PREFIX = URL_PREFIX  # override
