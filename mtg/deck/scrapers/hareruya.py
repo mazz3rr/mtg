@@ -24,8 +24,10 @@ from mtg.lib.common import ParsingError
 from mtg.lib.numbers import extract_int
 from mtg.lib.scrape.core import (
     ScrapingError, fetch, fetch_json, find_next_sibling_tag,
-    get_fragment, get_path_segments, get_query_values, is_more_than_root_path, strip_url_query,
+    get_fragment, get_path_segments, get_query_values, is_more_than_root_path, normalize_url,
+    strip_url_query,
 )
+from mtg.lib.scrape.dynamic import Xpath
 from mtg.yt.discover import UrlHook
 
 _log = logging.getLogger(__name__)
@@ -121,7 +123,7 @@ class InternationalHareruyaDeckScraper(DeckScraper):
             self._metadata["name"] = self._metadata["hareruya_archetype"]
 
     @staticmethod
-    def parse_card_tag(card_tag: Tag) -> str:
+    def parse_card_tag_for_name(card_tag: Tag) -> str:
         return card_tag.text.strip().strip("《》")
 
     @override
@@ -144,7 +146,7 @@ class InternationalHareruyaDeckScraper(DeckScraper):
                 name_tag = sub_tag.find("a", class_="popup_product")
                 if not name_tag:
                     continue
-                name = self.parse_card_tag(name_tag)
+                name = self.parse_card_tag_for_name(name_tag)
                 qty_tag = sub_tag.find("span")
                 if not qty_tag:
                     continue
@@ -270,33 +272,17 @@ class JapaneseHareruyaDeckScraper(DeckScraper):
         pass
 
 
-HEADERS = {
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,"
-              "image/png,image/svg+xml,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.5",
-    "Accept-Encoding": "gzip, deflate, br, zstd",
-    "Connection": "keep-alive",
-    "Cookie": SECRETS["hareruya"]["cookie"],
-    "DNT": "1",
-    "Host": "www.hareruyamtg.com",
-    "Priority": "u=0, i",
-    "Sec-Fetch-Dest": "document",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "cross-site",
-    "Sec-GPC": "1",
-    "TE": "trailers",
-    "Upgrade-Insecure-Requests": "1",
-    "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:131.0) Gecko/20100101 "
-                  "Firefox/131.0",
-}
-
-
 @DeckUrlsContainerScraper.registered
 class HareruyaEventScraper(DeckUrlsContainerScraper):
     """Scraper of Hareruya event decks search page.
     """
+    SELENIUM_PARAMS = {
+        "xpaths": [
+            Xpath("//a[@class='deckSearch-searchResult__itemWrapper']", wait_for_all=True),
+        ],
+        "headless": True,
+    }
     CONTAINER_NAME = "Hareruya event"  # override
-    HEADERS = HEADERS  # override
     DECK_SCRAPER_TYPES = InternationalHareruyaDeckScraper, JapaneseHareruyaDeckScraper  # override
     EXAMPLE_URLS = (
         "https://www.hareruyamtg.com/en/deck/result?dateFrom=2024/10/13&dateTo=2024/10/13"
@@ -308,6 +294,10 @@ class HareruyaEventScraper(DeckUrlsContainerScraper):
     def is_valid_url(cls, url: str) -> bool:
         return all(t in url for t in {"hareruyamtg.com", "/deck", "/result?", "eventName="})
 
+    @classmethod
+    def normalize_url(cls, url: str) -> str:
+        return normalize_url(url, case_sensitive=True)
+
     @override
     def _parse_input_for_decks_data(self) -> None:
         self._deck_urls = [
@@ -317,12 +307,10 @@ class HareruyaEventScraper(DeckUrlsContainerScraper):
 
 
 @DeckUrlsContainerScraper.registered
-class HareruyaPlayerScraper(DeckUrlsContainerScraper):
+class HareruyaPlayerScraper(HareruyaEventScraper):
     """Scraper of Hareruya player decks search page.
     """
     CONTAINER_NAME = "Hareruya player"  # override
-    HEADERS = HEADERS  # override
-    DECK_SCRAPER_TYPES = InternationalHareruyaDeckScraper, JapaneseHareruyaDeckScraper  # override
     EXAMPLE_URLS = (
         "https://www.hareruyamtg.com/en/deck/result?player=pg8",
     )
@@ -332,13 +320,6 @@ class HareruyaPlayerScraper(DeckUrlsContainerScraper):
     def is_valid_url(cls, url: str) -> bool:
         url = url.lower()
         return all(t in url for t in {"hareruyamtg.com", "/deck", "/result?", "player="})
-
-    @override
-    def _parse_input_for_decks_data(self) -> None:
-        self._deck_urls = [
-            a_tag.attrs["href"] for a_tag
-            in self._soup.find_all("a", class_="deckSearch-searchResult__itemWrapper")
-        ]
 
 
 class HareruyaArticleDeckTagParser(DeckTagParser):
@@ -398,7 +379,7 @@ class HareruyaArticleDeckTagParser(DeckTagParser):
                         continue
                 elif isinstance(item, Tag) and item.name == "span" and item.has_attr("class"):
                     if item["class"] == ["cardLink"]:
-                        name = InternationalHareruyaDeckScraper.parse_card_name(item)
+                        name = InternationalHareruyaDeckScraper.parse_card_tag_for_name(item)
                         self._maindeck += self.get_playset(self.find_card(name), qty)
                         qty, name = None, None
                     elif item["class"] == ["media_red"]:
@@ -419,7 +400,7 @@ class HareruyaArticleDeckTagParser(DeckTagParser):
                 # part of "media_red" case
                 elif isinstance(item, Tag) and item.name == "a" and item.attrs.get(
                         "class") == ["popup_product"]:
-                    name = InternationalHareruyaDeckScraper.parse_card_name(item)
+                    name = InternationalHareruyaDeckScraper.parse_card_tag_for_name(item)
                     self._maindeck += self.get_playset(self.find_card(name), qty)
                     qty, name = None, None
 
@@ -483,11 +464,11 @@ class HareruyaArticleScraper(HybridContainerScraper):
     DECK_TAG_PARSER_TYPE = HareruyaArticleDeckTagParser  # override
     DECK_JSON_PARSER_TYPE = JapaneseHareruyaDeckJsonParser  # override
     EXAMPLE_URLS = (
+        "https://article.hareruyamtg.com/article/21533/?lang=en",
         "https://article.hareruyamtg.com/article/72794/?lang=en",
         "https://article.hareruyamtg.com/article/84119/",
         "https://article.hareruyamtg.com/article/60476/?lang=en",
         "https://article.hareruyamtg.com/article/44666/",
-        "https://article.hareruyamtg.com/article/21533/?lang=en",
     )
 
     @classmethod

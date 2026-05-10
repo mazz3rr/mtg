@@ -1413,7 +1413,7 @@ def find_by_name(card_name: str, fall_back_on_api=True) -> Card | None:
         _cache_cards()
     if card := _names_cache.get(unidecode(card_name.casefold())):
         return card
-    delay = API_QUERY_DELAY * 2 if is_foreign(card_name) else API_QUERY_DELAY
+    delay = API_QUERY_DELAY * 3 if is_foreign(card_name) else API_QUERY_DELAY
     return query_api_for_card(card_name, delay=delay) if fall_back_on_api else None
 
 

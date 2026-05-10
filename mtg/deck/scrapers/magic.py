@@ -20,7 +20,7 @@ from mtg.constants import Json
 from mtg.deck.abc import DeckTagParser
 from mtg.deck.scrapers.abc import DeckScraper, DeckTagsContainerScraper
 from mtg.lib.common import ParsingError
-from mtg.lib.scrape.core import ScrapingError, get_query_values, strip_url_query
+from mtg.lib.scrape.core import ScrapingError, get_query_values, normalize_url, strip_url_query
 from mtg.lib.scrape.dynamic import fetch_dynamic_soup, Xpath, ConsentXpath
 from mtg.lib.text import sanitize_whitespace
 
@@ -159,7 +159,9 @@ class MagicGgDeckScraper(DeckScraper):
         "xpaths": [
             Xpath('//div[@class="css-3X0PN"]'),
         ],
-        "consent_xpath": ConsentXpath('//button[@aria-label="Reject All"]')
+        "consent_xpath": ConsentXpath(
+            '//button[contains(@aria-label, "Reject Non-Essential Cookies")]'
+        )
     }
     EXAMPLE_URLS = (
         "https://magic.gg/decklists/february-kaldheim-league-weekend-mpl-decklists?decklist=_Reid%2520Duke_February%2520Kaldheim%2520League%2520Weekend_02_27_21_7e2afc8b-3c0e-4873-8f71-e7b9b2fa70f2",
@@ -180,8 +182,12 @@ class MagicGgDeckScraper(DeckScraper):
             return True
         return False
 
+    @classmethod
+    def normalize_url(cls, url: str) -> str:
+        return normalize_url(url, case_sensitive=True)
+
     def _parse_decklist_id(self) -> str:
-        [decklist_id] = get_query_values(self.url, "decklist")
+        [decklist_id] = get_query_values(self.url, "decklist", raw=True)
         return decklist_id
 
     @override
@@ -232,7 +238,7 @@ class MagicGgEventScraper(DeckTagsContainerScraper):
     def _parse_input_for_decks_data(self) -> None:
         deck_tags = [*self._soup.find_all("deck-list")]
         if not deck_tags:
-            self.__class__.TAG_BASED_DECK_PARSER = MagicGgOldDeckTagParser
+            self.__class__.DECK_TAG_PARSER_TYPE = MagicGgOldDeckTagParser
             try:
                 self._soup, _, _ = fetch_dynamic_soup(
                     self.url, MagicGgDeckScraper.SELENIUM_PARAMS["xpaths"],
@@ -244,7 +250,7 @@ class MagicGgEventScraper(DeckTagsContainerScraper):
                 raise ScrapingError(self._selenium_timeout_msg, scraper=type(self), url=self.url)
             self._parse_input_for_metadata()
         else:
-            self.__class__.TAG_BASED_DECK_PARSER = MagicGgNewDeckTagParser
+            self.__class__.DECK_TAG_PARSER_TYPE = MagicGgNewDeckTagParser
 
         self._deck_tags = deck_tags
 

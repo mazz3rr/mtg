@@ -91,6 +91,7 @@ class MagicBlogsArticleScraper(HybridContainerScraper):
         'Dezember',
     ]
     EXAMPLE_URLS = (
+        "https://magicblogs.de/blog/10010-the-gate-aber-in-pioneer/",
         "https://magicblogs.de/blog/9893-in-a-land-before-the-monkey-aggro-5-5-sliver/",
     )
 

@@ -392,9 +392,29 @@ def get_fragment(url: str) -> str:
         return ""
 
 
-def get_query_values(url: str, param: str) -> list[str]:
+def parse_qs_raw(query_string: str) -> dict[str, list[str]]:
+    """Parse query string keeping percent-encoding intact.
+    """
+    if not query_string:
+        return {}
+
+    pairs = {}
+    for pair in query_string.split('&'):
+        if '=' in pair:
+            key, value = pair.split('=', maxsplit=1)
+        else:
+            key, value = pair, ''  # no value
+
+        pairs.setdefault(key, []).append(value)
+
+    return pairs
+
+
+def get_query_values(url: str, param: str, raw=False) -> list[str]:
     """Return query parameter values from supplied URL. If URL is invalid, or on any other failure,
     return an empty list.
+
+    If `raw` is True, the returned values will not be percent-decoded.
 
     E.g. supplying 'https://www.hareruyamtg.com/decks/1023318?display_token=f9d56.d861dfb19d83d9' and 'display_token' results in:
         ["f9d56.d861dfb19d83d9"]
@@ -403,12 +423,15 @@ def get_query_values(url: str, param: str) -> list[str]:
         query = urllib.parse.urlsplit(url).query
     except ValueError:
         return []
-    return urllib.parse.parse_qs(query).get(param, []) if query else []
+    func = parse_qs_raw if raw else urllib.parse.parse_qs
+    return func(query).get(param, []) if query else []
 
 
-def get_query_data(url: str) -> dict[str, str]:
+def get_query_data(url: str, raw=False) -> dict[str, list[str]]:
     """Return query parameter data from supplied URL. If URL is invalid, or on any other failure,
     return an empty dict.
+
+    If `raw` is True, the returned values will not be percent-decoded.
 
     E.g. supplying 'https://www.tcdecks.net/deck.php?id=38058&iddeck=347793' results in:
         {'id': ['38058'], 'iddeck': ['347793']}
@@ -417,7 +440,8 @@ def get_query_data(url: str) -> dict[str, str]:
         query = urllib.parse.urlsplit(url).query
     except ValueError:
         return {}
-    return urllib.parse.parse_qs(query) if query else {}
+    func = parse_qs_raw if raw else urllib.parse.parse_qs
+    return func(query) if query else {}
 
 
 def get_path_segments(url: str) -> list[str]:

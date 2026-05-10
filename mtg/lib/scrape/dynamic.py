@@ -301,7 +301,7 @@ def fetch_dynamic_soup(
         options.add_argument("--headless=new")
 
     with webdriver.Chrome(options=options) as driver:
-        _log.info(f"Webdriving using Chrome to: '{url}'...")
+        _log.info(f"Webdriving using {'headless ' if headless else ''}Chrome to: '{url}'...")
 
         if headers:
             driver.execute_cdp_cmd(
