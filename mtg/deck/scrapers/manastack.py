@@ -18,15 +18,12 @@ from mtg.lib.scrape.core import ScrapingError, strip_url_query
 _log = logging.getLogger(__name__)
 
 
+# TODO: switch to API-based JSON parsing
 @DeckScraper.registered
 class ManaStackDeckScraper(DeckScraper):
     """Scraper of ManaStack decklist page.
     """
-    SELENIUM_PARAMS = {  # override
-        "xpaths": [
-            Xpath("//div[@class='deck-list-container']"),
-        ],
-    }
+    JSON_FROM_API = True  # override
     EXAMPLE_URLS = (
         "https://manastack.com/deck/dustin-and-max-learned-tap-dancing",
         "https://manastack.com/deck/esper-transcendent-4",

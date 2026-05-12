@@ -23,7 +23,7 @@ _log = logging.getLogger(__name__)
 class ManaBoxDeckScraper(DeckScraper):
     """Scraper of ManaBox decklist page.
     """
-    JSON_FROM_SOUP = True
+    JSON_FROM_SOUP = True  # override
     EXAMPLE_URLS = (
         "https://manabox.app/decks/rx5CcxGfTJqBx7mQSqVb4A",
         "https://manabox.app/decks/c_Qy5ZBeTra_gHuDV3xqzA",
@@ -39,6 +39,7 @@ class ManaBoxDeckScraper(DeckScraper):
     def normalize_url(cls, url: str) -> str:
         return normalize_url(url, case_sensitive=True)
 
+    @override
     def _extract_json(self) -> None:
         data_tag = self._soup.find("astro-island", {"component-export": "Main"})
         if not data_tag:

@@ -292,7 +292,8 @@ class CardsrealmRegularTournamentScraper(DeckUrlsContainerScraper):
                 return BeautifulSoup(driver.page_source, "lxml")
 
             except TimeoutException:
-                err = ScrapingError(self._selenium_timeout_msg, scraper=type(self), url=self.url)
+                err = ScrapingError(
+                    "Waiting for elements timed out", scraper=type(self), url=self.url)
                 _log.warning(f"Scraping failed with: {err!r}")
                 return BeautifulSoup(driver.page_source, "lxml")
 

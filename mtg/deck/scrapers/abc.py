@@ -15,7 +15,7 @@ from typing import Self, Type, override
 import backoff
 from bs4 import BeautifulSoup, Tag
 from requests import ConnectionError, HTTPError, ReadTimeout
-from selenium.common import ElementClickInterceptedException, TimeoutException
+from selenium.common import ElementClickInterceptedException, WebDriverException
 
 from mtg.constants import Json
 from mtg.deck.abc import DeckJsonParser, DeckTagParser, NestedDeckParser
@@ -58,12 +58,6 @@ class DeckScraper(NestedDeckParser):
     def url(self) -> str:
         return self._url
 
-    @property
-    def _selenium_timeout_msg(self) -> str:
-        word = self.SELENIUM_PARAMS.get("xpath")
-        word = f"'{word}'" if word else "XPath-defined"
-        return f"Selenium timed out looking for {word} element(s)"
-
     @cached_property
     def _markup(self) -> str | None:
         return str(self._soup) if self._soup else None
@@ -104,9 +98,10 @@ class DeckScraper(NestedDeckParser):
             try:
                 self._soup, _, self._clipboard = fetch_dynamic_soup(
                     self.url, **self.SELENIUM_PARAMS)
-            except TimeoutException as te:
+            except WebDriverException as wde:
                 raise ScrapingError(
-                    self._selenium_timeout_msg, scraper=type(self), url=self.url) from te
+                    f"Unable to fetch soup with Selenium ({wde})", scraper=type(self),
+                    url=self.url) from wde
         else:
             if self.USE_WAYBACK:
                 self._soup = fetch_wayback_soup(self.url)

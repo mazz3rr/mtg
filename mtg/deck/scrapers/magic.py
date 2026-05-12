@@ -14,7 +14,7 @@ from typing import override
 
 import dateutil.parser
 from bs4 import BeautifulSoup, Comment, NavigableString
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, WebDriverException
 
 from mtg.constants import Json
 from mtg.deck.abc import DeckTagParser
@@ -246,8 +246,10 @@ class MagicGgEventScraper(DeckTagsContainerScraper):
                 deck_tags = [*self._soup.find_all("div", class_="css-3X0PN")]
                 if not deck_tags:
                     raise ScrapingError("Deck tags not found", scraper=type(self), url=self.url)
-            except TimeoutException:
-                raise ScrapingError(self._selenium_timeout_msg, scraper=type(self), url=self.url)
+            except WebDriverException as wde:
+                raise ScrapingError(
+                    f"Unable to fetch soup with Selenium ({wde})", scraper=type(self),
+                    url=self.url) from wde
             self._parse_input_for_metadata()
         else:
             self.__class__.DECK_TAG_PARSER_TYPE = MagicGgNewDeckTagParser

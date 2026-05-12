@@ -17,7 +17,7 @@ import dateutil.parser
 from bs4 import BeautifulSoup, Tag
 from httpcore import ReadTimeout
 from requests import HTTPError
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, WebDriverException
 
 from mtg.constants import Json, SECRETS
 from mtg.deck.abc import DeckJsonParser
@@ -429,8 +429,10 @@ class TcgPlayerArticleScraper(DecksJsonContainerScraper):
                 scroll_down=ScrollDown(self._scroll_down_times, delay=2.0),
                 **self.SELENIUM_PARAMS
             )
-        except TimeoutException:
-            raise ScrapingError(self._selenium_timeout_msg, scraper=type(self), url=self.url)
+        except WebDriverException as wde:
+                raise ScrapingError(
+                    f"Unable to fetch soup with Selenium ({wde})", scraper=type(self),
+                    url=self.url) from wde
 
     @staticmethod
     def _naive_strip_url_query(url: str) -> str:
