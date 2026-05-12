@@ -24,7 +24,8 @@ from mtg.lib.common import Noop, ParsingError, register_type
 from mtg.lib.json import Node, node_from_njs_fd_markup
 from mtg.lib.scrape.core import (
     InaccessiblePage, ScrapingError, Soft404Error, Throttling,
-    fetch_soup, find_links, normalize_url, prepend_url, throttle,
+    fetch_soup, find_links, normalize_url, prepend_url,
+    throttle,
 )
 from mtg.lib.scrape.dynamic import fetch_dynamic_soup
 from mtg.lib.scrape.wayback import fetch_wayback_soup

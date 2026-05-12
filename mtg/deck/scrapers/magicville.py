@@ -15,7 +15,6 @@ from mtg.lib.time import get_date_from_french_ago_text
 from mtg.lib.scrape.core import ScrapingError
 
 _log = logging.getLogger(__name__)
-URL_PREFIX = "https://www.magic-ville.com/fr/decks/"
 
 
 @DeckScraper.registered
@@ -120,7 +119,7 @@ class MagicVilleEventScraper(DeckUrlsContainerScraper):
     """
     CONTAINER_NAME = "MagicVille event"  # override
     DECK_SCRAPER_TYPES = MagicVilleDeckScraper,  # override
-    DECK_URL_PREFIX = URL_PREFIX  # override
+    DECK_URL_PREFIX = "https://magic-ville.com/fr/decks/"  # override
     EXAMPLE_URLS = (
         "https://www.magic-ville.com/fr/decks/decklists?event=55432",
     )
@@ -144,7 +143,7 @@ class MagicVilleUserScraper(DeckUrlsContainerScraper):
     """
     CONTAINER_NAME = "MagicVille user"  # override
     DECK_SCRAPER_TYPES = MagicVilleDeckScraper,  # override
-    DECK_URL_PREFIX = URL_PREFIX  # override
+    DECK_URL_PREFIX = "https://magic-ville.com/fr/"  # override
     EXAMPLE_URLS = (
         "https://magic-ville.com/fr/register/perso?user=excs&rub=decks",
     )
