@@ -10,23 +10,23 @@
 import logging
 from typing import override
 
+import dateutil.parser
+
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
+from mtg.lib.scrape.core import ScrapingError, fetch_json, get_path_segments, strip_url_query
 from mtg.lib.scrape.dynamic import Xpath
-from mtg.lib.time import get_date_from_ago_text
-from mtg.lib.scrape.core import ScrapingError, strip_url_query
 
 _log = logging.getLogger(__name__)
 
 
-# TODO: switch to API-based JSON parsing
 @DeckScraper.registered
 class ManaStackDeckScraper(DeckScraper):
     """Scraper of ManaStack decklist page.
     """
     JSON_FROM_API = True  # override
     EXAMPLE_URLS = (
-        "https://manastack.com/deck/dustin-and-max-learned-tap-dancing",
         "https://manastack.com/deck/esper-transcendent-4",
+        "https://manastack.com/deck/dustin-and-max-learned-tap-dancing",
     )
 
     @classmethod
@@ -40,46 +40,54 @@ class ManaStackDeckScraper(DeckScraper):
         url = super().normalize_url(url)
         return strip_url_query(url)
 
+    def _get_slug(self) -> str:
+        _, slug, *_ = get_path_segments(self.url)
+        return slug
+
+    @override
+    def _fetch_json(self) -> None:
+        slug = self._get_slug()
+        api_url = f"https://manastack.com/api/deck?slug={slug}"
+        self._json = fetch_json(api_url)
+
+    @override
+    def _validate_json(self) -> None:
+        super()._validate_json()
+        if not self._json.get("cards"):
+            raise ScrapingError("No cards data", scraper=type(self), url=self.url)
+
     @override
     def _parse_input_for_metadata(self) -> None:
-        self._metadata["name"] = self._soup.find("h3", class_="deck-name").text.strip()
-        self._update_fmt(self._soup.find("div", class_="format-listing").text.strip().lower())
-        if desc_tag := self._soup.select_one("div.deck-description.text"):
-            self._metadata["description"] = desc_tag.text.strip()
-        author_tag =  self._soup.find("div", class_="deck-meta-user")
-        self._metadata["author"] = author_tag.find("a").text.strip()
-        *_, date_text = author_tag.text.strip().split("Last updated")
-        self._metadata["date"] = get_date_from_ago_text(date_text.strip())
+        self._metadata["name"] = self._json["name"]
+        self._metadata["author"] = self._json["owner"]["username"]
+        self._update_fmt(self._json["format"]["name"])
+        self._metadata["date"] = dateutil.parser.parse(self._json["last_updated"]["date"]).date()
+        if desc := self._json.get("description"):
+            self._metadata["description"] = desc
+        comments = self._json.get("commentCount")
+        if comments is not None:
+            self._metadata["comments"] = comments
+        if folder := self._json.get("folder"):
+            self._metadata["folder"] = folder["name"]
 
     @override
     def _parse_input_for_decklist(self) -> None:
-        deck_tag = self._soup.find("div", class_="deck-list-container")
-        for tag in deck_tag.descendants:
-            if tag.name == "h4":
-                if "Sideboard" in tag.text:
-                    self._state.shift_to_sideboard()
-                elif "Commander" in tag.text:
-                    self._state.shift_to_commander()
-                elif "Companion" in tag.text:
-                    self._state.shift_to_companion()
-                elif not self._state.is_maindeck:
-                    self._state.shift_to_maindeck()
-            elif tag.name == "div":
-                class_ = tag.attrs.get("class")
-                if "deck-list-item" in class_:
-                    name = tag.find("a").text.strip()
-                    quantity = int(tag.text.strip().removesuffix(name).strip())
-                    cards = self.get_playset(self.find_card(name), quantity)
-                    if self._state.is_maindeck:
-                        self._maindeck += cards
-                    elif self._state.is_sideboard:
-                        self._sideboard += cards
-                    elif self._state.is_commander:
-                        self._set_commander(cards[0])
-                    elif self._state.is_companion:
-                        self._companion = cards[0]
+        for card_data in self._json["cards"]:
+            sub_data = card_data["card"]
+            collectors_number = sub_data["num"]
+            set_code = sub_data["set"]["slug"]
+            name = sub_data["name"]
+            card = self.find_card(name, (set_code, collectors_number))
+            if card_data["commander"]:
+                self._set_commander(card)
+            elif card_data["sideboard"]:
+                self._sideboard.append(card)
+            else:
+                self._maindeck.append(card)
 
 
+# TODO: switch to JSON-based scraping if possible, endpoint: /api/decks/user/kxdx1157
+#  this means encapsulating deck JSON parsing in a separate parser class
 @DeckUrlsContainerScraper.registered
 class ManaStackUserScraper(DeckUrlsContainerScraper):
     """Scraper of ManaStack user page.
