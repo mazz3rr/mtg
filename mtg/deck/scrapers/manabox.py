@@ -7,21 +7,18 @@
     @author: mazz3rr
 
 """
+import contextlib
 import json
 import logging
+from datetime import UTC, datetime
 from typing import override
-
-import dateutil.parser
-from bs4 import Tag
 
 from mtg.deck.scrapers.abc import DeckScraper
 from mtg.lib.scrape.core import ScrapingError, normalize_url
-from mtg.scryfall import Card
 
 _log = logging.getLogger(__name__)
 
 
-# TODO: switch to JSON-based scraping (from soup)
 @DeckScraper.registered
 class ManaBoxDeckScraper(DeckScraper):
     """Scraper of ManaBox decklist page.
@@ -29,6 +26,7 @@ class ManaBoxDeckScraper(DeckScraper):
     JSON_FROM_SOUP = True
     EXAMPLE_URLS = (
         "https://manabox.app/decks/rx5CcxGfTJqBx7mQSqVb4A",
+        "https://manabox.app/decks/c_Qy5ZBeTra_gHuDV3xqzA",
     )
 
     @classmethod
@@ -45,37 +43,38 @@ class ManaBoxDeckScraper(DeckScraper):
         data_tag = self._soup.find("astro-island", {"component-export": "Main"})
         if not data_tag:
             raise ScrapingError("No data tag found", scraper=type(self), url=self.url)
-        self._json = json.loads(data_tag["props"])["deck"]
+        _, self._json = json.loads(data_tag["props"])["deck"]
+
+    @override
+    def _validate_json(self) -> None:
+        super()._validate_json()
+        if not self._json.get("cards"):
+            raise ScrapingError("No cards data", scraper=type(self), url=self.url)
 
     @override
     def _parse_input_for_metadata(self) -> None:
-        pass
-    #     info_tag = self._soup.find("div", class_="w-full").select_one("div.mb-3")
-    #     name_tag, _, fmt_tag, date_tag, *_ = info_tag.find_all("div")
-    #     self._metadata["name"] = name_tag.text.strip()
-    #     fmt, *_ = fmt_tag.text.strip().split(" - ")
-    #     self._update_fmt(fmt)
-    #     self._metadata["date"] = dateutil.parser.parse(date_tag.text.strip()).date()
-    #
-    # @classmethod
-    # def _parse_container_div(cls, container_div: Tag) -> list[Card]:
-    #     cards = []
-    #     for card_tag in container_div.find_all("div", class_=["hidden", "md:block"]):
-    #         qty_tag, name_tag = card_tag.find_all("div", class_=lambda c: c and "text-sm" in c)
-    #         qty, name = int(qty_tag.text.strip()), name_tag.text.strip()
-    #         cards += cls.get_playset(cls.find_card(name), qty)
-    #     return cards
+        _, self._metadata["name"] = self._json["name"]
+        with contextlib.suppress(ValueError):
+            _, fmt = self._json["format"]
+            self._update_fmt(fmt)
+        _, dt = self._json["editDate"]
+        self._metadata["date"] = datetime.fromtimestamp(dt / 1000, UTC).date()
 
     @override
     def _parse_input_for_decklist(self) -> None:
-        pass
-        # for container_div in self._soup.find_all("div", class_="mb-3"):
-        #     header_tag = container_div.find(
-        #         "div", class_=["flex", "whitespace-nowrap", "overflow-hidden", "text-ellipsis"])
-        #     if "Commander" in header_tag.text:
-        #         for card in self._parse_container_div(container_div):
-        #             self._set_commander(card)
-        #     elif "Sideboard" in header_tag.text:
-        #         self._sideboard += self._parse_container_div(container_div)
-        #     else:
-        #         self._maindeck += self._parse_container_div(container_div)
+        _, cards = self._json["cards"]
+        for _, card_data in cards:
+            _, set_code = card_data["setId"]
+            _, collector_number = card_data["collectorNumber"]
+            _, name = card_data["name"]
+            _, qty = card_data["quantity"]
+            card = self.find_card(name, (set_code, collector_number))
+            playset = self.get_playset(card, qty)
+            _, cat = card_data["boardCategory"]
+            if cat == 0:
+                for c in playset:
+                    self._set_commander(c)
+            elif cat == 3:
+                self._maindeck += playset
+            elif cat == 4:
+                self._sideboard += playset
