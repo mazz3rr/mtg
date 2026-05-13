@@ -28,6 +28,7 @@ class ManaStackDeckScraper(DeckScraper):
         "https://manastack.com/deck/esper-transcendent-4",
         "https://manastack.com/deck/dustin-and-max-learned-tap-dancing",
     )
+    URL_TEMPLATE = "https://manastack.com/deck/{slug}"
 
     @classmethod
     @override
@@ -86,23 +87,16 @@ class ManaStackDeckScraper(DeckScraper):
                 self._maindeck.append(card)
 
 
-# TODO: switch to JSON-based scraping if possible, endpoint: /api/decks/user/kxdx1157
-#  this means encapsulating deck JSON parsing in a separate parser class
 @DeckUrlsContainerScraper.registered
 class ManaStackUserScraper(DeckUrlsContainerScraper):
     """Scraper of ManaStack user page.
     """
-    SELENIUM_PARAMS = {  # override
-        "xpaths": [
-            Xpath('//div[@class="deck-listing-container"]'),
-        ],
-    }
     CONTAINER_NAME = "ManaStack user"  # override
     DECK_SCRAPER_TYPES = ManaStackDeckScraper,  # override
-    DECK_URL_PREFIX = "https://manastack.com"  # override
     EXAMPLE_URLS = (
         "https://manastack.com/user/kxdx1157/decks",
     )
+    _SAMPLE_SIZE = 100  # this seems like enough
 
     @classmethod
     @override
@@ -115,13 +109,17 @@ class ManaStackUserScraper(DeckUrlsContainerScraper):
         url = super().normalize_url(url)
         return strip_url_query(url)
 
+    def _get_username(self) -> str:
+        _, username, *_ = get_path_segments(self.url)
+        return username
+
     @override
     def _parse_input_for_decks_data(self) -> None:
-        rows = self._soup.find_all("div", class_="deck-listing-container")
-        deck_tags = [
-            tag for tag in
-            [row.find("a", href=lambda h: h and h.lower().startswith("/deck/")) for row in rows]
-            if tag is not None]
-        if not deck_tags:
-            raise ScrapingError("Deck tags not found", scraper=type(self), url=self.url)
-        self._deck_urls = [deck_tag["href"] for deck_tag in deck_tags]
+        api_url = f"https://manastack.com/api/decks/user/{self._get_username()}"
+        data = fetch_json(api_url)
+        if not data or not data.get("results"):
+            raise ScrapingError("User data not found", scraper=type(self), url=self.url)
+        results = data["results"][:self._SAMPLE_SIZE]
+        self._deck_urls = [
+            ManaStackDeckScraper.URL_TEMPLATE.format(**result) for result in results
+        ]

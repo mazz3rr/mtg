@@ -335,7 +335,7 @@ def fetch_dynamic_soup(
             # halted by sentinel elements present and not timed out
             raise NoSuchElementException("Element(s) specified not present")
 
-        _log.info(f"Page has been loaded and element(s) located")
+        _log.info(f"Page has been loaded. Element(s) location successful")
 
         soup = BeautifulSoup(driver.page_source, "lxml")
         soup_after_click = None
