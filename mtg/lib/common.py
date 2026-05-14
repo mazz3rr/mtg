@@ -23,7 +23,7 @@ class ParsingError(ValueError):
 
 def from_iterable[T](
         iterable: Iterable[T],
-        predicate: Callable[[T], bool],
+        predicate: Callable[[T], bool] = lambda _: True,
         default: T | None = None) -> T | None:
     """Return item from ``iterable`` based on ``predicate`` or ``default``, if it cannot be found.
     """

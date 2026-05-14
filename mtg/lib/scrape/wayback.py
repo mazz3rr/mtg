@@ -18,6 +18,7 @@ from mtg.lib.time import timed
 
 
 _log = logging.getLogger(__name__)
+_SEARCH_RESULTS_LIMIT = 5
 
 
 def _wayback_predicate(soup: BeautifulSoup | None) -> bool:
@@ -41,13 +42,14 @@ def fetch_wayback_soup(url: str) -> BeautifulSoup | None:
     try:
         client = WaybackClient()
         _log.info(f"Searching for {url!r} in Wayback Machine...")
-        if memento := next(client.search(url, limit=-1, fast_latest=True), None):
+        results = client.search(url, limit=_SEARCH_RESULTS_LIMIT)
+        for i, memento in enumerate(results, start=1):
             try:
                 response = client.get_memento(memento, exact=False)
+                return BeautifulSoup(response.text, "lxml")
             except MementoPlaybackError:
-                _log.warning(f"Wayback Machine memento for {url!r} could not be retrieved")
-                return None
-            return BeautifulSoup(response.text, "lxml")
+                continue  # try next one if this snapshot is broken
+        _log.warning(f"Wayback Machine memento for {url!r} could not be retrieved")
         return None
     except (WaybackException, WaybackRetryError) as e:
         _log.warning(f"Wayback Machine failed with: {e!r}")

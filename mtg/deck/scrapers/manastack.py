@@ -14,7 +14,6 @@ import dateutil.parser
 
 from mtg.deck.scrapers.abc import DeckScraper, DeckUrlsContainerScraper
 from mtg.lib.scrape.core import ScrapingError, fetch_json, get_path_segments, strip_url_query
-from mtg.lib.scrape.dynamic import Xpath
 
 _log = logging.getLogger(__name__)
 
@@ -24,11 +23,11 @@ class ManaStackDeckScraper(DeckScraper):
     """Scraper of ManaStack decklist page.
     """
     JSON_FROM_API = True  # override
+    URL_TEMPLATE = "https://manastack.com/deck/{slug}"
     EXAMPLE_URLS = (
         "https://manastack.com/deck/esper-transcendent-4",
         "https://manastack.com/deck/dustin-and-max-learned-tap-dancing",
     )
-    URL_TEMPLATE = "https://manastack.com/deck/{slug}"
 
     @classmethod
     @override
@@ -93,10 +92,10 @@ class ManaStackUserScraper(DeckUrlsContainerScraper):
     """
     CONTAINER_NAME = "ManaStack user"  # override
     DECK_SCRAPER_TYPES = ManaStackDeckScraper,  # override
+    _SAMPLE_SIZE = 100  # this seems like enough
     EXAMPLE_URLS = (
         "https://manastack.com/user/kxdx1157/decks",
     )
-    _SAMPLE_SIZE = 100  # this seems like enough
 
     @classmethod
     @override
