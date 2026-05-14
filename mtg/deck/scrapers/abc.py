@@ -264,6 +264,7 @@ class ContainerScraper(DeckScraper):
     """
     _REGISTRY: set[Type[Self]] = set()  # override
     CONTAINER_NAME = None
+    METADATA_BEFORE_DECKS = True
 
     @classmethod
     def short_name(cls) -> str:
@@ -318,7 +319,8 @@ class ContainerScraper(DeckScraper):
         """
         try:
             self._pre_parse()  # by default fetches soup/JSON in scrapers
-            self._parse_input_for_metadata()
+            if self.METADATA_BEFORE_DECKS:
+                self._parse_input_for_metadata()
             self._parse_input_for_decks_data()
         except ParsingError as pe:
             err = ScrapingError(str(pe), type(self), self.url)
@@ -649,20 +651,12 @@ class HybridContainerScraper(
 
     @override
     def _scrape_before_delegation(self) -> None:
-        try:
-            self._pre_parse()  # fetches soup/JSON in scrapers
-            self._parse_input_for_metadata()
-            self._parse_input_for_decks_data()
-            if self.DECK_URL_PREFIX:
-                self._deck_urls = [prepend_url(l, self.DECK_URL_PREFIX) for l in self._deck_urls]
-            if self.CONTAINER_URL_PREFIX:
-                self._container_urls = [
-                    prepend_url(l, self.CONTAINER_URL_PREFIX) for l in self._container_urls]
-        except ParsingError as pe:
-            err = ScrapingError(str(pe), type(self), self.url)
-            _log.warning(f"Scraping failed with: {err!r}")
-        except ScrapingError as e:
-            _log.warning(f"Scraping failed with: {e!r}")
+        super()._scrape_before_delegation()
+        if self.DECK_URL_PREFIX:
+            self._deck_urls = [prepend_url(l, self.DECK_URL_PREFIX) for l in self._deck_urls]
+        if self.CONTAINER_URL_PREFIX:
+            self._container_urls = [
+                prepend_url(l, self.CONTAINER_URL_PREFIX) for l in self._container_urls]
 
     @classmethod
     def _get_container_scraper_types(cls) -> set[Type[ContainerScraper]]:

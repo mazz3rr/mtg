@@ -214,6 +214,7 @@ class MagicGgEventScraper(DeckTagsContainerScraper):
     """
     CONTAINER_NAME = "Magic.gg event"  # override
     DECK_TAG_PARSER_TYPE = MagicGgNewDeckTagParser  # override
+    METADATA_BEFORE_DECKS = False  # override
     EXAMPLE_URLS = (
         "https://magic.gg/decklists/magic-world-championship-xxix-standard-decklists-a-l",  # old kind
         "https://magic.gg/decklists/arena-championship-7-standard-decklists",  # new kind
@@ -255,17 +256,6 @@ class MagicGgEventScraper(DeckTagsContainerScraper):
             self.__class__.DECK_TAG_PARSER_TYPE = MagicGgNewDeckTagParser
 
         self._deck_tags = deck_tags
-
-    @override
-    def _scrape_before_delegation(self) -> None:
-        try:
-            self._pre_parse()
-            self._parse_input_for_decks_data()
-        except ParsingError as pe:
-            err = ScrapingError(str(pe), type(self), self.url)
-            _log.warning(f"Scraping failed with: {err!r}")
-        except ScrapingError as e:
-            _log.warning(f"Scraping failed with: {e!r}")
 
 
 @DeckTagsContainerScraper.registered
