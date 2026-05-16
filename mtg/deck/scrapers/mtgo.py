@@ -19,7 +19,10 @@ from mtg.deck.abc import DeckJsonParser
 from mtg.deck.scrapers.abc import DeckScraper, DecksJsonContainerScraper
 from mtg.lib.common import from_iterable
 from mtg.lib.numbers import get_ordinal_suffix
-from mtg.lib.scrape.core import ScrapingError, dissect_js, get_fragment, strip_url_query
+from mtg.lib.scrape.core import (
+    ScrapingError, dissect_js, get_fragment, normalize_url,
+    strip_url_query,
+)
 from mtg.scryfall import all_formats
 
 _log = logging.getLogger(__name__)
@@ -152,7 +155,7 @@ class MtgoDeckScraper(DeckScraper):
     @classmethod
     @override
     def normalize_url(cls, url: str) -> str:
-        url = super().normalize_url(url)
+        url = normalize_url(url, case_sensitive=True)
         return strip_url_query(url, keep_fragment=True)
 
     def _parse_player_name(self) -> str:
@@ -171,7 +174,7 @@ class MtgoDeckScraper(DeckScraper):
         if rank_data := json_data.get("final_rank"):
             _process_ranks(rank_data, deck_data)
         self._metadata.update(_get_event_metadata(json_data))
-        self._json = decks_data
+        self._json = deck_data
 
     @override
     def _get_sub_parser(self) -> MtgoDeckJsonParser:
