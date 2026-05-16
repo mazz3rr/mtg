@@ -186,7 +186,7 @@ class Throttling:
 def throttle(delay: float, offset=0.0) -> None:
     if offset:
         delay = round(random.uniform(delay - offset / 2, delay + offset / 2), 3)
-    _log.info(f"Throttling for {delay} seconds...")
+    _log.info(f"Throttling for {delay:.3f} seconds...")
     time.sleep(delay)
 
 

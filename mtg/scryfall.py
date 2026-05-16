@@ -50,6 +50,7 @@ from mtg import __version__
 from mtg.constants import APP_NAME, Json
 from mtg.lib.common import from_iterable
 from mtg.lib.numbers import get_float, get_int
+from mtg.lib.scrape.core import throttle
 from mtg.lib.text import get_repr, is_foreign
 from mtg.lib.time import timed
 from mtg.mtgwiki import CLASSES, RACES
@@ -1364,7 +1365,7 @@ def _validate_query_result(queried_name: str, found_card: Card) -> bool:
 @backoff.on_predicate(
     backoff.expo,
     predicate=lambda result: result is None,
-    max_time=60
+    max_tries=30
 )
 def query_api_for_card(card_name: str, delay=API_QUERY_DELAY) -> Card | None:
     """Query Scryfall API for a card designated by provided name.
@@ -1382,22 +1383,24 @@ def query_api_for_card(card_name: str, delay=API_QUERY_DELAY) -> Card | None:
         card_name (str): name of the card to query
         delay (float, optional): delay between calls to the API in seconds (defaults to the recommended 0.2)
     """
-    rate_limit = 1 / delay
     _log.info(f"Querying Scryfall for {card_name!r}...")
     try:
         try:
-            result = scrython.cards.Named(exact=card_name, rate_limit_per_second=rate_limit)
+            throttle(delay)
+            result = scrython.cards.Named(exact=card_name, rate_limit=False)
         except scrython.base.ScryfallError:
             result = None
         if not result:
             try:
-                result = scrython.cards.Named(fuzzy=card_name, rate_limit_per_second=rate_limit)
+                throttle(delay)
+                result = scrython.cards.Named(fuzzy=card_name, rate_limit=False)
             except scrython.base.ScryfallError:
                 result = None
             if not result :
                 try:
+                    throttle(delay)
                     result = scrython.cards.Named(
-                        fuzzy=unidecode(card_name), rate_limit_per_second=rate_limit)
+                        fuzzy=unidecode(card_name), rate_limit=False)
                 except scrython.base.ScryfallError:
                     result = None
     except (ServerTimeoutError, AsyncIoTimeoutError):
@@ -1426,7 +1429,7 @@ def find_by_name(card_name: str, fall_back_on_api=True) -> Card | None:
         _cache_cards()
     if card := _names_cache.get(unidecode(card_name.casefold())):
         return card
-    delay = API_QUERY_DELAY * 3 if is_foreign(card_name) else API_QUERY_DELAY
+    delay = API_QUERY_DELAY * 2.5 if is_foreign(card_name) else API_QUERY_DELAY
     return query_api_for_card(card_name, delay=delay) if fall_back_on_api else None
 
 

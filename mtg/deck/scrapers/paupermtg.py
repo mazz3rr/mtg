@@ -33,8 +33,8 @@ class PauperMtgDeckScraper(DeckScraper):
     """Scraper of PauperMTG decklist page.
     """
     EXAMPLE_URLS = (
+        "https://paupermtg.com/edhdeck/pppsc03_pdh_t001/",
         "https://paupermtg.com/deck/241206_ur_post/",
-        "https://paupermtg.com/edhdeck/pdh240101_halsin/",
     )
 
     def __init__(self, url: str, metadata: Json | None = None) -> None:
