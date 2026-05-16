@@ -28,8 +28,8 @@ class MtgVaultDeckScraper(DeckScraper):
     """Scraper of MTGVault decklist page.
     """
     EXAMPLE_URLS = (
+        "https://www.mtgvault.com/blacklotusgrower/decks/exhausted-vehicles/",
         "https://www.mtgvault.com/rogib/decks/edh-for-fun-special-garruk/",
-        "https://www.mtgvault.com/lemonadas/decks/athreos-shroud-veiled/",
     )
 
     @classmethod

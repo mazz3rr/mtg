@@ -892,6 +892,10 @@ class Card:
         return "Saga" in self.subtypes
 
     @property
+    def is_background(self) -> bool:
+        return self.is_enchantment and "Background" in self.subtypes
+
+    @property
     def races(self) -> list[str]:
         if self.is_multifaced:
             return sorted({t for face in self.card_faces for t in face.races})
@@ -921,7 +925,16 @@ class Card:
 
     @property
     def is_partner(self) -> bool:
-        return "Partner" in self.keywords or "Friends forever" in self.keywords
+        return (
+            "Partner" in self.keywords
+            or "Friends forever" in self.keywords
+            or self.is_background
+        )
+
+    @property
+    def is_partner_enabled(self) -> bool:
+        return any(
+            kw in self.keywords for kw in {"Partner", "Friends forever", "Choose a background"})
 
     @property
     def is_lord(self) -> bool:

@@ -614,29 +614,29 @@ class Deck:
             self, maindeck: Iterable[Card], sideboard: Iterable[Card] | None = None,
             commander: Card | None = None, partner_commander: Card | None = None,
             companion: Card | None = None, metadata: Json | None = None) -> None:
+        if partner_commander and not commander:
+            _log.warning("Partner commander without commander. Re-assigning as commander")
+            commander, partner_commander = partner_commander, commander
         commanders = [c for c in [commander, partner_commander] if c]
         maindeck, sideboard = [*maindeck], [*sideboard] if sideboard else []
+
         if commanders and sideboard:
             sideboard = []
             _log.warning("Disregarding sideboard for a commander-enabled deck")
-        if partner_commander:
-            if not commander:
-                raise InvalidDeck("Partner commander without commander")
+
         if commanders:
-            for cmd in commanders:
-                if cmd in maindeck:
-                    maindeck.remove(cmd)
-                if cmd in sideboard:
-                    sideboard.remove(cmd)
-            cards = {*maindeck, *sideboard}
-            if any(cmd in cards for cmd in commanders):
-                raise InvalidDeck(f"Redundant commander inclusion")
+            # redundant commander inclusion
+            if any(cmd in maindeck for cmd in commanders):
+                _log.warning(f"Removing redundant commander inclusion")
+            maindeck = [c for c in maindeck if c not in commanders]
+            # identity check
             identity = {clr for c in commanders for clr in c.color_identity.value}
-            for card in [*maindeck, *sideboard]:
+            for card in maindeck:
                 if any(letter not in identity for letter in card.color_identity.value):
                     _log.warning(
                         f"Color identity of '{card}' ({card.color_identity}) doesn't match "
                         f"commander's color identity ({Color.from_letters(*identity)})")
+
         self._commander, self._partner_commander = commander, partner_commander
 
         if companion:
@@ -656,6 +656,9 @@ class Deck:
         self._maindeck = [*itertools.chain(
             *sorted(playsets.values(), key=lambda l: l[0].name))]
 
+        # this is not strict enough for commander (not checking against 100 cards size) on purpose
+        # otherwise, various commander-like subtypes like brawl, oathbraker or tiny leaders would
+        # fail here
         if (len(self.maindeck) + len(commanders)) < self.MIN_MAINDECK_SIZE:
             raise InvalidDeck(
                 f"Invalid deck size: {len(self.maindeck) + len(commanders)} "
@@ -1005,7 +1008,11 @@ class DeckParser(ABC):
                 if non_partner := from_iterable((self._commander, card), lambda c: not c.is_partner):
                     _log.warning(
                         f"Each partner commander should have a 'Partner' or 'Friends forever' "
-                        f"keyword, '{non_partner}' doesn't")
+                        f"keyword or be a background enchantment, '{non_partner}' doesn't qualify")
+                    if card.is_background and not self._commander.is_partner_enabled:
+                        _log.warning(
+                            "Coupling a background enchantment card with a commander that is not "
+                            f"partner-enabled ({self._commander})")
                 self._partner_commander = card
         else:
             self._commander = card
