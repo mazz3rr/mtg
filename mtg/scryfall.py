@@ -1365,7 +1365,7 @@ def _validate_query_result(queried_name: str, found_card: Card) -> bool:
 @backoff.on_predicate(
     backoff.expo,
     predicate=lambda result: result is None,
-    max_tries=30
+    max_tries=12
 )
 def query_api_for_card(card_name: str, delay=API_QUERY_DELAY) -> Card | None:
     """Query Scryfall API for a card designated by provided name.
